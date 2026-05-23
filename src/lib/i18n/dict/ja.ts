@@ -14,6 +14,9 @@ export const ja: Dict = {
     areasCount: (n) => `${n} セクション`,
     read: "読む",
     practice: "練習",
+    lecture: "講義",
+    previous: "前へ",
+    next: "次へ",
   },
   section: {
     emptyTitle: "まだコンテンツはありません",

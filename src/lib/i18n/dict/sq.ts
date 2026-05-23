@@ -14,6 +14,9 @@ export const sq: Dict = {
     areasCount: (n) => `${n} seksione`,
     read: "Lexo",
     practice: "Ushtro",
+    lecture: "Leksion",
+    previous: "Para",
+    next: "Pas",
   },
   section: {
     emptyTitle: "Ende pa përmbajtje",

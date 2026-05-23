@@ -17,6 +17,9 @@ export const de: Dict = {
     areasCount: (n) => `${n} Bereiche`,
     read: "Lesen",
     practice: "Üben",
+    lecture: "Vorlesung",
+    previous: "Zurück",
+    next: "Weiter",
   },
   section: {
     emptyTitle: "Noch keine Inhalte",

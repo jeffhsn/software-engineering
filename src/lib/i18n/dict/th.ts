@@ -14,6 +14,9 @@ export const th: Dict = {
     areasCount: (n) => `${n} ส่วน`,
     read: "อ่าน",
     practice: "ฝึก",
+    lecture: "บรรยาย",
+    previous: "ก่อนหน้า",
+    next: "ถัดไป",
   },
   section: {
     emptyTitle: "ยังไม่มีเนื้อหา",

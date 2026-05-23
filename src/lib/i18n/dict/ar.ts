@@ -16,6 +16,9 @@ export const ar: Dict = {
     areasCount: (n) => `${n} أقسام`,
     read: "قراءة",
     practice: "تدريب",
+    lecture: "محاضرة",
+    previous: "السابق",
+    next: "التالي",
   },
   section: {
     emptyTitle: "لا يوجد محتوى بعد",

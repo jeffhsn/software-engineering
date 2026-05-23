@@ -14,6 +14,9 @@ export const fa: Dict = {
     areasCount: (n) => `${n} بخش`,
     read: "خواندن",
     practice: "تمرین",
+    lecture: "درس",
+    previous: "قبلی",
+    next: "بعدی",
   },
   section: {
     emptyTitle: "هنوز محتوایی نیست",

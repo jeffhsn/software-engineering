@@ -14,6 +14,9 @@ export const id: Dict = {
     areasCount: (n) => `${n} bagian`,
     read: "Baca",
     practice: "Latihan",
+    lecture: "Perkuliahan",
+    previous: "Sebelumnya",
+    next: "Berikutnya",
   },
   section: {
     emptyTitle: "Belum ada konten",

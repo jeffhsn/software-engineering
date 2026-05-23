@@ -14,6 +14,9 @@ export const ur: Dict = {
     areasCount: (n) => `${n} حصے`,
     read: "پڑھیں",
     practice: "مشق",
+    lecture: "لیکچر",
+    previous: "پچھلا",
+    next: "اگلا",
   },
   section: {
     emptyTitle: "ابھی کوئی مواد نہیں",

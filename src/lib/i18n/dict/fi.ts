@@ -14,6 +14,9 @@ export const fi: Dict = {
     areasCount: (n) => `${n} osiota`,
     read: "Lue",
     practice: "Harjoittele",
+    lecture: "Luento",
+    previous: "Edellinen",
+    next: "Seuraava",
   },
   section: {
     emptyTitle: "Ei vielä sisältöä",

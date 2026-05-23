@@ -14,6 +14,9 @@ export const vi: Dict = {
     areasCount: (n) => `${n} phần`,
     read: "Đọc",
     practice: "Luyện tập",
+    lecture: "Bài giảng",
+    previous: "Trước",
+    next: "Tiếp",
   },
   section: {
     emptyTitle: "Chưa có nội dung",

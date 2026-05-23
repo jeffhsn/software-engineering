@@ -14,6 +14,9 @@ export const sr: Dict = {
     areasCount: (n) => `${n} одељака`,
     read: "Читај",
     practice: "Вежбај",
+    lecture: "Предавање",
+    previous: "Претходно",
+    next: "Следеће",
   },
   section: {
     emptyTitle: "Још нема садржаја",

@@ -58,6 +58,9 @@ export interface Dict {
     areasCount: (n: number) => string;
     read: string;
     practice: string;
+    lecture: string;
+    previous: string;
+    next: string;
   };
   section: {
     emptyTitle: string;

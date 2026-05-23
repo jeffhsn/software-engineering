@@ -14,6 +14,9 @@ export const hu: Dict = {
     areasCount: (n) => `${n} szekció`,
     read: "Olvasás",
     practice: "Gyakorlás",
+    lecture: "Előadás",
+    previous: "Előző",
+    next: "Következő",
   },
   section: {
     emptyTitle: "Még nincs tartalom",

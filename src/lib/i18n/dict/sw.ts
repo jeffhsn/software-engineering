@@ -14,6 +14,9 @@ export const sw: Dict = {
     areasCount: (n) => `${n} sehemu`,
     read: "Soma",
     practice: "Mazoezi",
+    lecture: "Mhadhara",
+    previous: "Iliyotangulia",
+    next: "Inayofuata",
   },
   section: {
     emptyTitle: "Bado hakuna maudhui",

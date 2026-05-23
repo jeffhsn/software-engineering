@@ -14,6 +14,9 @@ export const bg: Dict = {
     areasCount: (n) => `${n} раздела`,
     read: "Чети",
     practice: "Упражнявай",
+    lecture: "Лекция",
+    previous: "Назад",
+    next: "Напред",
   },
   section: {
     emptyTitle: "Все още няма съдържание",

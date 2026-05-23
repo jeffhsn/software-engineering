@@ -14,6 +14,9 @@ export const hi: Dict = {
     areasCount: (n) => `${n} खंड`,
     read: "पढ़ें",
     practice: "अभ्यास",
+    lecture: "व्याख्यान",
+    previous: "पिछला",
+    next: "अगला",
   },
   section: {
     emptyTitle: "अभी कोई सामग्री नहीं",

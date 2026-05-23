@@ -14,6 +14,9 @@ export const uk: Dict = {
     areasCount: (n) => `${n} розділів`,
     read: "Читання",
     practice: "Практика",
+    lecture: "Лекція",
+    previous: "Назад",
+    next: "Далі",
   },
   section: {
     emptyTitle: "Поки немає матеріалів",

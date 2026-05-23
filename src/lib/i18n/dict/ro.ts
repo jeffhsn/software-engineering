@@ -14,6 +14,9 @@ export const ro: Dict = {
     areasCount: (n) => `${n} secțiuni`,
     read: "Citește",
     practice: "Exersează",
+    lecture: "Curs",
+    previous: "Anterior",
+    next: "Următor",
   },
   section: {
     emptyTitle: "Încă nu există conținut",

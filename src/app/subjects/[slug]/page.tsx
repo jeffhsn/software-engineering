@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getAllSubjectSlugs, getSubject } from "@/lib/subjects/registry";
+import { getNotebook } from "@/lib/notebooks/registry";
 import { ACCENT } from "@/lib/subjects/accents";
 import { splitSections } from "@/lib/subjects/section-columns";
 import type { SectionKind } from "@/lib/subjects/types";
+import { NotebookView } from "@/components/notebook-view";
 import { cn } from "@/lib/utils";
 import { getServerI18n } from "@/lib/i18n/server";
 
@@ -43,23 +45,28 @@ export default async function SubjectPage({
 
   const { dict } = await getServerI18n();
   const a = ACCENT[subject.accent];
-  const { read, practice } = splitSections(subject.sections);
+  const notebook = getNotebook(subject.slug);
 
+  // If this subject has a real notebook with lessons, render the paginated
+  // lecture/exercise view. Otherwise fall back to the empty-state layout.
+  if (notebook && notebook.lessons.length > 0) {
+    return <NotebookView notebook={notebook} />;
+  }
+
+  const { read, practice } = splitSections(subject.sections);
   return (
     <div className="grid min-h-[calc(100dvh-3.5rem)] grid-cols-1 md:grid-cols-2 md:divide-x md:divide-border/60 rtl:md:divide-x-reverse">
-      <NotebookColumn
+      <EmptyColumn
         label={dict.subject.read}
         accentBg={a.bg}
         sections={read}
-        subjectSlug={subject.slug}
         sectionLabels={dict.sections}
         emptyText={dict.section.emptyTitle}
       />
-      <NotebookColumn
+      <EmptyColumn
         label={dict.subject.practice}
         accentBg={a.bg}
         sections={practice}
-        subjectSlug={subject.slug}
         sectionLabels={dict.sections}
         emptyText={dict.section.emptyTitle}
       />
@@ -67,18 +74,16 @@ export default async function SubjectPage({
   );
 }
 
-function NotebookColumn({
+function EmptyColumn({
   label,
   accentBg,
   sections,
-  subjectSlug,
   sectionLabels,
   emptyText,
 }: {
   label: string;
   accentBg: string;
   sections: SectionKind[];
-  subjectSlug: string;
   sectionLabels: Record<SectionKind, string>;
   emptyText: string;
 }) {
@@ -93,43 +98,21 @@ function NotebookColumn({
           {label}
         </h2>
       </div>
-
       <div className="space-y-10">
         {sections.map((kind) => (
-          <SubSection
-            key={kind}
-            subjectSlug={subjectSlug}
-            kind={kind}
-            label={sectionLabels[kind]}
-            emptyText={emptyText}
-          />
+          <div key={kind}>
+            <div className="mb-3 flex items-center gap-2.5">
+              <span className="text-lg leading-none" aria-hidden>
+                {SECTION_ICON[kind]}
+              </span>
+              <h3 className="text-[15px] font-semibold tracking-tight">
+                {sectionLabels[kind]}
+              </h3>
+            </div>
+            <p className="text-sm text-muted-foreground">— {emptyText}</p>
+          </div>
         ))}
       </div>
-    </div>
-  );
-}
-
-function SubSection({
-  subjectSlug,
-  kind,
-  label,
-  emptyText,
-}: {
-  subjectSlug: string;
-  kind: SectionKind;
-  label: string;
-  emptyText: string;
-}) {
-  void subjectSlug;
-  return (
-    <div>
-      <div className="mb-3 flex items-center gap-2.5">
-        <span className="text-lg leading-none" aria-hidden>
-          {SECTION_ICON[kind]}
-        </span>
-        <h3 className="text-[15px] font-semibold tracking-tight">{label}</h3>
-      </div>
-      <p className="text-sm text-muted-foreground">— {emptyText}</p>
     </div>
   );
 }

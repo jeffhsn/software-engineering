@@ -16,6 +16,9 @@ export const zh: Dict = {
     areasCount: (n) => `${n} 个部分`,
     read: "阅读",
     practice: "练习",
+    lecture: "讲座",
+    previous: "上一节",
+    next: "下一节",
   },
   section: {
     emptyTitle: "暂无内容",

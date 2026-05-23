@@ -17,6 +17,9 @@ export const tr: Dict = {
     areasCount: (n) => `${n} bölüm`,
     read: "Oku",
     practice: "Çalış",
+    lecture: "Ders",
+    previous: "Önceki",
+    next: "Sonraki",
   },
   section: {
     emptyTitle: "Henüz içerik yok",

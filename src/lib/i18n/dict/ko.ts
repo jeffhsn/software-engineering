@@ -13,6 +13,9 @@ export const ko: Dict = {
     areasCount: (n) => `${n}개 섹션`,
     read: "읽기",
     practice: "연습",
+    lecture: "강의",
+    previous: "이전",
+    next: "다음",
   },
   section: {
     emptyTitle: "아직 콘텐츠가 없습니다",
