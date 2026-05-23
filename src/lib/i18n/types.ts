@@ -30,7 +30,6 @@ export type Locale =
   | "fi"
   | "id"
   | "th"
-  | "he"
   | "sw";
 
 export interface LocaleMeta {
@@ -57,6 +56,8 @@ export interface Dict {
   subject: {
     notebook: string;
     areasCount: (n: number) => string;
+    read: string;
+    practice: string;
   };
   section: {
     emptyTitle: string;

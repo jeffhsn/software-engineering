@@ -9,7 +9,12 @@ export const uk: Dict = {
     subtitle:
       "Кожен предмет має свій зошит — лекції, вправи, іспити, конспекти.",
   },
-  subject: { notebook: "Зошит", areasCount: (n) => `${n} розділів` },
+  subject: {
+    notebook: "Зошит",
+    areasCount: (n) => `${n} розділів`,
+    read: "Читання",
+    practice: "Практика",
+  },
   section: {
     emptyTitle: "Поки немає матеріалів",
     emptyBody: "Завантаж матеріали — і ми зберемо розділ для практики.",

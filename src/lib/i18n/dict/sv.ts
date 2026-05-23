@@ -9,7 +9,12 @@ export const sv: Dict = {
     subtitle:
       "Varje ämne har sin egen anteckningsbok — föreläsningar, övningar, tentor, sammanfattningar.",
   },
-  subject: { notebook: "Anteckningsbok", areasCount: (n) => `${n} sektioner` },
+  subject: {
+    notebook: "Anteckningsbok",
+    areasCount: (n) => `${n} sektioner`,
+    read: "Läs",
+    practice: "Öva",
+  },
   section: {
     emptyTitle: "Inget innehåll än",
     emptyBody: "Ladda upp material så bygger vi övningsområdet.",

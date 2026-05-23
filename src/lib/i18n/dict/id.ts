@@ -9,7 +9,12 @@ export const id: Dict = {
     subtitle:
       "Setiap mata kuliah punya buku catatannya sendiri — perkuliahan, latihan, ujian, ringkasan.",
   },
-  subject: { notebook: "Buku catatan", areasCount: (n) => `${n} bagian` },
+  subject: {
+    notebook: "Buku catatan",
+    areasCount: (n) => `${n} bagian`,
+    read: "Baca",
+    practice: "Latihan",
+  },
   section: {
     emptyTitle: "Belum ada konten",
     emptyBody: "Unggah materi dan kita akan membangun area latihan.",

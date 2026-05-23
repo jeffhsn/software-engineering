@@ -6,7 +6,7 @@ export const LOCALES: LocaleMeta[] = [
   { code: "de", label: "German", nativeLabel: "Deutsch", dir: "ltr", flag: "🇩🇪" },
   { code: "en", label: "English", nativeLabel: "English", dir: "ltr", flag: "🇬🇧" },
   { code: "tr", label: "Turkish", nativeLabel: "Türkçe", dir: "ltr", flag: "🇹🇷" },
-  { code: "ar", label: "Arabic", nativeLabel: "العربية", dir: "rtl", flag: "🇸🇦" },
+  { code: "ar", label: "Arabic", nativeLabel: "العربية", dir: "rtl", flag: "🇵🇸" },
   { code: "ru", label: "Russian", nativeLabel: "Русский", dir: "ltr", flag: "🇷🇺" },
   { code: "it", label: "Italian", nativeLabel: "Italiano", dir: "ltr", flag: "🇮🇹" },
   { code: "es", label: "Spanish", nativeLabel: "Español", dir: "ltr", flag: "🇪🇸" },
@@ -34,7 +34,6 @@ export const LOCALES: LocaleMeta[] = [
   { code: "fi", label: "Finnish", nativeLabel: "Suomi", dir: "ltr", flag: "🇫🇮" },
   { code: "id", label: "Indonesian", nativeLabel: "Bahasa Indonesia", dir: "ltr", flag: "🇮🇩" },
   { code: "th", label: "Thai", nativeLabel: "ไทย", dir: "ltr", flag: "🇹🇭" },
-  { code: "he", label: "Hebrew", nativeLabel: "עברית", dir: "rtl", flag: "🇮🇱" },
   { code: "sw", label: "Swahili", nativeLabel: "Kiswahili", dir: "ltr", flag: "🇰🇪" },
 ];
 

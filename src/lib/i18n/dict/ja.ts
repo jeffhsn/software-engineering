@@ -9,7 +9,12 @@ export const ja: Dict = {
     subtitle:
       "各科目に専用のノートがあります — 講義、演習、試験、まとめ。",
   },
-  subject: { notebook: "ノート", areasCount: (n) => `${n} セクション` },
+  subject: {
+    notebook: "ノート",
+    areasCount: (n) => `${n} セクション`,
+    read: "読む",
+    practice: "練習",
+  },
   section: {
     emptyTitle: "まだコンテンツはありません",
     emptyBody: "資料をアップロードすれば、練習エリアを一緒に作りましょう。",

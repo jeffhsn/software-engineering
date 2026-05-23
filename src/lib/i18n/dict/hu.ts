@@ -9,7 +9,12 @@ export const hu: Dict = {
     subtitle:
       "Minden tantárgynak van saját füzete — előadások, gyakorlatok, vizsgák, összefoglalók.",
   },
-  subject: { notebook: "Füzet", areasCount: (n) => `${n} szekció` },
+  subject: {
+    notebook: "Füzet",
+    areasCount: (n) => `${n} szekció`,
+    read: "Olvasás",
+    practice: "Gyakorlás",
+  },
   section: {
     emptyTitle: "Még nincs tartalom",
     emptyBody: "Tölts fel anyagokat és felépítjük a gyakorló területet.",

@@ -9,7 +9,12 @@ export const bg: Dict = {
     subtitle:
       "Всеки предмет има своя тетрадка — лекции, упражнения, изпити, резюмета.",
   },
-  subject: { notebook: "Тетрадка", areasCount: (n) => `${n} раздела` },
+  subject: {
+    notebook: "Тетрадка",
+    areasCount: (n) => `${n} раздела`,
+    read: "Чети",
+    practice: "Упражнявай",
+  },
   section: {
     emptyTitle: "Все още няма съдържание",
     emptyBody:

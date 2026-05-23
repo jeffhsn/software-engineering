@@ -9,7 +9,12 @@ export const pl: Dict = {
     subtitle:
       "Każdy przedmiot ma swój notatnik — wykłady, ćwiczenia, egzaminy, podsumowania.",
   },
-  subject: { notebook: "Notatnik", areasCount: (n) => `${n} sekcji` },
+  subject: {
+    notebook: "Notatnik",
+    areasCount: (n) => `${n} sekcji`,
+    read: "Czytaj",
+    practice: "Ćwicz",
+  },
   section: {
     emptyTitle: "Brak treści",
     emptyBody: "Prześlij materiały, a zbudujemy obszar do ćwiczeń.",

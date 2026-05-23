@@ -9,7 +9,12 @@ export const cs: Dict = {
     subtitle:
       "Každý předmět má svůj sešit — přednášky, cvičení, zkoušky, shrnutí.",
   },
-  subject: { notebook: "Sešit", areasCount: (n) => `${n} sekcí` },
+  subject: {
+    notebook: "Sešit",
+    areasCount: (n) => `${n} sekcí`,
+    read: "Číst",
+    practice: "Cvičit",
+  },
   section: {
     emptyTitle: "Zatím žádný obsah",
     emptyBody: "Nahraj materiály a společně postavíme cvičnou oblast.",

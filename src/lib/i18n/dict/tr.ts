@@ -15,6 +15,8 @@ export const tr: Dict = {
   subject: {
     notebook: "Defter",
     areasCount: (n) => `${n} bölüm`,
+    read: "Oku",
+    practice: "Çalış",
   },
   section: {
     emptyTitle: "Henüz içerik yok",

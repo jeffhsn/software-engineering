@@ -32,14 +32,13 @@ import { sv } from "./dict/sv";
 import { fi } from "./dict/fi";
 import { id } from "./dict/id";
 import { th } from "./dict/th";
-import { he } from "./dict/he";
 import { sw } from "./dict/sw";
 
 export const DICTIONARIES: Record<Locale, Dict> = {
   de, en, tr, ar, ru, it, es, fr, zh,
   pl, pt, uk, fa, ja, ko, vi, hi, ur,
   nl, el, cs, hu, ro, sq, sr, hr, bg,
-  sv, fi, id, th, he, sw,
+  sv, fi, id, th, sw,
 };
 
 export function getDict(locale: Locale): Dict {

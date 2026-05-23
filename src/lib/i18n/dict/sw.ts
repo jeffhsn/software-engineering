@@ -9,7 +9,12 @@ export const sw: Dict = {
     subtitle:
       "Kila somo lina daftari lake — mihadhara, mazoezi, mitihani, muhtasari.",
   },
-  subject: { notebook: "Daftari", areasCount: (n) => `${n} sehemu` },
+  subject: {
+    notebook: "Daftari",
+    areasCount: (n) => `${n} sehemu`,
+    read: "Soma",
+    practice: "Mazoezi",
+  },
   section: {
     emptyTitle: "Bado hakuna maudhui",
     emptyBody: "Pakia vifaa na tutajenga eneo la mazoezi pamoja.",

@@ -9,7 +9,12 @@ export const vi: Dict = {
     subtitle:
       "Mỗi môn có một quyển sổ riêng — bài giảng, bài tập, kỳ thi, tóm tắt.",
   },
-  subject: { notebook: "Sổ tay", areasCount: (n) => `${n} phần` },
+  subject: {
+    notebook: "Sổ tay",
+    areasCount: (n) => `${n} phần`,
+    read: "Đọc",
+    practice: "Luyện tập",
+  },
   section: {
     emptyTitle: "Chưa có nội dung",
     emptyBody: "Tải tài liệu lên và chúng ta sẽ xây dựng khu vực luyện tập.",

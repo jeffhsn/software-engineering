@@ -9,7 +9,12 @@ export const th: Dict = {
     subtitle:
       "แต่ละวิชามีสมุดของตัวเอง — บรรยาย แบบฝึกหัด ข้อสอบ สรุป",
   },
-  subject: { notebook: "สมุด", areasCount: (n) => `${n} ส่วน` },
+  subject: {
+    notebook: "สมุด",
+    areasCount: (n) => `${n} ส่วน`,
+    read: "อ่าน",
+    practice: "ฝึก",
+  },
   section: {
     emptyTitle: "ยังไม่มีเนื้อหา",
     emptyBody: "อัปโหลดสื่อแล้วเราจะสร้างพื้นที่ฝึกฝนด้วยกัน",

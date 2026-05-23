@@ -14,6 +14,8 @@ export const ar: Dict = {
   subject: {
     notebook: "الدفتر",
     areasCount: (n) => `${n} أقسام`,
+    read: "قراءة",
+    practice: "تدريب",
   },
   section: {
     emptyTitle: "لا يوجد محتوى بعد",

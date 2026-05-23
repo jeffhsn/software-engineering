@@ -15,6 +15,8 @@ export const es: Dict = {
   subject: {
     notebook: "Cuaderno",
     areasCount: (n) => `${n} secciones`,
+    read: "Leer",
+    practice: "Practicar",
   },
   section: {
     emptyTitle: "Aún no hay contenido",

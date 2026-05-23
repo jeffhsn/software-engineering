@@ -9,7 +9,12 @@ export const fa: Dict = {
     subtitle:
       "هر درس دفتر مخصوص خودش را دارد — کلاس‌ها، تمرین‌ها، امتحان‌ها، خلاصه‌ها.",
   },
-  subject: { notebook: "دفتر", areasCount: (n) => `${n} بخش` },
+  subject: {
+    notebook: "دفتر",
+    areasCount: (n) => `${n} بخش`,
+    read: "خواندن",
+    practice: "تمرین",
+  },
   section: {
     emptyTitle: "هنوز محتوایی نیست",
     emptyBody: "مطالب را آپلود کن تا با هم بخش تمرین را بسازیم.",

@@ -9,7 +9,12 @@ export const ro: Dict = {
     subtitle:
       "Fiecare materie are propriul caiet — cursuri, exerciții, examene, rezumate.",
   },
-  subject: { notebook: "Caiet", areasCount: (n) => `${n} secțiuni` },
+  subject: {
+    notebook: "Caiet",
+    areasCount: (n) => `${n} secțiuni`,
+    read: "Citește",
+    practice: "Exersează",
+  },
   section: {
     emptyTitle: "Încă nu există conținut",
     emptyBody: "Încarcă materiale și vom construi zona de exerciții.",

@@ -13,14 +13,15 @@ export function SubjectCard({ subject }: Props) {
   return (
     <Link
       href={`/subjects/${subject.slug}`}
-      className="group block transition-transform duration-300 ease-out hover:-translate-y-1"
+      className="group block cursor-pointer transition-transform duration-300 ease-out hover:-translate-y-1"
     >
       <Card
         className={cn(
-          "relative h-full min-h-[280px] overflow-hidden p-0 ring-0 border border-border/60 bg-card",
-          "shadow-[0_1px_0_0_rgba(0,0,0,0.04),0_1px_2px_-1px_rgba(0,0,0,0.06)]",
+          "relative h-full min-h-[300px] overflow-hidden p-0 ring-0 border border-border bg-card",
+          "shadow-[0_1px_2px_rgba(0,0,0,0.04)]",
           "transition-all duration-300 ease-out",
-          "group-hover:shadow-[0_12px_24px_-12px_rgba(0,0,0,0.18),0_4px_8px_-4px_rgba(0,0,0,0.08)]",
+          "group-hover:shadow-[0_20px_40px_-16px_rgba(0,0,0,0.25),0_8px_16px_-8px_rgba(0,0,0,0.08)]",
+          "dark:group-hover:shadow-[0_24px_48px_-16px_rgba(0,0,0,0.6)]",
           a.hoverBorder,
         )}
       >
@@ -33,11 +34,11 @@ export function SubjectCard({ subject }: Props) {
           className="absolute inset-y-0 start-1.5 w-px bg-foreground/5"
         />
 
-        <div className="flex h-full flex-col p-5 ps-7">
+        <div className="flex h-full flex-col p-6 ps-8">
           <div className="flex items-start justify-between">
             <span
               className={cn(
-                "rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider",
+                "rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.15em]",
                 a.badgeBg,
                 a.badgeText,
               )}
@@ -46,9 +47,9 @@ export function SubjectCard({ subject }: Props) {
             </span>
           </div>
 
-          <div className="flex flex-1 items-center justify-center py-4">
+          <div className="flex flex-1 items-center justify-center py-6">
             <span
-              className="text-6xl drop-shadow-sm transition-transform duration-500 ease-out group-hover:-rotate-3 group-hover:scale-110"
+              className="text-7xl transition-transform duration-500 ease-out group-hover:-rotate-3 group-hover:scale-110"
               aria-hidden
             >
               {subject.emoji}
@@ -56,8 +57,8 @@ export function SubjectCard({ subject }: Props) {
           </div>
 
           <div>
-            <div className="mb-3 h-px w-8 bg-border" />
-            <h3 className="text-[15px] font-semibold leading-snug tracking-tight text-foreground text-balance">
+            <div className="mb-3 h-px w-10 bg-border" />
+            <h3 className="text-[17px] font-semibold leading-snug tracking-tight text-foreground text-balance">
               {subject.title}
             </h3>
           </div>

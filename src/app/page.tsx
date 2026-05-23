@@ -6,20 +6,20 @@ export default async function Home() {
   const { dict } = await getServerI18n();
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
-      <section className="mb-10 flex flex-col items-start gap-3">
-        <span className="rounded-full border border-border/70 bg-card px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+    <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
+      <section className="mb-14 flex flex-col items-start gap-4">
+        <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
           {dict.home.pill}
         </span>
-        <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
+        <h1 className="text-balance text-5xl font-semibold tracking-tighter sm:text-6xl">
           {dict.home.title}
         </h1>
-        <p className="max-w-xl text-base text-muted-foreground">
+        <p className="max-w-xl text-balance text-lg text-muted-foreground">
           {dict.home.subtitle}
         </p>
       </section>
       <section>
-        <div className="grid auto-rows-fr grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid auto-rows-fr grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {SUBJECTS.map((s) => (
             <SubjectCard key={s.slug} subject={s} />
           ))}

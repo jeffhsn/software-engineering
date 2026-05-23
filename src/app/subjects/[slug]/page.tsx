@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { getAllSubjectSlugs, getSubject } from "@/lib/subjects/registry";
 import { ACCENT } from "@/lib/subjects/accents";
-import { SectionCard } from "@/components/section-card";
+import { splitSections } from "@/lib/subjects/section-columns";
+import type { SectionKind } from "@/lib/subjects/types";
 import { cn } from "@/lib/utils";
 import { getServerI18n } from "@/lib/i18n/server";
 
@@ -22,6 +22,16 @@ export async function generateMetadata({
   return { title: `${subject.title} — Software Engineering BSc` };
 }
 
+const SECTION_ICON: Record<SectionKind, string> = {
+  lectures: "📖",
+  exercises: "✏️",
+  exams: "📝",
+  summaries: "🗒️",
+  flashcards: "🃏",
+  cheatsheets: "📋",
+  code: "💻",
+};
+
 export default async function SubjectPage({
   params,
 }: {
@@ -33,69 +43,93 @@ export default async function SubjectPage({
 
   const { dict } = await getServerI18n();
   const a = ACCENT[subject.accent];
+  const { read, practice } = splitSections(subject.sections);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-12">
-      <Link
-        href="/"
-        className="inline-flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <span aria-hidden className="rtl:rotate-180">←</span>
-        <span>{dict.nav.allSubjects}</span>
-      </Link>
+    <div className="grid min-h-[calc(100dvh-3.5rem)] grid-cols-1 md:grid-cols-2 md:divide-x md:divide-border/60 rtl:md:divide-x-reverse">
+      <NotebookColumn
+        label={dict.subject.read}
+        accentBg={a.bg}
+        sections={read}
+        subjectSlug={subject.slug}
+        sectionLabels={dict.sections}
+        emptyText={dict.section.emptyTitle}
+      />
+      <NotebookColumn
+        label={dict.subject.practice}
+        accentBg={a.bg}
+        sections={practice}
+        subjectSlug={subject.slug}
+        sectionLabels={dict.sections}
+        emptyText={dict.section.emptyTitle}
+      />
+    </div>
+  );
+}
 
-      <header className="mt-8 flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:gap-8">
-        <div
-          className={cn(
-            "relative flex h-28 w-24 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-card",
-            "shadow-[0_8px_20px_-12px_rgba(0,0,0,0.2)]",
-          )}
-        >
-          <span
-            aria-hidden
-            className={cn("absolute inset-y-0 start-0 w-1 rounded-s-xl", a.bg)}
+function NotebookColumn({
+  label,
+  accentBg,
+  sections,
+  subjectSlug,
+  sectionLabels,
+  emptyText,
+}: {
+  label: string;
+  accentBg: string;
+  sections: SectionKind[];
+  subjectSlug: string;
+  sectionLabels: Record<SectionKind, string>;
+  emptyText: string;
+}) {
+  return (
+    <div className="px-6 py-12 sm:px-12 sm:py-16 lg:px-20 lg:py-20">
+      <div className="mb-10 flex items-center gap-2">
+        <span
+          aria-hidden
+          className={cn("inline-block h-1.5 w-1.5 rounded-full", accentBg)}
+        />
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+          {label}
+        </h2>
+      </div>
+
+      <div className="space-y-10">
+        {sections.map((kind) => (
+          <SubSection
+            key={kind}
+            subjectSlug={subjectSlug}
+            kind={kind}
+            label={sectionLabels[kind]}
+            emptyText={emptyText}
           />
-          <span className="text-5xl" aria-hidden>
-            {subject.emoji}
-          </span>
-        </div>
-        <div className="flex flex-col gap-2">
-          <span
-            className={cn(
-              "self-start rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider",
-              a.badgeBg,
-              a.badgeText,
-            )}
-          >
-            {subject.shortTitle}
-          </span>
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            {subject.title}
-          </h1>
-        </div>
-      </header>
+        ))}
+      </div>
+    </div>
+  );
+}
 
-      <section className="mt-12">
-        <div className="mb-4 flex items-baseline justify-between">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            {dict.subject.notebook}
-          </h2>
-          <span className="text-xs text-muted-foreground">
-            {dict.subject.areasCount(subject.sections.length)}
-          </span>
-        </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {subject.sections.map((kind) => (
-            <SectionCard
-              key={kind}
-              subjectSlug={subject.slug}
-              kind={kind}
-              accent={subject.accent}
-              label={dict.sections[kind]}
-            />
-          ))}
-        </div>
-      </section>
+function SubSection({
+  subjectSlug,
+  kind,
+  label,
+  emptyText,
+}: {
+  subjectSlug: string;
+  kind: SectionKind;
+  label: string;
+  emptyText: string;
+}) {
+  void subjectSlug;
+  return (
+    <div>
+      <div className="mb-3 flex items-center gap-2.5">
+        <span className="text-lg leading-none" aria-hidden>
+          {SECTION_ICON[kind]}
+        </span>
+        <h3 className="text-[15px] font-semibold tracking-tight">{label}</h3>
+      </div>
+      <p className="text-sm text-muted-foreground">— {emptyText}</p>
     </div>
   );
 }

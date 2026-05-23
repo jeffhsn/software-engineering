@@ -9,7 +9,12 @@ export const sr: Dict = {
     subtitle:
       "Сваки предмет има своју свеску — предавања, вежбе, испити, сажеци.",
   },
-  subject: { notebook: "Свеска", areasCount: (n) => `${n} одељака` },
+  subject: {
+    notebook: "Свеска",
+    areasCount: (n) => `${n} одељака`,
+    read: "Читај",
+    practice: "Вежбај",
+  },
   section: {
     emptyTitle: "Још нема садржаја",
     emptyBody: "Отпреми материјале и направићемо област за вежбу.",

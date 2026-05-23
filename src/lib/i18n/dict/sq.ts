@@ -9,7 +9,12 @@ export const sq: Dict = {
     subtitle:
       "Çdo lëndë ka fletoren e vet — leksione, ushtrime, provime, përmbledhje.",
   },
-  subject: { notebook: "Fletore", areasCount: (n) => `${n} seksione` },
+  subject: {
+    notebook: "Fletore",
+    areasCount: (n) => `${n} seksione`,
+    read: "Lexo",
+    practice: "Ushtro",
+  },
   section: {
     emptyTitle: "Ende pa përmbajtje",
     emptyBody:

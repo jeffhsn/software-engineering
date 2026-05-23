@@ -14,6 +14,8 @@ export const zh: Dict = {
   subject: {
     notebook: "笔记本",
     areasCount: (n) => `${n} 个部分`,
+    read: "阅读",
+    practice: "练习",
   },
   section: {
     emptyTitle: "暂无内容",

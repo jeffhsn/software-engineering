@@ -9,7 +9,12 @@ export const fi: Dict = {
     subtitle:
       "Jokaisella aineella on oma vihkonsa — luennot, harjoitukset, tentit, tiivistelmät.",
   },
-  subject: { notebook: "Vihko", areasCount: (n) => `${n} osiota` },
+  subject: {
+    notebook: "Vihko",
+    areasCount: (n) => `${n} osiota`,
+    read: "Lue",
+    practice: "Harjoittele",
+  },
   section: {
     emptyTitle: "Ei vielä sisältöä",
     emptyBody:

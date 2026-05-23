@@ -9,7 +9,12 @@ export const nl: Dict = {
     subtitle:
       "Elk vak heeft zijn eigen schrift — colleges, oefeningen, tentamens, samenvattingen.",
   },
-  subject: { notebook: "Schrift", areasCount: (n) => `${n} secties` },
+  subject: {
+    notebook: "Schrift",
+    areasCount: (n) => `${n} secties`,
+    read: "Lezen",
+    practice: "Oefenen",
+  },
   section: {
     emptyTitle: "Nog geen inhoud",
     emptyBody: "Upload materiaal en we bouwen de oefenruimte uit.",

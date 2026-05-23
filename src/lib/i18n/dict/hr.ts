@@ -9,7 +9,12 @@ export const hr: Dict = {
     subtitle:
       "Svaki predmet ima svoju bilježnicu — predavanja, vježbe, ispiti, sažeci.",
   },
-  subject: { notebook: "Bilježnica", areasCount: (n) => `${n} odjeljaka` },
+  subject: {
+    notebook: "Bilježnica",
+    areasCount: (n) => `${n} odjeljaka`,
+    read: "Čitaj",
+    practice: "Vježbaj",
+  },
   section: {
     emptyTitle: "Još nema sadržaja",
     emptyBody:

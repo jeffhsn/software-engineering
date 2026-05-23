@@ -9,7 +9,12 @@ export const el: Dict = {
     subtitle:
       "Κάθε μάθημα έχει το δικό του τετράδιο — διαλέξεις, ασκήσεις, εξετάσεις, περιλήψεις.",
   },
-  subject: { notebook: "Τετράδιο", areasCount: (n) => `${n} ενότητες` },
+  subject: {
+    notebook: "Τετράδιο",
+    areasCount: (n) => `${n} ενότητες`,
+    read: "Διαβάστε",
+    practice: "Εξάσκηση",
+  },
   section: {
     emptyTitle: "Δεν υπάρχει ακόμη περιεχόμενο",
     emptyBody:
