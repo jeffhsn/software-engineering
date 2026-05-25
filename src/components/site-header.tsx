@@ -6,16 +6,19 @@ import { useI18n } from "@/lib/i18n/client";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { SUBJECTS } from "@/lib/subjects/registry";
-import { getNotebook } from "@/lib/notebooks/registry";
+import { getNotebook, getNotebooksForSubject } from "@/lib/notebooks/registry";
 import type { Notebook } from "@/lib/notebooks/types";
 import { setLessonInUrl } from "@/lib/notebooks/nav";
+import { tr as trText } from "@/lib/i18n/translatable";
+import type { Locale } from "@/lib/i18n/types";
+import { YearPicker } from "@/components/year-picker";
 import { cn } from "@/lib/utils";
 import { ACCENT } from "@/lib/subjects/accents";
 
 const SUBJECT_RE = /^\/subjects\/([^/]+)(?:\/([^/]+))?\/?$/;
 
 export function SiteHeader() {
-  const { dict } = useI18n();
+  const { dict, locale } = useI18n();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -78,6 +81,7 @@ export function SiteHeader() {
               lectureLabel={dict.subject.lecture}
               previousLabel={dict.subject.previous}
               nextLabel={dict.subject.next}
+              locale={locale}
             />
           ) : null}
         </div>
@@ -100,30 +104,31 @@ function SubjectCrumb({
   notebook?: Notebook;
 }) {
   const a = ACCENT[subject.accent];
+  const allYears = notebook ? getNotebooksForSubject(subject.slug) : [];
   return (
-    <Link
-      href={`/subjects/${subject.slug}`}
-      className={cn(
-        "group flex min-w-0 cursor-pointer items-center gap-2 rounded-lg px-2 py-1 font-bold tracking-tight",
-        "transition-colors hover:bg-accent",
-      )}
-    >
-      <span className="text-base leading-none" aria-hidden>
-        {subject.emoji}
-      </span>
-      <span className="flex min-w-0 items-center gap-1.5">
-        <span
-          aria-hidden
-          className={cn("inline-block h-1.5 w-1.5 shrink-0 rounded-full", a.bg)}
-        />
-        <span className="truncate">{subject.title}</span>
-      </span>
-      {notebook && (
-        <span className="ms-1 shrink-0 rounded-full border border-border/70 bg-card px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-          {notebook.term}
+    <div className="flex min-w-0 items-center gap-2">
+      <Link
+        href={`/subjects/${subject.slug}`}
+        className={cn(
+          "group flex min-w-0 cursor-pointer items-center gap-2 rounded-lg px-2 py-1 font-bold tracking-tight",
+          "transition-colors hover:bg-accent",
+        )}
+      >
+        <span className="text-base leading-none" aria-hidden>
+          {subject.emoji}
         </span>
+        <span className="flex min-w-0 items-center gap-1.5">
+          <span
+            aria-hidden
+            className={cn("inline-block h-1.5 w-1.5 shrink-0 rounded-full", a.bg)}
+          />
+          <span className="truncate">{subject.title}</span>
+        </span>
+      </Link>
+      {notebook && (
+        <YearPicker current={notebook} available={allYears} />
       )}
-    </Link>
+    </div>
   );
 }
 
@@ -133,12 +138,14 @@ function LessonNav({
   lectureLabel,
   previousLabel,
   nextLabel,
+  locale,
 }: {
   notebook: Notebook;
   lessonIndex: number;
   lectureLabel: string;
   previousLabel: string;
   nextLabel: string;
+  locale: Locale;
 }) {
   const total = notebook.lessons.length;
   const lesson = notebook.lessons[lessonIndex];
@@ -166,7 +173,7 @@ function LessonNav({
           {lectureLabel} {String(lesson.number).padStart(2, "0")} · {lessonIndex + 1}/{total}
         </span>
         <span className="w-full truncate text-sm font-semibold tracking-tight">
-          {lesson.title}
+          {trText(lesson.title, locale)}
         </span>
       </div>
       <Chevron
@@ -200,9 +207,9 @@ function Chevron({
       disabled={disabled}
       aria-label={label}
       className={cn(
-        "inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-border/70 bg-card text-lg leading-none text-muted-foreground",
-        "transition-colors hover:bg-accent hover:text-foreground",
-        "disabled:pointer-events-none disabled:opacity-30",
+        "inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border bg-card text-xl font-semibold leading-none text-foreground",
+        "transition-all hover:scale-105 hover:border-foreground/30 hover:bg-accent",
+        "disabled:pointer-events-none disabled:opacity-20",
       )}
     >
       {children}

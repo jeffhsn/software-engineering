@@ -1,0 +1,28 @@
+---
+description: Convert PDF files to Markdown using the pdf-to-md CLI. Use when the user provides a PDF or asks to read/convert/process PDF files.
+globs:
+alwaysApply: false
+---
+
+# PDF to Markdown Tool
+
+A `pdf-to-md` CLI is available at `tools/pdf-to-md/` in this project. Use it to convert any PDF into readable markdown.
+
+## How to convert PDFs
+
+- Single file to stdout: `node tools/pdf-to-md/pdf-to-md.js <file.pdf> --stdout`
+- Single file to a directory: `node tools/pdf-to-md/pdf-to-md.js <file.pdf> --output-dir <dir>`
+- All PDFs in a folder: `node tools/pdf-to-md/pdf-to-md.js <folder>/ --output-dir <dir>`
+
+## Flags
+
+- `--output-dir <dir>` — override output directory
+- `--stdout` — print markdown to stdout (single file only)
+- `--json-summary` — print JSON conversion report to stderr
+- `--no-headings` / `--no-lists` / `--no-code` / `--no-tables` / `--no-clean` — disable specific detections
+
+## When the user gives you a PDF
+
+1. Convert it with the tool above
+2. Read the converted markdown to understand the content
+3. Use it to generate quizzes, practice exams, summaries, or whatever the user asks for

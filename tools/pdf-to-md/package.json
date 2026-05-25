@@ -1,0 +1,16 @@
+{
+  "name": "pdf-to-md",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "PDF to Markdown converter",
+  "main": "pdf-to-md.js",
+  "bin": {
+    "pdf-to-md": "./pdf-to-md.js"
+  },
+  "scripts": {
+    "convert": "node pdf-to-md.js"
+  },
+  "dependencies": {
+    "pdf-parse": "^2.4.5"
+  }
+}

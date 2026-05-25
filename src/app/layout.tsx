@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Fraunces } from "next/font/google";
 import "./globals.css";
 import { getServerI18n } from "@/lib/i18n/server";
 import { I18nProvider } from "@/lib/i18n/client";
@@ -13,6 +13,15 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+// Editorial serif for long-form reading (Erklärung, Lösungs-Walkthrough,
+// h1/h2 anchors). Warm, slightly expressive — gives the site a notebook
+// feel without leaning fully into a "book" look.
+const fraunces = Fraunces({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  axes: ["SOFT", "opsz"],
 });
 
 export const metadata: Metadata = {
@@ -34,7 +43,7 @@ export default async function RootLayout({
       lang={locale}
       dir={dir}
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} h-full antialiased`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />

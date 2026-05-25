@@ -2,8 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
-import "react-pdf/dist/Page/AnnotationLayer.css";
-import "react-pdf/dist/Page/TextLayer.css";
 import { cn } from "@/lib/utils";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -14,6 +12,8 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 interface Props {
   src: string;
   className?: string;
+  /** Notify the parent once pdfjs has finished parsing the document. */
+  onReady?: () => void;
 }
 
 /**
@@ -22,7 +22,7 @@ interface Props {
  * everything else is a sized placeholder so the scrollbar/track stays
  * stable. As the user scrolls, more pages mount in.
  */
-export function PdfViewer({ src, className }: Props) {
+export function PdfViewer({ src, className, onReady }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageWidth, setPageWidth] = useState<number | null>(null);
@@ -46,9 +46,13 @@ export function PdfViewer({ src, className }: Props) {
     return () => ro.disconnect();
   }, []);
 
-  const onLoad = useCallback((d: { numPages: number }) => {
-    setNumPages(d.numPages);
-  }, []);
+  const onLoad = useCallback(
+    (d: { numPages: number }) => {
+      setNumPages(d.numPages);
+      onReady?.();
+    },
+    [onReady],
+  );
 
   return (
     <div
@@ -87,6 +91,7 @@ export function PdfViewer({ src, className }: Props) {
                 root={containerRef.current}
                 pageNumber={i + 1}
                 width={pageWidth}
+                eager={i === 0}
               />
             ))}
         </Document>
@@ -104,13 +109,16 @@ function LazyPage({
   pageNumber,
   width,
   root,
+  eager,
 }: {
   pageNumber: number;
   width: number;
   root: HTMLElement | null;
+  /** When true, mount immediately — used for the first page so it renders ASAP. */
+  eager?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [mounted, setMounted] = useState(false);
+  const [mounted, setMounted] = useState(!!eager);
 
   useEffect(() => {
     if (mounted || !ref.current) return;
@@ -121,23 +129,24 @@ function LazyPage({
           io.disconnect();
         }
       },
-      { root: root ?? undefined, rootMargin: "800px 0px" },
+      { root: root ?? undefined, rootMargin: "300px 0px" },
     );
     io.observe(ref.current);
     return () => io.disconnect();
   }, [mounted, root]);
 
-  // Placeholder height ≈ A4-ish aspect; replaced by real page once mounted.
   const placeholderHeight = Math.round(width * 1.414);
 
   return (
     <div ref={ref} style={{ width }}>
       {mounted ? (
+        // Text + annotation layers are heavy and not needed for read-only
+        // slide viewing — leaving them off ~halves per-page render time.
         <Page
           pageNumber={pageNumber}
           width={width}
-          renderTextLayer
-          renderAnnotationLayer
+          renderTextLayer={false}
+          renderAnnotationLayer={false}
           className="!shadow-sm"
         />
       ) : (

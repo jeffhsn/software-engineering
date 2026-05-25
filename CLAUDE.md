@@ -4,12 +4,12 @@
 
 ## PDF to Markdown Tool
 
-A `pdf-to-md` CLI is available at `~/warp/pdf-to-md/`. Use it to convert any PDF the user provides into readable markdown.
+A `pdf-to-md` CLI is available at `tools/pdf-to-md/` in this project. Use it to convert any PDF the user provides into readable markdown.
 
 ### How to convert PDFs
-- Single file to stdout: `node ~/warp/pdf-to-md/pdf-to-md.js <file.pdf> --stdout`
-- Single file to a directory: `node ~/warp/pdf-to-md/pdf-to-md.js <file.pdf> --output-dir <dir>`
-- All PDFs in a folder: `node ~/warp/pdf-to-md/pdf-to-md.js <folder>/ --output-dir <dir>`
+- Single file to stdout: `node tools/pdf-to-md/pdf-to-md.js <file.pdf> --stdout`
+- Single file to a directory: `node tools/pdf-to-md/pdf-to-md.js <file.pdf> --output-dir <dir>`
+- All PDFs in a folder: `node tools/pdf-to-md/pdf-to-md.js <folder>/ --output-dir <dir>`
 
 ### When the user gives you a PDF
 1. Convert it with the tool above
@@ -18,11 +18,11 @@ A `pdf-to-md` CLI is available at `~/warp/pdf-to-md/`. Use it to convert any PDF
 
 ## fetch-moodle (pull from Moodle / auth pages)
 
-A `fetch-moodle` CLI is available at `~/warp/fetch-moodle/`. It uses the user's Chrome cookies to download files (PDFs, slides, video recordings, etc.) from Moodle and other auth-protected pages without manual login.
+A `fetch-moodle` CLI is available at `~/tools/fetch-moodle/`. It uses the user's Chrome cookies to download files (PDFs, slides, video recordings, etc.) from Moodle and other auth-protected pages without manual login.
 
 ### How to fetch
-- Single URL: `~/warp/fetch-moodle/fetch-moodle.sh <url>`
-- Multiple URLs: `~/warp/fetch-moodle/fetch-moodle.sh <url1> <url2> ...`
+- Single URL: `~/tools/fetch-moodle/fetch-moodle.sh <url>`
+- Multiple URLs: `~/tools/fetch-moodle/fetch-moodle.sh <url1> <url2> ...`
 - Custom output dir: add `--out <dir>` (default: `~/Downloads/se-bsc`)
 - Different browser: add `--browser safari|firefox|edge` (default: chrome)
 

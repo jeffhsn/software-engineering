@@ -11,3 +11,13 @@ const NOTEBOOKS: Notebook[] = [cybersicherheit2025];
 export function getNotebook(subjectSlug: string): Notebook | undefined {
   return NOTEBOOKS.find((n) => n.subject === subjectSlug);
 }
+
+/**
+ * All available iterations of a subject, newest year first. Used by the
+ * year picker in the header.
+ */
+export function getNotebooksForSubject(subjectSlug: string): Notebook[] {
+  return NOTEBOOKS.filter((n) => n.subject === subjectSlug).sort(
+    (a, b) => b.year - a.year,
+  );
+}
