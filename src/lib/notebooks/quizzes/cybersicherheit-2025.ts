@@ -125,7 +125,7 @@ const lesson1: QuizSet = {
           question: {
             de: "Warum ist Sicherheit anders als die meisten anderen Ingenieursfächer?",
           },
-          options: [ { de: "Die verwendete Mathematik ist deutlich schwieriger" }, { de: "Es gibt keine Normen und Standards" }, { de: "Hardware altert schneller als anderswo" }, { de: "Man kämpft gegen einen denkenden, boshaften Gegner statt gegen die neutrale Natur" } ],
+          options: [ { de: "Die verwendete Mathematik ist deutlich schwieriger als in anderen Disziplinen" }, { de: "Es gibt anders als anderswo keinerlei Normen, Standards oder Vorschriften" }, { de: "Die eingesetzte Hardware altert und verschleißt schneller als sonst überall" }, { de: "Man kämpft gegen einen denkenden, boshaften Gegner statt gegen die neutrale Natur" } ],
           correct: 3,
           explanation: {
             de: "Die Schwerkraft denkt sich keine neue Variante aus; ein Angreifer schon. Er nutzt das System bewusst anders, als es gedacht war.",
@@ -149,7 +149,7 @@ const lesson1: QuizSet = {
           type: "mcq",
           difficulty: "medium",
           question: { de: "Was ist das „Security Mindset“?" },
-          options: [ { de: "Möglichst viele Sicherheitsprodukte einkaufen" }, { de: "Bei allem reflexartig fragen, wie man es brechen oder missbrauchen könnte" }, { de: "Allen Beteiligten grundsätzlich misstrauen" }, { de: "Jede Software vor dem Einsatz formal beweisen" } ],
+          options: [ { de: "Möglichst viele kommerzielle Sicherheitsprodukte einkaufen und kombinieren" }, { de: "Bei allem reflexartig fragen, wie man es brechen oder missbrauchen könnte" }, { de: "Grundsätzlich allen Beteiligten misstrauen und niemandem Zugriff geben" }, { de: "Jede eingesetzte Software vor dem Produktiveinsatz vollständig formal beweisen" } ],
           correct: 1,
           explanation: {
             de: "Normale Entwickler fragen, wie etwas funktioniert; Sicherheitsleute fragen, wie man es zum Versagen bringt.",
@@ -388,7 +388,7 @@ const lesson1: QuizSet = {
           question: {
             de: "Mit welchen Mitteln sichert man typischerweise die Verfügbarkeit?",
           },
-          options: [ { de: "Mit Redundanz, Backups und Abwehr von Überlastungsangriffen" }, { de: "Mit stärkerer Verschlüsselung" }, { de: "Mit digitalen Signaturen" }, { de: "Mit längeren Schlüsseln" } ],
+          options: [ { de: "Mit Redundanz, Backups und Abwehr von Überlastungsangriffen" }, { de: "Mit möglichst starker Verschlüsselung sämtlicher gespeicherter Daten" }, { de: "Mit digitalen Signaturen und laufenden Integritätsprüfungen der Daten" }, { de: "Mit deutlich längeren Schlüsseln und mathematisch stärkeren Chiffren" } ],
           correct: 0,
           explanation: {
             de: "Verfügbarkeit rettet man mit handfesten Dingen, nicht mit Mathematik — Redundanz und Backups statt Formeln.",
@@ -440,7 +440,7 @@ const lesson1: QuizSet = {
           question: {
             de: "Im Klausur-Reflex „welches Schutzziel ist verletzt?“ — wonach fragst du der Reihe nach?",
           },
-          options: [ { de: "Wer darf lesen? Wer könnte unbemerkt ändern? Was blockiert das Nutzen?" }, { de: "Wurde es teurer? Schneller? Größer?" }, { de: "Ist es symmetrisch, asymmetrisch oder ein Protokoll?" }, { de: "Wer ist Alice, wer Bob, wer Oskar?" } ],
+          options: [ { de: "Wer darf lesen? Wer könnte unbemerkt ändern? Was blockiert das Nutzen?" }, { de: "Wurde es teurer, wurde es schneller, wurde es am Ende größer?" }, { de: "Ist das Verfahren symmetrisch, asymmetrisch oder doch nur ein Protokoll?" }, { de: "Wer ist hier Alice, wer ist Bob und wer der Lauscher Oskar?" } ],
           correct: 0,
           explanation: {
             de: "Genau über die drei Verben lesen (C) / unbemerkt ändern (I) / nutzen (A) ordnest du jedes Szenario zu.",
@@ -512,7 +512,7 @@ const lesson1: QuizSet = {
           type: "mcq",
           difficulty: "medium",
           question: { de: "Welche Maßnahmenliste ist ein Beispiel für Defense in Depth?" },
-          options: [ { de: "Nur eine sehr starke Firewall" }, { de: "Den Algorithmus geheim halten" }, { de: "Firewall UND Authentifizierung UND Verschlüsselung UND Überwachung" }, { de: "Ein besonders langes Passwort" } ],
+          options: [ { de: "Eine einzige, dafür besonders sorgfältig gehärtete Firewall am Rand" }, { de: "Den verwendeten Verschlüsselungsalgorithmus möglichst lange geheim halten" }, { de: "Firewall UND Authentifizierung UND Verschlüsselung UND Überwachung" }, { de: "Ein besonders langes, kompliziertes und nirgends wiederverwendetes Passwort" } ],
           correct: 2,
           explanation: {
             de: "Mehrere unabhängige Schichten, die einander auffangen — nicht alles hängt an einer einzigen Annahme.",
@@ -536,7 +536,7 @@ const lesson1: QuizSet = {
           question: {
             de: "Warum ist der „denkende Gegner“ schlimmer als die Natur, gegen die andere Ingenieure kämpfen?",
           },
-          options: [ { de: "Er hält sich an keine Regeln und tut, womit niemand rechnet" }, { de: "Er ist stärker als physikalische Kräfte" }, { de: "Er arbeitet nur nachts" }, { de: "Er greift nur alte Systeme an" } ],
+          options: [ { de: "Er hält sich an keine Regeln und tut, womit niemand rechnet" }, { de: "Er ist grundsätzlich stärker als alle physikalischen Naturkräfte" }, { de: "Er arbeitet ausschließlich nachts, wenn niemand das System beobachtet" }, { de: "Er greift grundsätzlich nur veraltete, längst ungepatchte Systeme an" } ],
           correct: 0,
           explanation: {
             de: "Die Natur ist gnadenlos, aber nicht boshaft; ein Angreifer nutzt das System bewusst regelwidrig.",
@@ -562,7 +562,7 @@ const lesson1: QuizSet = {
           question: {
             de: "Wie würde jemand mit Security Mindset einen neuen Mechanismus betrachten?",
           },
-          options: [ { de: "„Wie funktioniert das?“" }, { de: "„Wie schön sieht das aus?“" }, { de: "„Wie kann ich das brechen oder missbrauchen?“" }, { de: "„Wie viel kostet das?“" } ],
+          options: [ { de: "„Wie genau funktioniert dieser Mechanismus eigentlich?“" }, { de: "„Wie ansprechend und schön sieht das Ganze am Ende aus?“" }, { de: "„Wie kann ich das brechen oder missbrauchen?“" }, { de: "„Wie viel kostet das in Anschaffung und Betrieb?“" } ],
           correct: 2,
           explanation: {
             de: "Der reflexartige Gegen-Gedanke „und wie breche ich das wieder?“ ist die wichtigste Gewohnheit des Kurses.",
@@ -575,7 +575,7 @@ const lesson1: QuizSet = {
           question: {
             de: "Woraus entsteht unvermeidbar die Gefahr von Insider-Angriffen?",
           },
-          options: [ { de: "Aus zu schwachen Passwörtern" }, { de: "Aus veralteter Hardware" }, { de: "Aus fehlender Verschlüsselung" }, { de: "Daraus, dass man immer irgendjemandem vertrauen muss" } ],
+          options: [ { de: "Daraus, dass Nutzer immer wieder viel zu schwache Passwörter wählen" }, { de: "Daraus, dass eingesetzte Hardware mit der Zeit veraltet und ausfällt" }, { de: "Daraus, dass viele Systeme in der Praxis gar nicht verschlüsselt sind" }, { de: "Daraus, dass man immer irgendjemandem vertrauen muss" } ],
           correct: 3,
           explanation: {
             de: "Wer Vertrauen genießt, kann es auch missbrauchen — und ganz ohne Vertrauen funktioniert kein System.",
@@ -719,7 +719,7 @@ const lesson1: QuizSet = {
           type: "mcq",
           difficulty: "medium",
           question: { de: "Was besitzt bei asymmetrischen Verfahren jede Person?" },
-          options: [ { de: "Einen einzigen geteilten Schlüssel" }, { de: "Ein Schlüsselpaar aus öffentlichem und privatem Schlüssel" }, { de: "Gar keinen Schlüssel" }, { de: "Nur einen öffentlichen Schlüssel" } ],
+          options: [ { de: "Einen einzigen, mit allen Partnern geteilten Geheimschlüssel" }, { de: "Ein Schlüsselpaar aus öffentlichem und privatem Schlüssel" }, { de: "Gar keinen eigenen Schlüssel, sondern nur ein gemeinsames Passwort" }, { de: "Ausschließlich einen öffentlichen, frei verteilbaren Schlüssel" } ],
           correct: 1,
           explanation: {
             de: "Public-Key-Verfahren (vor allem RSA) nutzen ein Paar: öffentlich und privat.",
@@ -774,7 +774,7 @@ const lesson1: QuizSet = {
           question: {
             de: "Welches Henne-Ei-Problem plagte die rein symmetrische Welt vor 1976?",
           },
-          options: [ { de: "Schlüssel waren zu lang zum Speichern" }, { de: "Algorithmen waren zu langsam" }, { de: "Beide Seiten mussten denselben geheimen Schlüssel kennen" }, { de: "Es gab keine Computer" } ],
+          options: [ { de: "Die Schlüssel waren schlicht zu lang, um sie sicher zu speichern" }, { de: "Die Algorithmen waren für die damalige Hardware viel zu langsam" }, { de: "Beide Seiten mussten denselben geheimen Schlüssel kennen" }, { de: "Es gab damals schlicht noch keine Computer für die Berechnungen" } ],
           correct: 2,
           explanation: {
             de: "Genau dieses Schlüsselaustauschproblem löste 1976 die Public-Key-Kryptografie.",
@@ -1327,7 +1327,7 @@ const lesson1: QuizSet = {
           type: "mcq",
           difficulty: "medium",
           question: { de: "Wie ist „r = x mod d“ zu verstehen?" },
-          options: [ { de: "r ist das Produkt von x und d" }, { de: "r ist der Rest, der bei der Division von x durch d bleibt" }, { de: "r ist der Ganzzahlquotient von x und d" }, { de: "r ist x geteilt durch d ohne Rest" } ],
+          options: [ { de: "r ist das Produkt, das die beiden Zahlen x und d miteinander ergeben" }, { de: "r ist der Rest, der bei der Division von x durch d bleibt" }, { de: "r ist der Ganzzahlquotient aus der Division von x durch d" }, { de: "r ist x geteilt durch d, glatt und ganz ohne jeden Rest" } ],
           correct: 1,
           explanation: { de: "mod liefert den Rest: x = q·d + r, und r ist dieser Rest." },
         },
@@ -1378,7 +1378,7 @@ const lesson1: QuizSet = {
           type: "mcq",
           difficulty: "medium",
           question: { de: "In welche drei großen Bereiche gliedert sich der Kurs?" },
-          options: [ { de: "Kryptografie, Netzwerksicherheit, Software- und Systemsicherheit" }, { de: "Hardware, Software, Firmware" }, { de: "Vertraulichkeit, Integrität, Verfügbarkeit" }, { de: "Symmetrisch, asymmetrisch, Protokolle" } ],
+          options: [ { de: "Kryptografie, Netzwerksicherheit, Software- und Systemsicherheit" }, { de: "Hardware-Sicherheit, Software-Sicherheit und Firmware-Sicherheit" }, { de: "Vertraulichkeit, Integrität und Verfügbarkeit der gespeicherten Daten" }, { de: "Symmetrische Verfahren, asymmetrische Verfahren und Protokolle" } ],
           correct: 0,
           explanation: {
             de: "Die Kursinhalte teilen sich in Kryptografie, Netzwerksicherheit sowie Software- und Systemsicherheit.",
@@ -1422,7 +1422,7 @@ const lesson1: QuizSet = {
           type: "mcq",
           difficulty: "medium",
           question: { de: "Was zählt im Kryptologie-Baum zur Kryptografie?" },
-          options: [ { de: "Symmetrische Chiffren, asymmetrische Chiffren und Protokolle" }, { de: "Nur das Brechen von Verschlüsselung" }, { de: "Frequenzanalyse und Brute-Force" }, { de: "Ausschließlich Hash-Funktionen" } ],
+          options: [ { de: "Symmetrische Chiffren, asymmetrische Chiffren und Protokolle" }, { de: "Nur das Brechen und Analysieren bereits fremder Verschlüsselung" }, { de: "Vor allem die Frequenzanalyse und der klassische Brute-Force-Angriff" }, { de: "Ausschließlich kryptografische Hash-Funktionen und nichts weiter" } ],
           correct: 0,
           explanation: {
             de: "Die Kryptografie umfasst symmetrische und asymmetrische Chiffren sowie Protokolle; der andere Zweig ist die Kryptanalyse.",
@@ -1446,7 +1446,7 @@ const lesson1: QuizSet = {
           question: {
             de: "Wann gilt ein Verschlüsselungsverfahren als sicher?",
           },
-          options: [ { de: "Sobald sein Erfinder es für sicher hält" }, { de: "Sobald der Algorithmus geheim gehalten wird" }, { de: "Erst wenn die besten Kryptanalytiker jahrelang erfolglos daran scheitern" }, { de: "Sobald es patentiert ist" } ],
+          options: [ { de: "Sobald sein Erfinder selbst fest von der Sicherheit überzeugt ist" }, { de: "Sobald man den verwendeten Algorithmus streng geheim hält" }, { de: "Erst wenn die besten Kryptanalytiker jahrelang erfolglos daran scheitern" }, { de: "Sobald es als Verfahren offiziell zum Patent angemeldet wurde" } ],
           correct: 2,
           explanation: {
             de: "Vertrauen entsteht durch überstandene Analyse, nicht durch die Meinung des Erfinders.",
@@ -1459,7 +1459,7 @@ const lesson1: QuizSet = {
           question: {
             de: "„Welcher Algorithmus, AES oder DES? Welche Schlüssellänge, 128 oder 192 Bit?“ — worauf will diese Folie hinaus?",
           },
-          options: [ { de: "AES ist immer die richtige Wahl" }, { de: "Schlüssellänge ist irrelevant" }, { de: "DES ist sicherer als AES" }, { de: "Krypto erfordert bewusste Entscheidungen und nützt nur, wenn der Rest des Systems sicher ist" } ],
+          options: [ { de: "Dass der Advanced Encryption Standard in jeder denkbaren Lage die beste Wahl ist" }, { de: "Dass die gewählte Schlüssellänge für die tatsächliche Sicherheit unerheblich ist" }, { de: "Dass das ältere DES dem moderneren AES in Sachen Sicherheit klar überlegen ist" }, { de: "Krypto erfordert bewusste Entscheidungen und nützt nur, wenn der Rest des Systems sicher ist" } ],
           correct: 3,
           explanation: {
             de: "Kryptografie ist kein Selbstläufer: man muss wählen, und sie hilft nur, wenn der Rest des Systems sicher ist.",
@@ -1622,7 +1622,7 @@ const lesson1: QuizSet = {
           type: "mcq",
           difficulty: "medium",
           question: { de: "Wie lässt sich die Angreifer-Verteidiger-Asymmetrie zusammenfassen?" },
-          options: [ { de: "Der Angreifer braucht nur eine Lücke, der Verteidiger muss alle schließen" }, { de: "Beide müssen alles abdecken" }, { de: "Der Verteidiger braucht nur eine starke Stelle" }, { de: "Der Angreifer muss alle Türen gleichzeitig öffnen" } ],
+          options: [ { de: "Der Angreifer braucht nur eine Lücke, der Verteidiger muss alle schließen" }, { de: "Beide Seiten müssen stets das komplette System lückenlos abdecken" }, { de: "Dem Verteidiger genügt eine einzige besonders gut gesicherte Stelle" }, { de: "Der Angreifer muss sämtliche Türen exakt gleichzeitig aufbrechen" } ],
           correct: 0,
           explanation: { de: "Einmal irgendwo gewinnen vs. überall gewinnen müssen." },
         },
@@ -1640,7 +1640,7 @@ const lesson1: QuizSet = {
           type: "mcq",
           difficulty: "medium",
           question: { de: "Was folgt aus „es gibt keine perfekte Sicherheit“?" },
-          options: [ { de: "Man kann auf Sicherheit verzichten" }, { de: "Nur Open Source ist sicher" }, { de: "Man muss immer jemandem vertrauen, woraus Insider-Angriffe entstehen" }, { de: "Verschlüsselung ist sinnlos" } ],
+          options: [ { de: "Man kann in der Praxis getrost ganz auf Sicherheitsmaßnahmen verzichten" }, { de: "Nur quelloffene Open-Source-Software kann überhaupt jemals sicher sein" }, { de: "Man muss immer jemandem vertrauen, woraus Insider-Angriffe entstehen" }, { de: "Verschlüsselung ist letztlich sinnlos und reine Zeitverschwendung" } ],
           correct: 2,
           explanation: { de: "Vertrauen ist unvermeidbar und kann missbraucht werden (Insider)." },
         },
@@ -1712,7 +1712,7 @@ const lesson1: QuizSet = {
           type: "mcq",
           difficulty: "medium",
           question: { de: "Welche drei Themenblöcke umfasst der Kurs?" },
-          options: [ { de: "Mathematik, Physik, Informatik" }, { de: "Angriff, Verteidigung, Forensik" }, { de: "Kryptografie, Netzwerksicherheit, Software-/Systemsicherheit" }, { de: "Hardware, Cloud, Mobile" } ],
+          options: [ { de: "Reine Mathematik, theoretische Physik und Informatik" }, { de: "Angriffstechnik, Verteidigung und die digitale Forensik" }, { de: "Kryptografie, Netzwerksicherheit, Software-/Systemsicherheit" }, { de: "Hardware-Sicherheit, Cloud-Dienste und mobile Endgeräte" } ],
           correct: 2,
           explanation: { de: "Die drei großen Bereiche der Kursinhalte." },
         },
