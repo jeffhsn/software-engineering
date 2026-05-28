@@ -245,6 +245,7 @@ function ChapterView({
         ariaLabel="Hilfen"
         scrollRef={rightScrollRef}
         chips={rightChips}
+        progress={onLecture ? rightLecture !== "quiz" : rightUebung === "walkthrough"}
       >
         {onLecture ? (
           rightLecture === "quiz" ? (

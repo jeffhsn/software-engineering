@@ -33,6 +33,10 @@ export const metadata: Metadata = {
 
 const themeScript = `(function(){try{var m=document.cookie.match(/(?:^|; )se-bsc-theme=([^;]+)/);var s=m?m[1]:null;var d=s==='dark'||(s!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.classList.add('dark');}}catch(e){}})();`;
 
+// Apply saved reading preferences (font size + line spacing) before paint
+// so there is no flash of the default size on load.
+const readingScript = `(function(){try{var r=document.documentElement;var s=localStorage.getItem('se-bsc-reading-scale');var l=localStorage.getItem('se-bsc-reading-leading');if(s)r.style.setProperty('--reading-scale',s);if(l)r.style.setProperty('--reading-leading',l);}catch(e){}})();`;
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -49,6 +53,7 @@ export default async function RootLayout({
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script dangerouslySetInnerHTML={{ __html: readingScript }} />
       </head>
       <body className="min-h-full">
         <I18nProvider initialLocale={locale}>

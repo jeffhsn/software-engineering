@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useI18n } from "@/lib/i18n/client";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { ReadingSettings } from "@/components/reading-settings";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { SUBJECTS } from "@/lib/subjects/registry";
 import {
@@ -112,6 +113,7 @@ export function SiteHeader() {
         </div>
 
         <div className="flex items-center justify-end gap-1.5">
+          <ReadingSettings />
           <ThemeSwitcher />
           <LanguageSwitcher />
         </div>
