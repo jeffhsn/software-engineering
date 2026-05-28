@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Subject } from "@/lib/subjects/types";
 import { ACCENT } from "@/lib/subjects/accents";
+import { getNotebook } from "@/lib/notebooks/registry";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
@@ -10,9 +11,16 @@ interface Props {
 
 export function SubjectCard({ subject }: Props) {
   const a = ACCENT[subject.accent];
+  // If the subject has a notebook, deep-link straight into chapter 1 — the
+  // notebook home is reserved for direct visits, the primary flow is
+  // "click subject → start reading".
+  const notebook = getNotebook(subject.slug);
+  const href = notebook
+    ? `/subjects/${subject.slug}?l=1`
+    : `/subjects/${subject.slug}`;
   return (
     <Link
-      href={`/subjects/${subject.slug}`}
+      href={href}
       className="group block cursor-pointer transition-transform duration-300 ease-out hover:-translate-y-1"
     >
       <Card

@@ -5,39 +5,37 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
-  Light mode = warm cream paper. The hue (~85°) is barely there — about
-  the same warmth as old-book stock — but enough to lose the clinical
-  Apple-white feel. Cards stay pure white so they "sit on" the paper.
+  Light mode = clean off-white paper. Just a whisper of warmth so it
+  isn't clinical Apple-white, but no cream/yellow tint either.
 */
 :root {
-  --background: oklch(0.985 0.008 85);
-  --foreground: oklch(0.18 0.01 60);
-  --surface: oklch(0.972 0.01 85);
+  --background: oklch(0.985 0.003 90);
+  --foreground: oklch(0.2 0.005 250);
+  --surface: oklch(0.975 0.004 90);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.01 60);
+  --card-foreground: oklch(0.2 0.005 250);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.01 60);
-  --primary: oklch(0.2 0.01 60);
-  --primary-foreground: oklch(0.99 0.005 85);
-  --secondary: oklch(0.955 0.012 85);
-  --secondary-foreground: oklch(0.22 0.01 60);
-  --muted: oklch(0.955 0.012 85);
-  --muted-foreground: oklch(0.5 0.012 60);
-  --accent: oklch(0.94 0.014 80);
-  --accent-foreground: oklch(0.2 0.01 60);
+  --popover-foreground: oklch(0.2 0.005 250);
+  --primary: oklch(0.22 0.005 250);
+  --primary-foreground: oklch(0.99 0.003 90);
+  --secondary: oklch(0.96 0.004 90);
+  --secondary-foreground: oklch(0.22 0.005 250);
+  --muted: oklch(0.96 0.004 90);
+  --muted-foreground: oklch(0.5 0.006 250);
+  --accent: oklch(0.945 0.005 90);
+  --accent-foreground: oklch(0.22 0.005 250);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.88 0.015 75);
-  --input: oklch(0.88 0.015 75);
-  --ring: oklch(0.65 0.02 70);
+  --border: oklch(0.88 0.005 250);
+  --input: oklch(0.88 0.005 250);
+  --ring: oklch(0.66 0.008 250);
   --radius: 0.875rem;
 
-  /* Notebook accents — tasteful, single-axis warmth. Used only sparingly
-     (heading rule, blockquote stripe). Not for body text. */
-  --ink: oklch(0.32 0.04 50);
-  --ink-soft: oklch(0.5 0.025 55);
-  --rule: oklch(0.85 0.02 70);
-  --rule-strong: oklch(0.62 0.04 55);
-  --paper-tint: oklch(0.95 0.018 85);
+  /* Notebook accents — very low chroma, near-neutral. */
+  --ink: oklch(0.28 0.008 250);
+  --ink-soft: oklch(0.48 0.006 250);
+  --rule: oklch(0.86 0.006 250);
+  --rule-strong: oklch(0.6 0.01 250);
+  --paper-tint: oklch(0.955 0.005 90);
 }
 
 @theme inline {
@@ -63,7 +61,7 @@
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
   --font-serif: var(--font-serif);
-  --font-heading: var(--font-serif);
+  --font-heading: var(--font-sans);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -74,40 +72,36 @@
 }
 
 /*
-  Dark mode = warm dim notebook. Same "cozy paper" intent as light mode,
-  but lifted off pure black so long reading isn't strained: a slightly
-  warm slate (~60° hue) for surfaces, brighter parchment-cream foreground
-  with a noticeable warm tilt. Hierarchy stays readable because headings
-  push toward true cream while body sits at a softer tone.
+  Dark mode = deep neutral ink. Very low chroma so it reads as a
+  refined dark gray — not blue-slate-Tesla, not coffee-brown. Just
+  paper turned off. Cards lift a step so they sit clearly on the page.
 */
 .dark {
-  --background: oklch(0.165 0.012 60);
-  --foreground: oklch(0.92 0.018 85);
-  --surface: oklch(0.135 0.012 60);
-  --card: oklch(0.205 0.014 60);
-  --card-foreground: oklch(0.92 0.018 85);
-  --popover: oklch(0.205 0.014 60);
-  --popover-foreground: oklch(0.92 0.018 85);
-  --primary: oklch(0.95 0.018 85);
-  --primary-foreground: oklch(0.18 0.012 60);
-  --secondary: oklch(0.26 0.014 60);
-  --secondary-foreground: oklch(0.92 0.018 85);
-  --muted: oklch(0.24 0.014 60);
-  --muted-foreground: oklch(0.72 0.018 75);
-  --accent: oklch(0.28 0.016 65);
-  --accent-foreground: oklch(0.95 0.018 85);
+  --background: oklch(0.215 0.004 250);
+  --foreground: oklch(0.96 0.004 250);
+  --surface: oklch(0.195 0.004 250);
+  --card: oklch(0.265 0.005 250);
+  --card-foreground: oklch(0.96 0.004 250);
+  --popover: oklch(0.28 0.005 250);
+  --popover-foreground: oklch(0.96 0.004 250);
+  --primary: oklch(0.95 0.004 250);
+  --primary-foreground: oklch(0.21 0.004 250);
+  --secondary: oklch(0.305 0.005 250);
+  --secondary-foreground: oklch(0.96 0.004 250);
+  --muted: oklch(0.295 0.005 250);
+  --muted-foreground: oklch(0.78 0.006 250);
+  --accent: oklch(0.325 0.005 250);
+  --accent-foreground: oklch(0.96 0.004 250);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0.01 80 / 13%);
-  --input: oklch(1 0.01 80 / 15%);
-  --ring: oklch(0.6 0.02 70);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.62 0.008 250);
 
-  /* Headings push toward warm cream so the hierarchy snaps in dark mode
-     the way it does in light mode. Rules are visible but not loud. */
-  --ink: oklch(0.97 0.02 85);
-  --ink-soft: oklch(0.78 0.018 75);
-  --rule: oklch(1 0.012 80 / 16%);
-  --rule-strong: oklch(0.62 0.025 60);
-  --paper-tint: oklch(0.235 0.014 65);
+  --ink: oklch(0.98 0.004 250);
+  --ink-soft: oklch(0.82 0.005 250);
+  --rule: oklch(1 0 0 / 15%);
+  --rule-strong: oklch(0.66 0.008 250);
+  --paper-tint: oklch(0.32 0.005 250);
 }
 
 html {
@@ -148,11 +142,10 @@ body {
 .prose-notebook h2,
 .prose-notebook h3,
 .prose-notebook h4 {
-  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   color: var(--ink);
-  letter-spacing: -0.012em;
+  letter-spacing: -0.018em;
   text-wrap: balance;
-  font-feature-settings: "ss01", "ss02";
 }
 
 .prose-notebook h1 {

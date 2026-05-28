@@ -21,3 +21,8 @@ export function getNotebooksForSubject(subjectSlug: string): Notebook[] {
     (a, b) => b.year - a.year,
   );
 }
+
+/** Every registered notebook. Used by cross-notebook search on the root home. */
+export function getAllNotebooks(): Notebook[] {
+  return NOTEBOOKS;
+}

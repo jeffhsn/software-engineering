@@ -23,20 +23,13 @@ export function YearPicker({ current, available, onSelect }: Props) {
       <PopoverTrigger
         aria-label={`Term: ${current.term}`}
         className={cn(
-          "inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-semibold text-foreground",
-          "shadow-[0_1px_0_rgba(0,0,0,0.04)] transition-colors",
-          "hover:bg-accent",
+          "inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-medium text-muted-foreground",
+          "transition-colors hover:bg-foreground/[0.04] hover:text-foreground",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
-          "data-[state=open]:bg-accent",
+          "data-[state=open]:bg-foreground/[0.06]",
         )}
       >
-        <span className="text-[11px] leading-none" aria-hidden>
-          📅
-        </span>
-        <span>{current.term}</span>
-        <span aria-hidden className="text-[10px] text-muted-foreground">
-          ▾
-        </span>
+        <span className="font-serif italic">{current.term}</span>
       </PopoverTrigger>
       <PopoverContent align="start" sideOffset={6} className="w-56 p-1">
         <div className="px-2 pb-1 pt-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">

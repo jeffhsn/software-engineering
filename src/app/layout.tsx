@@ -4,6 +4,8 @@ import "./globals.css";
 import { getServerI18n } from "@/lib/i18n/server";
 import { I18nProvider } from "@/lib/i18n/client";
 import { SiteHeader } from "@/components/site-header";
+import { LessonNavBar } from "@/components/lesson-nav-bar";
+import { NotebookOverlay } from "@/components/notebook-overlay";
 
 const geistSans = Geist({
   variable: "--font-sans",
@@ -52,6 +54,8 @@ export default async function RootLayout({
         <I18nProvider initialLocale={locale}>
           <SiteHeader />
           <main className="flex-1">{children}</main>
+          <LessonNavBar />
+          <NotebookOverlay />
         </I18nProvider>
       </body>
     </html>

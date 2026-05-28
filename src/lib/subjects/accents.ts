@@ -10,6 +10,22 @@ interface AccentClasses {
   hoverBg: string;
   badgeBg: string;
   badgeText: string;
+  /**
+   * Soft, paper-respecting wash for the notebook header body. Sits on top
+   * of the page background, blends with the cream/leather palette instead
+   * of fighting it.
+   */
+  notebookCover: string;
+  /**
+   * Thin saturated strip at the very top of the notebook header — the
+   * binding/spine of the notebook. Uses the saturated 500 shade.
+   */
+  notebookSpine: string;
+  /**
+   * Soft accent border at the bottom of the notebook header. Makes the
+   * cover feel lifted from the page below.
+   */
+  notebookEdge: string;
 }
 
 export const ACCENT: Record<AccentColor, AccentClasses> = {
@@ -23,6 +39,9 @@ export const ACCENT: Record<AccentColor, AccentClasses> = {
     hoverBg: "hover:bg-red-500/5",
     badgeBg: "bg-red-500/10 dark:bg-red-500/15",
     badgeText: "text-red-700 dark:text-red-300",
+    notebookCover: "bg-red-50/85 dark:bg-red-950/45",
+    notebookSpine: "bg-red-500",
+    notebookEdge: "border-red-200/70 dark:border-red-900/50",
   },
   indigo: {
     dot: "bg-indigo-500",
@@ -34,6 +53,9 @@ export const ACCENT: Record<AccentColor, AccentClasses> = {
     hoverBg: "hover:bg-indigo-500/5",
     badgeBg: "bg-indigo-500/10 dark:bg-indigo-500/15",
     badgeText: "text-indigo-700 dark:text-indigo-300",
+    notebookCover: "bg-indigo-50/85 dark:bg-indigo-950/45",
+    notebookSpine: "bg-indigo-500",
+    notebookEdge: "border-indigo-200/70 dark:border-indigo-900/50",
   },
   emerald: {
     dot: "bg-emerald-500",
@@ -45,6 +67,9 @@ export const ACCENT: Record<AccentColor, AccentClasses> = {
     hoverBg: "hover:bg-emerald-500/5",
     badgeBg: "bg-emerald-500/10 dark:bg-emerald-500/15",
     badgeText: "text-emerald-700 dark:text-emerald-300",
+    notebookCover: "bg-emerald-50/85 dark:bg-emerald-950/45",
+    notebookSpine: "bg-emerald-500",
+    notebookEdge: "border-emerald-200/70 dark:border-emerald-900/50",
   },
   amber: {
     dot: "bg-amber-500",
@@ -56,6 +81,9 @@ export const ACCENT: Record<AccentColor, AccentClasses> = {
     hoverBg: "hover:bg-amber-500/5",
     badgeBg: "bg-amber-500/10 dark:bg-amber-500/15",
     badgeText: "text-amber-700 dark:text-amber-300",
+    notebookCover: "bg-amber-50/85 dark:bg-amber-950/45",
+    notebookSpine: "bg-amber-500",
+    notebookEdge: "border-amber-200/70 dark:border-amber-900/50",
   },
   fuchsia: {
     dot: "bg-fuchsia-500",
@@ -67,6 +95,9 @@ export const ACCENT: Record<AccentColor, AccentClasses> = {
     hoverBg: "hover:bg-fuchsia-500/5",
     badgeBg: "bg-fuchsia-500/10 dark:bg-fuchsia-500/15",
     badgeText: "text-fuchsia-700 dark:text-fuchsia-300",
+    notebookCover: "bg-fuchsia-50/85 dark:bg-fuchsia-950/45",
+    notebookSpine: "bg-fuchsia-500",
+    notebookEdge: "border-fuchsia-200/70 dark:border-fuchsia-900/50",
   },
   sky: {
     dot: "bg-sky-500",
@@ -78,6 +109,9 @@ export const ACCENT: Record<AccentColor, AccentClasses> = {
     hoverBg: "hover:bg-sky-500/5",
     badgeBg: "bg-sky-500/10 dark:bg-sky-500/15",
     badgeText: "text-sky-700 dark:text-sky-300",
+    notebookCover: "bg-sky-50/85 dark:bg-sky-950/45",
+    notebookSpine: "bg-sky-500",
+    notebookEdge: "border-sky-200/70 dark:border-sky-900/50",
   },
   teal: {
     dot: "bg-teal-500",
@@ -89,5 +123,8 @@ export const ACCENT: Record<AccentColor, AccentClasses> = {
     hoverBg: "hover:bg-teal-500/5",
     badgeBg: "bg-teal-500/10 dark:bg-teal-500/15",
     badgeText: "text-teal-700 dark:text-teal-300",
+    notebookCover: "bg-teal-50/85 dark:bg-teal-950/45",
+    notebookSpine: "bg-teal-500",
+    notebookEdge: "border-teal-200/70 dark:border-teal-900/50",
   },
 };

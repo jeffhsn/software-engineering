@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 export const STORAGE_NAMESPACE = "se-bsc:v1:";
 
@@ -23,16 +23,7 @@ export function usePersistedState<T>(
   initial: T,
 ): [T, (value: T | ((prev: T) => T)) => void] {
   const fullKey = storageKey(key);
-  const [value, setValue] = useState<T>(initial);
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(fullKey);
-      if (raw !== null) setValue(JSON.parse(raw) as T);
-    } catch {}
-    setHydrated(true);
-  }, [fullKey]);
+  const [value, setValue] = useState<T>(() => readPersisted(key, initial));
 
   const update = useCallback(
     (next: T | ((prev: T) => T)) => {
@@ -47,10 +38,6 @@ export function usePersistedState<T>(
     },
     [fullKey],
   );
-
-  // Mark unused-but-intentional. Consumers can ignore the hydration flag;
-  // exposing it here would clutter the API. Keep state until truly needed.
-  void hydrated;
 
   return [value, update];
 }
