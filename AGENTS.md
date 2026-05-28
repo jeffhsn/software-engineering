@@ -129,17 +129,22 @@ The conversion is lossy (umlauts in older slides come out mangled, layout is fla
 
 ## Quality bar for the AI artefacts
 
-- **Explanation** — ONE single explanation per lecture (no deep/simple split), German canonical. Goal: the user must *understand a horrible lecture on the first read* and *prep for the exam fast* — not become a researcher. Stay strictly inside the lecture MD; never add topics the slides don't cover. Every concept opens with an everyday picture/analogy a beginner gets, then deepens into the precise mechanism and the *why*. It follows a **fixed, standardized skeleton** so it's identical to read across every lecture and every subject — fixed top-and-tail, flexible middle:
+- **Explanation** — ONE single explanation per lecture (no deep/simple split), German canonical. Goal: the user must *understand the lecture on the first read and pass the exam more easily* — not become a researcher. **It is LONG and narrative**: flowing, connected prose that tells the topic as a story and *expands* every idea — the opposite of a bullet-point summary. (User's words: not summarized, "expanded… like a story"; "long explanation, long structure not short". Headings followed by terse bullets read like the slides and are exactly what to avoid.)
 
-  1. **Lead paragraph** (no heading, 2–4 sentences) — what this lecture is *really* about, the ONE core idea, how it follows from the previous chapter. Demystify ("auf den Folien wirkt es wie X, eigentlich geht es um Y").
-  2. **## Das Wichtigste in Kürze** — 3–6 bullets, the pure essence. If the reader reads only this, they have the gist. The fast-prep entry point.
-  3. **[BODY — 2–5 `##` sections with lecture-specific names]** — the understanding layer that decodes the slides. Each concept in a consistent rhythm: intuition/analogy → precise mechanism → why it matters / where it's used. Use tables for comparisons, **numbered `### Schritt für Schritt`** worked examples for any algorithm/procedure (DES round, RSA key-gen, …).
-  4. **## Begriffe & Notation** — glossary table (term/symbol → meaning, + tiny example). Fast lookup + memorization.
-  5. **## Typische Fallen** — common misunderstandings & exam traps, each bullet: *the trap → the correction*.
-  6. **## Klausur-Fokus** — explicit, honest exam prep: what's most likely asked, what you must be able to *do* (derive/compute), what to memorize cold. Grounded in what the slides actually emphasise.
-  7. **## Mehr dazu** — 2–4 curated, verified links (search with exa), each with what it helps with + duration/language. Only resources that reinforce the lecture's own topics.
+  **Ground it in BOTH sources, not just the slides:** read the lecture `lectures/NN.md` *and* the matching `uebungen/NN/aufgaben.md` (+ `loesung.md`). The Übungen reveal what the professor actually tests and where he's heading — the explanation must prepare the reader for exactly those skills/computations.
 
-  Tone: warm, clear, playful but substantive, no jargon left unexplained. Use the markdown that renders beautifully in `prose-notebook`: `##`/`###` headings, tables, ordered/unordered lists, **bold** lead-ins. **The explanation must be self-sufficient: after reading it, the user can answer any quiz question — better than the slides themselves.** Three non-negotiable enrichments:
+  **Fixed structure — STORY FIRST, recap LAST** (identical across every lecture and subject):
+
+  1. **Lead paragraph** (no heading) — a hook that frames the lecture as a problem/story and previews the arc.
+  2. **[BODY — several `##` sections with lecture-specific names]** — the heart, written as **long flowing prose**. Each concept unfolded in connected paragraphs (second person, intuition → mechanism → *why* → how it connects forward/back), never compressed into bullets. Embed diagrams, weave inline links, drop the occasional `> **Eselsbrücke:**` callout, and include **numbered `### Schritt für Schritt`** worked examples in the *Übung's* style for anything computable. Err on the side of long and expansive.
+  3. **Only AFTER the story, the recap/reference tail:**
+     - **## Auf den Punkt** — the concise recap (now justified, because the story has been told).
+     - **## Begriffe & Notation** — glossary table for quick lookup.
+     - **## Typische Fallen** — common misunderstandings & exam traps.
+     - **## Klausur-Fokus** — honest exam prep **grounded in the matching Übung**: the concrete skills/computations the professor drills (e.g. "Cäsar/Vigenère/Transposition per Hand", "RSA-Schlüssel berechnen", "DES-Runde rechnen").
+     - **## Mehr dazu** — 2–4 curated, verified links.
+
+  Tone: warm, clear, playful but substantive, no jargon left unexplained. Use the markdown that renders beautifully in `prose-notebook`: `##`/`###` headings, tables (only for genuine comparisons/reference, not as a stand-in for prose), **bold** lead-ins. **The explanation must be self-sufficient: after reading it, the user can answer any quiz question — better than the slides themselves.** Three non-negotiable enrichments:
 
   - **Inline links woven into the prose** (not only in "Mehr dazu"): drop a link right where a concept appears, e.g. "[Computerphile erklärt das](url)". Only ever use URLs returned by exa or already present in the lecture MD — never invent a URL.
   - **Embedded diagrams where they help** — `![alt](url "Bildunterschrift")`. Source from Wikimedia via exa, prefer the stable `https://commons.wikimedia.org/wiki/Special:FilePath/<File>.svg` form, and **verify every URL resolves to an image** (`curl -sIL … | grep content-type`) before using it. They render on a white card (legible in dark mode) with the title as caption. **In image titles never use a straight `"` — it closes the markdown title and breaks parsing; use German „ " or no inner quotes.**
