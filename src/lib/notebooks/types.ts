@@ -23,7 +23,7 @@ export interface ResourceRef {
 /**
  * Everything that belongs to the Vorlesung side of a lesson. The PDF is
  * the foundation — it's the only required material — and everything else
- * (deep + simple explanation, quiz bank, optional YouTube fallback) is
+ * (explanation, quiz bank, optional YouTube fallback) is
  * grounded in it.
  */
 export interface Lecture {
@@ -31,7 +31,7 @@ export interface Lecture {
   pdf: PdfRef;
   /** Optional YouTube (or other) link when the user found a better one. */
   videoUrl?: string;
-  /** Long-form deep + simple explanation — `id` from the explanations registry. */
+  /** Long-form explanation (one text, written for any level) — `id` from the explanations registry. */
   walkthroughId?: string;
   /** Quiz bank id (many sets, not one) from the quiz registry. */
   quizBankId?: string;

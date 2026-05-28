@@ -566,7 +566,7 @@ function ErklaerungPanel({
   const title = tr(explanation.title);
 
   return (
-    <article className="prose-notebook max-w-none px-5 pt-1 pb-8 text-[16px] sm:px-8">
+    <article className="prose-notebook max-w-none px-5 pt-16 pb-8 text-[16px] sm:px-8">
       <h2 className="not-prose mb-5 font-serif text-[24px] font-semibold leading-tight text-[var(--ink)]">
         {title}
       </h2>

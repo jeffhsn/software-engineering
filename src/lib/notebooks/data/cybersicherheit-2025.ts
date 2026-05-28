@@ -33,7 +33,10 @@ export const cybersicherheit2025: Notebook = {
         de: "Kursorganisation & Einführung in die IT-Sicherheit",
         en: "Course organisation & introduction to IT security",
       },
-      lecture: { pdf: { label: L.vorlesung, src: `${BASE}/lectures/01.pdf` } },
+      lecture: {
+        pdf: { label: L.vorlesung, src: `${BASE}/lectures/01.pdf` },
+        walkthroughId: "cs-2025-l01",
+      },
       exercises: [
         {
           label: L.uebung,
@@ -48,7 +51,10 @@ export const cybersicherheit2025: Notebook = {
     {
       number: 2,
       title: { de: "Einführung in die Kryptografie", en: "Introduction to cryptography" },
-      lecture: { pdf: { label: L.vorlesung, src: `${BASE}/lectures/02.pdf` } },
+      lecture: {
+        pdf: { label: L.vorlesung, src: `${BASE}/lectures/02.pdf` },
+        walkthroughId: "cs-2025-l02",
+      },
       exercises: [
         {
           label: L.uebung,
@@ -66,7 +72,10 @@ export const cybersicherheit2025: Notebook = {
         de: "Symmetrische Kryptografie: Stromchiffren & DES",
         en: "Symmetric cryptography: stream ciphers & DES",
       },
-      lecture: { pdf: { label: L.vorlesung, src: `${BASE}/lectures/03.pdf` } },
+      lecture: {
+        pdf: { label: L.vorlesung, src: `${BASE}/lectures/03.pdf` },
+        walkthroughId: "cs-2025-l03",
+      },
       exercises: [
         {
           label: L.uebung,
@@ -84,7 +93,10 @@ export const cybersicherheit2025: Notebook = {
         de: "AES & asymmetrische Kryptografie: RSA-Schlüsselerzeugung",
         en: "AES & asymmetric cryptography: RSA key generation",
       },
-      lecture: { pdf: { label: L.vorlesung, src: `${BASE}/lectures/04.pdf` } },
+      lecture: {
+        pdf: { label: L.vorlesung, src: `${BASE}/lectures/04.pdf` },
+        walkthroughId: "cs-2025-l04",
+      },
       exercises: [
         {
           label: L.uebung,
@@ -99,7 +111,10 @@ export const cybersicherheit2025: Notebook = {
         de: "RSA-Verschlüsselung, digitale Signaturen & Hash-Einführung",
         en: "RSA encryption, digital signatures & hash intro",
       },
-      lecture: { pdf: { label: L.vorlesung, src: `${BASE}/lectures/05.pdf` } },
+      lecture: {
+        pdf: { label: L.vorlesung, src: `${BASE}/lectures/05.pdf` },
+        walkthroughId: "cs-2025-l05",
+      },
       exercises: [
         {
           label: L.uebung,
@@ -114,7 +129,10 @@ export const cybersicherheit2025: Notebook = {
         de: "Digitale Signaturen, Hash-Funktionen & MAC",
         en: "Digital signatures, hash functions & MAC",
       },
-      lecture: { pdf: { label: L.vorlesung, src: `${BASE}/lectures/06.pdf` } },
+      lecture: {
+        pdf: { label: L.vorlesung, src: `${BASE}/lectures/06.pdf` },
+        walkthroughId: "cs-2025-l06",
+      },
       exercises: [
         {
           label: L.uebung,
@@ -126,7 +144,10 @@ export const cybersicherheit2025: Notebook = {
     {
       number: 7,
       title: { de: "Bitcoin & Hashing-Anwendungen", en: "Bitcoin & hashing use cases" },
-      lecture: { pdf: { label: L.vorlesung, src: `${BASE}/lectures/07.pdf` } },
+      lecture: {
+        pdf: { label: L.vorlesung, src: `${BASE}/lectures/07.pdf` },
+        walkthroughId: "cs-2025-l07",
+      },
       exercises: [
         {
           label: L.uebung,
@@ -141,7 +162,10 @@ export const cybersicherheit2025: Notebook = {
         de: "Sicherheitsprotokolle & Schlüsselvereinbarung",
         en: "Security protocols & key agreement",
       },
-      lecture: { pdf: { label: L.vorlesung, src: `${BASE}/lectures/08.pdf` } },
+      lecture: {
+        pdf: { label: L.vorlesung, src: `${BASE}/lectures/08.pdf` },
+        walkthroughId: "cs-2025-l08",
+      },
       exercises: [
         {
           label: L.uebung,
@@ -156,7 +180,10 @@ export const cybersicherheit2025: Notebook = {
         de: "DoS, Input Validation & Web-Sicherheit",
         en: "DoS, input validation & web security",
       },
-      lecture: { pdf: { label: L.vorlesung, src: `${BASE}/lectures/09.pdf` } },
+      lecture: {
+        pdf: { label: L.vorlesung, src: `${BASE}/lectures/09.pdf` },
+        walkthroughId: "cs-2025-l09",
+      },
       exercises: [
         {
           label: L.uebung,
@@ -171,7 +198,10 @@ export const cybersicherheit2025: Notebook = {
       //   Ü11 — Software-Exploits (with Lösung)
       number: 10,
       title: { de: "Software-Exploits", en: "Software exploits" },
-      lecture: { pdf: { label: L.vorlesung, src: `${BASE}/lectures/10.pdf` } },
+      lecture: {
+        pdf: { label: L.vorlesung, src: `${BASE}/lectures/10.pdf` },
+        walkthroughId: "cs-2025-l10",
+      },
       exercises: [
         {
           label: L.uebungCIntro,
@@ -191,7 +221,10 @@ export const cybersicherheit2025: Notebook = {
         de: "Betriebssystemsicherheit: Multics & TEE",
         en: "OS security: Multics & TEE",
       },
-      lecture: { pdf: { label: L.vorlesung, src: `${BASE}/lectures/11.pdf` } },
+      lecture: {
+        pdf: { label: L.vorlesung, src: `${BASE}/lectures/11.pdf` },
+        walkthroughId: "cs-2025-l11",
+      },
       exercises: [
         {
           label: L.uebung,
@@ -206,7 +239,10 @@ export const cybersicherheit2025: Notebook = {
     {
       number: 12,
       title: { de: "Reverse Engineering & Malware", en: "Reverse engineering & malware" },
-      lecture: { pdf: { label: L.vorlesung, src: `${BASE}/lectures/12.pdf` } },
+      lecture: {
+        pdf: { label: L.vorlesung, src: `${BASE}/lectures/12.pdf` },
+        walkthroughId: "cs-2025-l12",
+      },
       exercises: [
         {
           label: L.uebung,
@@ -222,7 +258,10 @@ export const cybersicherheit2025: Notebook = {
         de: "Zusammenfassung & Klausurvorbereitung",
         en: "Summary & exam preparation",
       },
-      lecture: { pdf: { label: L.vorlesung, src: `${BASE}/lectures/13.pdf` } },
+      lecture: {
+        pdf: { label: L.vorlesung, src: `${BASE}/lectures/13.pdf` },
+        walkthroughId: "cs-2025-l13",
+      },
       exercises: [{ label: L.uebung, solutions: [] }],
     },
   ],

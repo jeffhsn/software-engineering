@@ -198,6 +198,15 @@ body {
   text-wrap: pretty;
 }
 
+/* Lead paragraph (the standfirst right under the title): larger, softer,
+   sets a calm magazine tone before the body proper begins. */
+.prose-notebook > p:first-of-type {
+  font-size: 1.27rem;
+  line-height: 1.62;
+  color: var(--ink-soft);
+  margin-top: 0.2rem;
+}
+
 .prose-notebook a {
   color: var(--ink);
   text-decoration: underline;
@@ -239,23 +248,26 @@ body {
   letter-spacing: 0.005em;
 }
 
+/* Blockquote = a soft callout card. Used for memorable principles and
+   "Merke"/"Klausur-Tipp" asides. Accent bar on the lead edge, gentle tint,
+   rounded so it reads as a deliberate highlight rather than a quote. */
 .prose-notebook blockquote {
-  margin: 1.5rem 0;
-  padding: 0.4rem 0 0.4rem 1.25rem;
-  border-inline-start: 3px solid var(--rule-strong);
-  background: linear-gradient(
-    to right,
-    color-mix(in oklab, var(--paper-tint) 60%, transparent),
-    transparent 60%
-  );
+  margin: 1.6rem 0;
+  padding: 0.85rem 1.15rem 0.85rem 1.25rem;
+  border-inline-start: 3px solid var(--accent, var(--rule-strong));
+  border-radius: 0.1rem 0.55rem 0.55rem 0.1rem;
+  background: color-mix(in oklab, var(--paper-tint) 75%, transparent);
   font-family: var(--font-serif), Georgia, serif;
   font-style: italic;
   color: var(--ink);
-  font-size: 1.05rem;
-  line-height: 1.65;
+  font-size: 1.06rem;
+  line-height: 1.66;
 }
 .prose-notebook blockquote p {
   margin: 0.35rem 0;
+}
+.prose-notebook blockquote strong {
+  font-style: normal;
 }
 
 .prose-notebook hr {
