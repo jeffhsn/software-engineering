@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { getAllSubjectSlugs, getSubject } from "@/lib/subjects/registry";
 import { getNotebook } from "@/lib/notebooks/registry";
@@ -37,10 +37,13 @@ const SECTION_ICON: Record<SectionKind, string> = {
 
 export default async function SubjectPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ l?: string }>;
 }) {
   const { slug } = await params;
+  const { l } = await searchParams;
   const subject = getSubject(slug);
   if (!subject) notFound();
 
@@ -48,8 +51,14 @@ export default async function SubjectPage({
   const a = ACCENT[subject.accent];
   const notebook = getNotebook(subject.slug);
 
-  // Subjects with a real notebook get the three-column reading shell.
+  // Subjects with a real notebook open straight into a chapter — there is
+  // no notebook home. A bare URL redirects to the first chapter so the
+  // header (chapter picker) and body stay in sync.
   if (notebook && notebook.lessons.length > 0) {
+    const hasChapter = l != null && l !== "0";
+    if (!hasChapter) {
+      redirect(`/subjects/${slug}?l=1`);
+    }
     return <NotebookView notebook={notebook} />;
   }
 

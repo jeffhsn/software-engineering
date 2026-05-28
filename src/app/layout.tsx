@@ -50,10 +50,10 @@ export default async function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full">
         <I18nProvider initialLocale={locale}>
           <SiteHeader />
-          <main className="flex-1">{children}</main>
+          <main className="pt-14">{children}</main>
           <LessonNavBar />
           <NotebookOverlay />
         </I18nProvider>

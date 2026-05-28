@@ -51,7 +51,7 @@ export function SiteHeader() {
   const onSubjectHome = Boolean(subject && !inChapter);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[var(--rule)]/70 bg-background/90 backdrop-blur-xl">
+    <header className="fixed inset-x-0 top-0 z-40 h-14 bg-background shadow-[0_2px_10px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.5)]">
       <div className="grid h-14 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 px-4 sm:px-8 lg:px-12">
         <div className="flex min-w-0 items-center gap-2">
           <Link

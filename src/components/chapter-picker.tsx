@@ -9,6 +9,9 @@ import {
 import type { Lesson, Notebook } from "@/lib/notebooks/types";
 import { useI18n } from "@/lib/i18n/client";
 import { setLessonInUrl } from "@/lib/notebooks/nav";
+import { getSubject } from "@/lib/subjects/registry";
+import { ACCENT_INK } from "@/lib/subjects/accents";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -25,27 +28,39 @@ interface Props {
 export function ChapterPicker({ notebook, currentLesson }: Props) {
   const { tr } = useI18n();
   const [open, setOpen] = useState(false);
+  const subject = getSubject(notebook.subject);
+  const accent = subject ? ACCENT_INK[subject.accent] : "var(--ink)";
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         aria-label={`Kapitel ${currentLesson.number}`}
         className={cn(
-          "group inline-flex max-w-[min(60vw,32rem)] cursor-pointer items-center gap-2 rounded-full px-3 py-1.5",
-          "transition-colors hover:bg-foreground/[0.04]",
+          "group inline-flex max-w-[min(60vw,32rem)] cursor-pointer items-center gap-2 rounded-full bg-foreground/[0.05] px-3.5 py-1.5",
+          "transition-colors hover:bg-foreground/[0.1]",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
-          "data-[state=open]:bg-foreground/[0.06]",
+          "data-[state=open]:bg-foreground/[0.1]",
         )}
       >
         <span
           aria-hidden
-          className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[var(--paper-tint)] text-[10px] font-semibold tabular-nums text-[var(--ink)]"
+          className="shrink-0 font-serif text-[15px] font-semibold italic tabular-nums"
+          style={{ color: accent }}
         >
           {String(currentLesson.number).padStart(2, "0")}
         </span>
+        <span
+          aria-hidden
+          className="h-3.5 w-px shrink-0"
+          style={{ backgroundColor: `color-mix(in oklab, ${accent} 35%, transparent)` }}
+        />
         <span className="truncate font-serif text-[13.5px] font-medium text-foreground">
           {tr(currentLesson.title)}
         </span>
+        <ChevronDown
+          className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform group-data-[state=open]:rotate-180"
+          strokeWidth={2}
+        />
       </PopoverTrigger>
       <PopoverContent align="center" sideOffset={8} className="w-80 p-1">
         <div className="px-2 pb-1 pt-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">

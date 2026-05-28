@@ -10,6 +10,7 @@ import type { Lesson, Notebook } from "@/lib/notebooks/types";
 import { useI18n } from "@/lib/i18n/client";
 import { setLessonInUrl } from "@/lib/notebooks/nav";
 import { SUBJECTS } from "@/lib/subjects/registry";
+import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -74,16 +75,14 @@ export function NotebookSearch({ notebooks, scope }: Props) {
       <PopoverTrigger
         aria-label={placeholder}
         className={cn(
-          "inline-flex w-[min(70vw,28rem)] cursor-text items-center gap-2 rounded-full bg-card/80 px-4 py-1.5 text-left text-xs text-muted-foreground",
-          "shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all hover:bg-card hover:shadow-[0_3px_12px_rgba(0,0,0,0.06)]",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
-          "data-[state=open]:bg-card",
+          "inline-flex w-[min(70vw,28rem)] cursor-text items-center gap-2.5 rounded-full bg-card px-4 py-2 text-left text-xs text-muted-foreground ring-1 ring-[var(--rule)]",
+          "transition-colors hover:text-foreground hover:ring-[var(--rule-strong)]/50",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          "data-[state=open]:ring-[var(--rule-strong)]/50",
         )}
       >
-        <span aria-hidden className="text-[12px] leading-none">
-          🔎
-        </span>
-        <span className="flex-1 truncate font-serif text-[12.5px] italic">
+        <Search className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
+        <span className="flex-1 truncate font-serif text-[13px] italic">
           {placeholder}
         </span>
       </PopoverTrigger>

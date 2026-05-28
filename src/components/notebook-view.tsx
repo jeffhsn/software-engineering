@@ -1,22 +1,27 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type {
-  Exam,
   Exercise,
   Lesson,
   Notebook,
   PdfRef,
-  ResourceRef,
 } from "@/lib/notebooks/types";
 import { clampedIndex, setLessonInUrl, setOverlayInUrl } from "@/lib/notebooks/nav";
 import { useI18n } from "@/lib/i18n/client";
 import { getExplanation } from "@/lib/notebooks/explanations/registry";
+import { getSubject } from "@/lib/subjects/registry";
+import { ACCENT_INK } from "@/lib/subjects/accents";
+import {
+  ChevronLeft,
+  ChevronRight,
+  PlayCircle,
+  Sparkles,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const PdfViewer = dynamic(
@@ -36,206 +41,16 @@ interface Props {
 }
 
 /**
- * NotebookView routes between two screens off the `?l=` search param:
- *
- *  - **Home** (no `?l=`) — title, short blurb, then a flat list of every
- *    chapter; library shelf below for notebook-wide resources.
- *  - **Chapter** (`?l=N`) — two-column reading view. Left column holds the
- *    primary materials (Folien & Video, Übungen) with a chip switcher.
- *    Right column holds AI helpers (Erklärung, Quiz for the lecture;
- *    Lösung, Walkthrough for the Übung). Floating prev/next arrows at
- *    the bottom switch chapters.
+ * NotebookView always opens straight into a chapter — there is no
+ * separate notebook home. `?l=N` selects the chapter; with no param it
+ * defaults to chapter 1 (the subject route also redirects bare URLs to
+ * `?l=1` server-side so the header stays in sync).
  */
 export function NotebookView({ notebook }: Props) {
   const searchParams = useSearchParams();
   const rawL = searchParams.get("l");
-  const hasChapterSelection = rawL != null && rawL !== "0";
-
-  if (!hasChapterSelection) {
-    return <NotebookHome notebook={notebook} />;
-  }
-
   const index = clampedIndex(parseInt(rawL ?? "1") - 1, notebook.lessons.length);
   return <ChapterView notebook={notebook} lessonIndex={index} />;
-}
-
-/* ─────────────────────── Notebook Home ─────────────────────── */
-
-function NotebookHome({ notebook }: { notebook: Notebook }) {
-  const { tr } = useI18n();
-  return (
-    <div className="w-full">
-      <section className="w-full border-b border-border/60 bg-[var(--paper-tint)]/50 px-4 py-10 sm:px-8 sm:py-14 lg:px-12">
-        <h1 className="font-serif text-4xl font-semibold tracking-tight text-[var(--ink)] sm:text-5xl">
-          {capitalSubjectTitle(notebook.subject)}
-        </h1>
-        <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground">
-          {notebook.term} · {notebook.lessons.length} Kapitel · Notizbuch
-          durchsuchen — oben im Header tippen oder unten direkt ein Kapitel
-          öffnen. Jedes Modul bringt sein eigenes Material mit: Folien,
-          Übungen, Zusammenfassungen und Klausuren. Alles, was du in diesem
-          Fach schon gemacht hast, liegt hier.
-        </p>
-      </section>
-
-      <div className="w-full px-4 py-10 sm:px-8 lg:px-12">
-        <section className="mb-12 max-w-3xl">
-          <h2 className="mb-3 font-serif text-lg font-medium italic text-[var(--ink-soft)]">
-            Kapitel
-          </h2>
-          <ul className="flex flex-col">
-            {notebook.lessons.map((lesson) => (
-              <li key={lesson.number}>
-                <ChapterCard
-                  lesson={lesson}
-                  title={tr(lesson.title)}
-                  slug={notebook.subject}
-                />
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="max-w-3xl">
-        <h2 className="mb-3 font-serif text-lg font-medium italic text-[var(--ink-soft)]">
-          Bibliothek
-        </h2>
-        <ul className="flex flex-col gap-3">
-          <LibraryRow
-            icon="📚"
-            title="Zusammenfassung"
-            resource={notebook.zusammenfassung}
-            emptyHint="Noch keine Zusammenfassung. Sobald die Vorlesungen ausgearbeitet sind, kann ich eine aus allen Lektionen schreiben."
-          />
-          <LibraryRow
-            icon="📋"
-            title="Cheatsheet"
-            resource={notebook.cheatsheet}
-            emptyHint="Noch kein Cheatsheet. Wenn keines vorliegt, kompiliere ich eines aus den Vorlesungen."
-          />
-          <LibraryRow
-            icon="📝"
-            title="Klausuren"
-            exams={notebook.exams}
-            emptyHint="Noch keine Klausuren. Lege echte Klausuren ab, dann schreibe ich Walkthroughs und kann Übungsklausuren im Stil des Profs erstellen."
-          />
-        </ul>
-        </section>
-      </div>
-    </div>
-  );
-}
-
-function ChapterCard({
-  lesson,
-  title,
-  slug,
-}: {
-  lesson: Lesson;
-  title: string;
-  slug: string;
-}) {
-  return (
-    <Link
-      href={`/subjects/${slug}?l=${lesson.number}`}
-      onClick={(e) => {
-        if (e.metaKey || e.ctrlKey || e.shiftKey) return;
-        e.preventDefault();
-        setLessonInUrl(lesson.number);
-      }}
-      className={cn(
-        "group flex w-full items-center gap-4 border-b border-border/40 py-4",
-        "transition-colors hover:bg-foreground/[0.025] focus-visible:bg-foreground/[0.025]",
-        "focus:outline-none",
-      )}
-    >
-      <span
-        aria-hidden
-        className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-foreground/5 text-sm font-bold tabular-nums text-muted-foreground"
-      >
-        {String(lesson.number).padStart(2, "0")}
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-[15px] font-medium text-foreground">
-          {title}
-        </span>
-        <span className="mt-0.5 block text-[12px] text-muted-foreground">
-          {chapterMetaSummary(lesson)}
-        </span>
-      </span>
-      <span
-        aria-hidden
-        className="text-muted-foreground/60 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground"
-      >
-        →
-      </span>
-    </Link>
-  );
-}
-
-function chapterMetaSummary(lesson: Lesson): string {
-  const parts: string[] = ["Vorlesung"];
-  const exCount = lesson.exercises.filter(
-    (e) => e.aufgaben || e.solutions.length > 0,
-  ).length;
-  if (exCount > 0) {
-    parts.push(`${exCount} ${exCount === 1 ? "Übung" : "Übungen"}`);
-  }
-  if (lesson.lecture.quizBankId) parts.push("Quiz");
-  if (lesson.lecture.walkthroughId) parts.push("Erklärung");
-  return parts.join(" · ");
-}
-
-function LibraryRow({
-  icon,
-  title,
-  resource,
-  exams,
-  emptyHint,
-}: {
-  icon: string;
-  title: string;
-  resource?: ResourceRef;
-  exams?: Exam[];
-  emptyHint: string;
-}) {
-  const isExams = exams !== undefined;
-  const provided = isExams ? exams!.length > 0 : Boolean(resource);
-  const meta = isExams
-    ? exams!.length === 0
-      ? "leer"
-      : `${exams!.length} ${exams!.length === 1 ? "Klausur" : "Klausuren"}`
-    : provided
-      ? resource!.source === "ai"
-        ? "KI-generiert"
-        : "vom Lehrstuhl"
-      : "leer";
-
-  return (
-    <li className="flex items-start gap-4 border-b border-border/40 py-4">
-      <span aria-hidden className="text-2xl leading-none">
-        {icon}
-      </span>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-3">
-          <h3 className="font-serif text-[16px] font-semibold text-foreground">
-            {title}
-          </h3>
-          <span className="font-serif text-[12px] italic text-muted-foreground">
-            {meta}
-          </span>
-        </div>
-        <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
-          {provided ? "Bereit zum Lesen." : emptyHint}
-        </p>
-      </div>
-    </li>
-  );
-}
-
-function capitalSubjectTitle(slug: string): string {
-  if (!slug) return "";
-  return slug.charAt(0).toUpperCase() + slug.slice(1);
 }
 
 /* ─────────────────────── Chapter View ─────────────────────── */
@@ -394,8 +209,24 @@ function ChapterView({
         },
       ];
 
+  const subject = getSubject(notebook.subject);
+  const accentInk = subject ? ACCENT_INK[subject.accent] : "var(--ink)";
+
   return (
-    <div className="relative grid h-[calc(100dvh-3.5rem)] w-full grid-cols-1 lg:grid-cols-2 lg:divide-x lg:divide-[var(--rule)]">
+    <div
+      style={{ ["--accent" as string]: accentInk }}
+      className="relative grid h-[calc(100dvh-3.5rem)] w-full grid-cols-1 lg:grid-cols-2"
+    >
+      {/* Centre fold — a soft book-gutter shadow instead of a hard
+          divider, so the two columns read like facing pages. */}
+      <div
+        aria-hidden
+        className={cn(
+          "pointer-events-none absolute inset-y-0 left-1/2 z-10 hidden w-10 -translate-x-1/2 lg:block",
+          "bg-[linear-gradient(to_right,transparent,rgba(0,0,0,0.05)_47%,rgba(0,0,0,0.08)_50%,rgba(0,0,0,0.05)_53%,transparent)]",
+          "dark:bg-[linear-gradient(to_right,transparent,rgba(0,0,0,0.28)_47%,rgba(0,0,0,0.42)_50%,rgba(0,0,0,0.28)_53%,transparent)]",
+        )}
+      />
       <ColumnPane
         ariaLabel="Materialien"
         scrollRef={leftScrollRef}
@@ -469,27 +300,33 @@ function ColumnPane({
   return (
     <section
       aria-label={ariaLabel}
-      className={cn(
-        "relative grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)]",
-        background,
-      )}
+      className={cn("relative h-full min-h-0 overflow-hidden", background)}
     >
       {progress && <ColumnTopProgress scrollRef={scrollRef} />}
 
-      <div className="px-3 pb-3 pt-3 sm:px-5">
-        <FloatingChipPill chips={chips} />
+      {/* Content scrolls full-bleed from the very top; the chips float
+          directly over it. overscroll-contain keeps the fixed header
+          steady. */}
+      <div
+        ref={scrollRef}
+        className="h-full overflow-y-auto overscroll-contain pb-16"
+      >
+        {children}
       </div>
 
-      <div ref={scrollRef} className="min-h-0 overflow-y-auto">
-        {children}
+      {/* Chips float ON TOP of the material, vertically centered within
+          the top spacing gap — separate pills, no subheader. */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex h-16 items-center px-3 sm:px-4">
+        <ChipRow chips={chips} />
       </div>
     </section>
   );
 }
 
 /**
- * Thicker progress bar pinned to the very top edge of the column.
- * Sits above the chip pill, doesn't try to look like a divider.
+ * Reading-progress rule pinned to the very top edge of the column, above
+ * the chips. Fills left-to-right in the subject's accent as the slides
+ * are read.
  */
 function ColumnTopProgress({
   scrollRef,
@@ -526,10 +363,10 @@ function ColumnTopProgress({
       aria-valuenow={pct}
       aria-valuemin={0}
       aria-valuemax={100}
-      className="absolute inset-x-0 top-0 z-20 h-1.5 bg-[var(--rule)]/30"
+      className="pointer-events-none absolute inset-x-0 top-0 z-20 h-2.5"
     >
       <span
-        className="absolute inset-y-0 inset-s-0 bg-[var(--rule-strong)] transition-[width]"
+        className="absolute inset-y-0 inset-s-0 bg-[var(--accent)] transition-[width] duration-200"
         style={{ width: `${pct}%` }}
       />
     </div>
@@ -537,23 +374,27 @@ function ColumnTopProgress({
 }
 
 /**
- * Borderless floating chip pill — same vibe as the bottom chevron nav.
- * Card-tinted background, soft shadow, no outline.
+ * Floating chips — each is its OWN separate pill hovering over the
+ * content (not grouped in a container). Active pill is a solid accent
+ * fill; inactive pills are solid cards with a hairline so they stay
+ * legible over whatever slide scrolls underneath. New chips just join
+ * the row at the same level.
  */
-function FloatingChipPill({ chips }: { chips: Chip[] }) {
+function ChipRow({ chips }: { chips: Chip[] }) {
   return (
-    <div className="inline-flex items-center gap-0.5 rounded-full bg-card/90 p-1 shadow-[0_3px_12px_rgba(0,0,0,0.06)] backdrop-blur">
+    <div role="tablist" className="pointer-events-auto flex flex-wrap items-center gap-2">
       {chips.map((c) => (
         <button
           key={c.key}
           type="button"
+          role="tab"
+          aria-selected={c.active}
           onClick={c.onClick}
-          aria-pressed={c.active}
           className={cn(
-            "cursor-pointer rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-colors",
+            "cursor-pointer rounded-full px-4 py-1.5 font-serif text-[14px] tracking-tight shadow-[0_4px_16px_-5px_rgba(0,0,0,0.3)] transition-all",
             c.active
-              ? "bg-[var(--paper-tint)] text-[var(--ink)]"
-              : "text-muted-foreground hover:text-foreground",
+              ? "bg-[var(--accent)] font-medium text-background"
+              : "bg-card text-muted-foreground hover:text-foreground",
           )}
         >
           {c.label}
@@ -564,10 +405,9 @@ function FloatingChipPill({ chips }: { chips: Chip[] }) {
 }
 
 /**
- * Two small chevron buttons, fixed at the center-bottom of the
- * viewport. Floats above the content. Clicking switches the whole
- * chapter (both columns reset to lecture). Keyboard ← / → does the
- * same thing.
+ * Two chevron buttons in a solid card, fixed at the center-bottom of
+ * the viewport. No blur, no glass. Clicking switches the whole chapter;
+ * keyboard ← / → does the same.
  */
 function FloatingChapterNav({
   prev,
@@ -579,24 +419,27 @@ function FloatingChapterNav({
   return (
     <nav
       aria-label="Kapitelnavigation"
-      className="pointer-events-none fixed inset-x-0 bottom-5 z-30 flex justify-center"
+      className="pointer-events-none fixed inset-x-0 bottom-6 z-30 flex justify-center gap-2.5"
     >
-      <div className="pointer-events-auto inline-flex items-center gap-1 rounded-full bg-card/90 px-1 py-1 shadow-[0_4px_14px_rgba(0,0,0,0.12)] backdrop-blur">
-        <ArrowButton
-          direction="prev"
-          lesson={prev}
-          ariaLabel="Vorheriges Kapitel"
-        />
-        <ArrowButton
-          direction="next"
-          lesson={next}
-          ariaLabel="Nächstes Kapitel"
-        />
-      </div>
+      <ArrowButton
+        direction="prev"
+        lesson={prev}
+        ariaLabel="Vorheriges Kapitel"
+      />
+      <ArrowButton
+        direction="next"
+        lesson={next}
+        ariaLabel="Nächstes Kapitel"
+      />
     </nav>
   );
 }
 
+/**
+ * Each chevron is its OWN separate floating pill — matching the chips:
+ * solid card with a hairline + shadow, accent fill on hover, no grouping
+ * container.
+ */
 function ArrowButton({
   direction,
   lesson,
@@ -607,6 +450,7 @@ function ArrowButton({
   ariaLabel: string;
 }) {
   const disabled = !lesson;
+  const Icon = direction === "prev" ? ChevronLeft : ChevronRight;
   return (
     <button
       type="button"
@@ -615,13 +459,13 @@ function ArrowButton({
       aria-label={ariaLabel}
       title={ariaLabel}
       className={cn(
-        "inline-flex h-8 w-8 items-center justify-center rounded-full text-[15px] transition-colors",
+        "pointer-events-auto inline-flex h-10 w-10 items-center justify-center rounded-full shadow-[0_4px_16px_-5px_rgba(0,0,0,0.3)] transition-all",
         disabled
-          ? "cursor-not-allowed text-muted-foreground/40"
-          : "cursor-pointer text-[var(--ink)] hover:bg-[var(--paper-tint)]",
+          ? "cursor-not-allowed bg-card text-muted-foreground/30"
+          : "cursor-pointer bg-card text-foreground hover:bg-[var(--accent)] hover:text-background",
       )}
     >
-      {direction === "prev" ? "‹" : "›"}
+      <Icon className="h-[18px] w-[18px]" strokeWidth={2} />
     </button>
   );
 }
@@ -632,15 +476,15 @@ function LecturePanel({ lesson }: { lesson: Lesson }) {
   return (
     <div className="flex flex-col">
       {lesson.lecture.videoUrl && (
-        <div className="px-3 pb-3 pt-1 sm:px-5">
+        <div className="px-4 pb-3 pt-3 sm:px-6">
           <a
             href={lesson.lecture.videoUrl}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-card/90 px-3 py-1.5 text-[12px] font-medium text-foreground shadow-[0_3px_12px_rgba(0,0,0,0.06)] backdrop-blur transition-colors hover:bg-card"
+            className="group inline-flex cursor-pointer items-center gap-2 text-[13px] font-medium text-muted-foreground transition-colors hover:text-[var(--accent)]"
           >
-            <span aria-hidden>▶︎</span>
-            <span>Video öffnen</span>
+            <PlayCircle className="h-4 w-4" strokeWidth={1.75} />
+            <span>Aufzeichnung ansehen</span>
           </a>
         </div>
       )}
@@ -741,14 +585,17 @@ function QuizPanel({ quizBankId }: { quizBankId?: string }) {
     );
   }
   return (
-    <div className="px-5 pt-1 sm:px-8">
+    <div className="px-5 pt-4 sm:px-8">
       <button
         type="button"
         onClick={() => setOverlayInUrl("quiz")}
-        className="group flex w-full cursor-pointer items-center gap-4 rounded-3xl bg-card/90 px-6 py-6 text-start text-foreground shadow-[0_3px_14px_rgba(0,0,0,0.06)] backdrop-blur transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.1)]"
+        className="group flex w-full cursor-pointer items-center gap-4 rounded-2xl bg-card px-6 py-6 text-start text-foreground ring-1 ring-[var(--rule)] transition-all hover:-translate-y-0.5 hover:ring-[var(--accent)]"
       >
-        <span aria-hidden className="text-3xl leading-none">
-          🧠
+        <span
+          aria-hidden
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[var(--accent)]/10 text-[var(--accent)] transition-colors group-hover:bg-[var(--accent)] group-hover:text-background"
+        >
+          <Sparkles className="h-5 w-5" strokeWidth={1.75} />
         </span>
         <span className="min-w-0 flex-1">
           <span className="block font-serif text-[19px] font-semibold leading-snug text-[var(--ink)]">
@@ -758,12 +605,10 @@ function QuizPanel({ quizBankId }: { quizBankId?: string }) {
             Viele Sets · beliebig wiederholbar · keine Antwort-Tells
           </span>
         </span>
-        <span
-          aria-hidden
-          className="text-2xl leading-none text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground"
-        >
-          →
-        </span>
+        <ChevronRight
+          className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-[var(--accent)]"
+          strokeWidth={2}
+        />
       </button>
     </div>
   );
@@ -819,8 +664,8 @@ function PdfBlock({ src, label }: { src: string; label?: string }) {
 
 function EmptyHint({ children }: { children: React.ReactNode }) {
   return (
-    <div className="px-5 pt-1 sm:px-8">
-      <p className="rounded-2xl bg-card/70 px-5 py-4 font-serif text-[14px] italic leading-relaxed text-muted-foreground">
+    <div className="px-5 pt-4 sm:px-8">
+      <p className="rounded-2xl bg-card px-5 py-4 font-serif text-[14px] italic leading-relaxed text-muted-foreground ring-1 ring-[var(--rule)]">
         {children}
       </p>
     </div>

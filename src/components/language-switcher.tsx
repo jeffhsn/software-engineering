@@ -29,16 +29,17 @@ export function LanguageSwitcher() {
       <PopoverTrigger
         aria-label={dict.nav.language}
         className={cn(
-          "inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-border/60 bg-card px-2.5 py-1 text-xs font-medium",
-          "transition-colors hover:bg-accent/60 hover:text-accent-foreground",
+          "group inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-foreground/[0.05] px-2.5 py-1.5 text-[13px]",
+          "transition-colors hover:bg-foreground/[0.1]",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          "data-[state=open]:bg-foreground/[0.1]",
         )}
       >
         <span className="text-sm leading-none" aria-hidden>
           {current.flag}
         </span>
-        <span className="uppercase tracking-wider text-muted-foreground">
-          {current.code}
+        <span className="font-serif italic text-muted-foreground group-hover:text-foreground">
+          {current.nativeLabel}
         </span>
       </PopoverTrigger>
       <PopoverContent

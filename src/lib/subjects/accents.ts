@@ -28,6 +28,23 @@ interface AccentClasses {
   notebookEdge: string;
 }
 
+/**
+ * Raw accent ink per subject, as an oklch string. Threaded into the
+ * notebook reader as the `--accent` CSS variable so the active tab,
+ * progress bar and focus ring all carry the subject's identity (the
+ * same color used on its home-page cover card). Mid shade chosen to
+ * read well on both the ivory light paper and the charcoal dark page.
+ */
+export const ACCENT_INK: Record<AccentColor, string> = {
+  red: "oklch(0.62 0.21 25.3)",
+  indigo: "oklch(0.585 0.233 277.1)",
+  emerald: "oklch(0.66 0.16 163.2)",
+  amber: "oklch(0.72 0.17 65)",
+  fuchsia: "oklch(0.62 0.27 322.9)",
+  sky: "oklch(0.62 0.16 240)",
+  teal: "oklch(0.66 0.13 183)",
+};
+
 export const ACCENT: Record<AccentColor, AccentClasses> = {
   red: {
     dot: "bg-red-500",
