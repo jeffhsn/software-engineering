@@ -51,37 +51,45 @@ export function SiteHeader() {
   const onSubjectHome = Boolean(subject && !inChapter);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-40 h-14 bg-background shadow-[0_2px_10px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.5)]">
+    <header className="fixed inset-x-0 top-0 z-40 h-14 bg-background shadow-[0_4px_18px_-2px_rgba(0,0,0,0.2)] dark:shadow-[0_6px_22px_-2px_rgba(0,0,0,0.7)]">
       <div className="grid h-14 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 px-4 sm:px-8 lg:px-12">
         <div className="flex min-w-0 items-center gap-2">
-          <Link
-            href="/"
-            aria-label={dict.brand}
-            className="group inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-lg px-2 py-1 font-serif text-[15px] font-semibold transition-colors hover:bg-foreground/5"
-          >
-            <span className="text-base leading-none transition-transform group-hover:-rotate-6">
-              💻
-            </span>
-            {!subject && <span>{dict.brand}</span>}
-          </Link>
-
-          {subject && (
-            <>
-              <span aria-hidden className="text-foreground/30">
-                /
+          {!subject ? (
+            <Link
+              href="/"
+              aria-label={dict.brand}
+              className="group inline-flex h-9 shrink-0 cursor-pointer items-center gap-2 rounded-full bg-foreground/[0.05] px-2.5 pe-3.5 transition-colors hover:bg-foreground/[0.1]"
+            >
+              <span className="text-[16px] leading-none transition-transform group-hover:-rotate-6">
+                💻
               </span>
+              <span className="font-serif text-[13.5px] font-semibold">
+                {dict.brand}
+              </span>
+            </Link>
+          ) : (
+            <>
+              {/* Home logo button — icon only, its own pill. */}
+              <Link
+                href="/"
+                aria-label={dict.brand}
+                className="group inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-foreground/[0.05] transition-colors hover:bg-foreground/[0.1]"
+              >
+                <span className="text-[16px] leading-none transition-transform group-hover:-rotate-6">
+                  💻
+                </span>
+              </Link>
+              {/* Current subject — its own pill. */}
               <Link
                 href={`/subjects/${subject.slug}`}
-                className={cn(
-                  "group inline-flex min-w-0 items-center gap-2 rounded-lg px-2 py-1",
-                  "font-serif text-[15px] font-semibold",
-                  "transition-colors hover:bg-foreground/5",
-                )}
+                className="group inline-flex h-9 min-w-0 items-center gap-2 rounded-full bg-foreground/[0.05] px-3.5 transition-colors hover:bg-foreground/[0.1]"
               >
-                <span aria-hidden className="text-base leading-none">
+                <span className="shrink-0 text-[16px] leading-none transition-transform group-hover:-rotate-6">
                   {subject.emoji}
                 </span>
-                <span className="truncate">{subject.title}</span>
+                <span className="truncate font-serif text-[13.5px] font-medium text-foreground">
+                  {subject.title}
+                </span>
               </Link>
               {notebook && (
                 <YearPicker

@@ -29,7 +29,7 @@ export function LanguageSwitcher() {
       <PopoverTrigger
         aria-label={dict.nav.language}
         className={cn(
-          "group inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-foreground/[0.05] px-2.5 py-1.5 text-[13px]",
+          "group inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full bg-foreground/[0.05] px-3 text-[13.5px]",
           "transition-colors hover:bg-foreground/[0.1]",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
           "data-[state=open]:bg-foreground/[0.1]",

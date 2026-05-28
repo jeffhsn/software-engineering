@@ -19,6 +19,7 @@ import { ACCENT_INK } from "@/lib/subjects/accents";
 import {
   ChevronLeft,
   ChevronRight,
+  PenLine,
   PlayCircle,
   Sparkles,
 } from "lucide-react";
@@ -366,7 +367,7 @@ function ColumnTopProgress({
       className="pointer-events-none absolute inset-x-0 top-0 z-20 h-2.5"
     >
       <span
-        className="absolute inset-y-0 inset-s-0 bg-[var(--accent)] transition-[width] duration-200"
+        className="absolute inset-y-0 inset-s-0 rounded-r-full bg-[var(--accent)] shadow-[0_0_6px_-1px_var(--accent)] transition-[width] duration-200"
         style={{ width: `${pct}%` }}
       />
     </div>
@@ -391,10 +392,10 @@ function ChipRow({ chips }: { chips: Chip[] }) {
           aria-selected={c.active}
           onClick={c.onClick}
           className={cn(
-            "cursor-pointer rounded-full px-4 py-1.5 font-serif text-[14px] tracking-tight shadow-[0_4px_16px_-5px_rgba(0,0,0,0.3)] transition-all",
+            "cursor-pointer rounded-full px-4 py-1.5 font-serif text-[15.5px] tracking-tight shadow-[0_5px_12px_-2px_rgba(0,0,0,0.32),0_22px_50px_-10px_rgba(0,0,0,0.8)] transition-all",
             c.active
               ? "bg-[var(--accent)] font-medium text-background"
-              : "bg-card text-muted-foreground hover:text-foreground",
+              : "bg-card text-foreground hover:text-foreground",
           )}
         >
           {c.label}
@@ -459,7 +460,7 @@ function ArrowButton({
       aria-label={ariaLabel}
       title={ariaLabel}
       className={cn(
-        "pointer-events-auto inline-flex h-10 w-10 items-center justify-center rounded-full shadow-[0_4px_16px_-5px_rgba(0,0,0,0.3)] transition-all",
+        "pointer-events-auto inline-flex h-10 w-10 items-center justify-center rounded-full shadow-[0_5px_12px_-2px_rgba(0,0,0,0.32),0_22px_50px_-10px_rgba(0,0,0,0.8)] transition-all",
         disabled
           ? "cursor-not-allowed bg-card text-muted-foreground/30"
           : "cursor-pointer bg-card text-foreground hover:bg-[var(--accent)] hover:text-background",
@@ -565,8 +566,8 @@ function ErklaerungPanel({
   const title = tr(explanation.title);
 
   return (
-    <article className="prose-notebook max-w-none px-5 pt-1 pb-8 text-[14.5px] sm:px-8">
-      <h2 className="not-prose mb-5 font-serif text-[22px] font-semibold leading-tight text-[var(--ink)]">
+    <article className="prose-notebook max-w-none px-5 pt-1 pb-8 text-[16px] sm:px-8">
+      <h2 className="not-prose mb-5 font-serif text-[24px] font-semibold leading-tight text-[var(--ink)]">
         {title}
       </h2>
       <ReactMarkdown remarkPlugins={[remarkGfm]}>{body}</ReactMarkdown>
@@ -598,10 +599,10 @@ function QuizPanel({ quizBankId }: { quizBankId?: string }) {
           <Sparkles className="h-5 w-5" strokeWidth={1.75} />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block font-serif text-[19px] font-semibold leading-snug text-[var(--ink)]">
+          <span className="block font-serif text-[21px] font-semibold leading-snug text-[var(--ink)]">
             Quiz öffnen
           </span>
-          <span className="mt-1 block text-[12.5px] leading-snug text-muted-foreground">
+          <span className="mt-1 block text-[13.5px] leading-snug text-muted-foreground">
             Viele Sets · beliebig wiederholbar · keine Antwort-Tells
           </span>
         </span>
@@ -664,8 +665,13 @@ function PdfBlock({ src, label }: { src: string; label?: string }) {
 
 function EmptyHint({ children }: { children: React.ReactNode }) {
   return (
-    <div className="px-5 pt-4 sm:px-8">
-      <p className="rounded-2xl bg-card px-5 py-4 font-serif text-[14px] italic leading-relaxed text-muted-foreground ring-1 ring-[var(--rule)]">
+    <div className="flex h-full min-h-[20rem] flex-col items-center justify-center gap-4 px-10 text-center">
+      <PenLine
+        aria-hidden
+        className="h-7 w-7 text-muted-foreground/35"
+        strokeWidth={1.25}
+      />
+      <p className="max-w-sm font-serif text-[16px] italic leading-relaxed text-muted-foreground/80">
         {children}
       </p>
     </div>

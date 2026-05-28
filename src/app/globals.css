@@ -77,20 +77,20 @@
   paper turned off. Cards lift a step so they sit clearly on the page.
 */
 .dark {
-  --background: oklch(0.215 0.004 250);
+  --background: oklch(0.29 0.004 250);
   --foreground: oklch(0.96 0.004 250);
-  --surface: oklch(0.195 0.004 250);
-  --card: oklch(0.265 0.005 250);
+  --surface: oklch(0.27 0.004 250);
+  --card: oklch(0.34 0.005 250);
   --card-foreground: oklch(0.96 0.004 250);
-  --popover: oklch(0.28 0.005 250);
+  --popover: oklch(0.35 0.005 250);
   --popover-foreground: oklch(0.96 0.004 250);
   --primary: oklch(0.95 0.004 250);
   --primary-foreground: oklch(0.21 0.004 250);
-  --secondary: oklch(0.305 0.005 250);
+  --secondary: oklch(0.36 0.005 250);
   --secondary-foreground: oklch(0.96 0.004 250);
-  --muted: oklch(0.295 0.005 250);
-  --muted-foreground: oklch(0.78 0.006 250);
-  --accent: oklch(0.325 0.005 250);
+  --muted: oklch(0.35 0.005 250);
+  --muted-foreground: oklch(0.8 0.006 250);
+  --accent: oklch(0.385 0.005 250);
   --accent-foreground: oklch(0.96 0.004 250);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 12%);
@@ -99,13 +99,16 @@
 
   --ink: oklch(0.98 0.004 250);
   --ink-soft: oklch(0.82 0.005 250);
-  --rule: oklch(1 0 0 / 15%);
-  --rule-strong: oklch(0.66 0.008 250);
-  --paper-tint: oklch(0.32 0.005 250);
+  --rule: oklch(1 0 0 / 14%);
+  --rule-strong: oklch(0.68 0.008 250);
+  --paper-tint: oklch(0.4 0.005 250);
 }
 
 html {
   scroll-padding-top: 5rem;
+  /* Bump the base so every rem-based size (UI text, headings, the reading
+     prose) reads a notch larger and easier across the whole site. */
+  font-size: 17.5px;
 }
 
 body {
@@ -127,7 +130,7 @@ body {
    so a reader can sit with the material without fatigue. */
 .prose-notebook {
   color: var(--foreground);
-  font-size: 1.0625rem;
+  font-size: 1.15rem;
   line-height: 1.78;
   letter-spacing: 0.005em;
 }

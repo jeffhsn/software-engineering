@@ -28,7 +28,7 @@ export function YearPicker({ current, available, onSelect }: Props) {
       <PopoverTrigger
         aria-label={`Term: ${current.term}`}
         className={cn(
-          "group inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full bg-foreground/[0.05] px-3 py-1.5 text-[12px] font-medium text-muted-foreground",
+          "group inline-flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-full bg-foreground/[0.05] px-3 text-[13.5px] font-medium text-muted-foreground",
           "transition-colors hover:bg-foreground/[0.1] hover:text-foreground",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
           "data-[state=open]:bg-foreground/[0.1]",

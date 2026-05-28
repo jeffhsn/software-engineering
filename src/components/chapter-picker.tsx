@@ -36,7 +36,7 @@ export function ChapterPicker({ notebook, currentLesson }: Props) {
       <PopoverTrigger
         aria-label={`Kapitel ${currentLesson.number}`}
         className={cn(
-          "group inline-flex max-w-[min(60vw,32rem)] cursor-pointer items-center gap-2 rounded-full bg-foreground/[0.05] px-3.5 py-1.5",
+          "group inline-flex h-9 max-w-[min(38vw,24rem)] cursor-pointer items-center gap-2 rounded-full bg-foreground/[0.05] px-3.5",
           "transition-colors hover:bg-foreground/[0.1]",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
           "data-[state=open]:bg-foreground/[0.1]",
@@ -44,7 +44,7 @@ export function ChapterPicker({ notebook, currentLesson }: Props) {
       >
         <span
           aria-hidden
-          className="shrink-0 font-serif text-[15px] font-semibold italic tabular-nums"
+          className="shrink-0 font-serif text-[14px] font-semibold italic tabular-nums"
           style={{ color: accent }}
         >
           {String(currentLesson.number).padStart(2, "0")}
