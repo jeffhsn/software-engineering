@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { figureComponents } from "@/components/prose-figure";
+import { PageSkeleton } from "@/components/pdf-skeleton";
 import type {
   Exercise,
   Lesson,
@@ -31,8 +32,8 @@ const PdfViewer = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
-        Wird geladen…
+      <div className="w-full px-4 py-4 sm:px-6">
+        <PageSkeleton height={560} srLabel="Wird geladen" />
       </div>
     ),
   },

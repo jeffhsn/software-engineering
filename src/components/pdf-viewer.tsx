@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { cn } from "@/lib/utils";
+import { PageSkeleton } from "@/components/pdf-skeleton";
 import { PDF_ZOOM_FACTOR, usePdfZoom } from "@/lib/notebooks/use-pdf-zoom";
 
 interface DocumentState {
@@ -116,13 +117,11 @@ export function PdfViewer({ src, className, onReady, mode = "fit" }: Props) {
             setDocumentState({ src, numPages: null, loadError: true })
           }
           loading={
-            <div
-              className={cn(
-                "flex items-center justify-center px-6 py-10 text-sm text-muted-foreground",
-                isStack ? "min-h-[160px]" : "h-full",
-              )}
-            >
-              Loading…
+            <div className={cn("w-full", isStack ? "py-1" : "px-4 py-4")}>
+              <PageSkeleton
+                height={pageWidth ? Math.round(pageWidth * 1.414) : 560}
+                srLabel="PDF wird geladen"
+              />
             </div>
           }
           error={
@@ -205,13 +204,10 @@ function LazyPage({
           renderTextLayer={false}
           renderAnnotationLayer={false}
           className="shadow-sm!"
+          loading={<PageSkeleton height={placeholderHeight} />}
         />
       ) : (
-        <div
-          aria-hidden
-          className="rounded-sm border border-border/40 bg-muted/40"
-          style={{ height: placeholderHeight }}
-        />
+        <PageSkeleton height={placeholderHeight} loading={false} />
       )}
     </div>
   );

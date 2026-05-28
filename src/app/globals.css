@@ -360,6 +360,58 @@ body {
   text-transform: uppercase;
 }
 
+/* ─────────────────────────── Loading skeletons ──────────────────────────
+   A "sheet of paper" that shimmers while a PDF page rasterizes, then is
+   replaced by the real page. Far nicer than repeated "Loading…" text. */
+.sheet-skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.4rem;
+  border: 1px solid var(--rule);
+  background: var(--card);
+  animation: sheet-fade-in 0.25s ease both;
+}
+.sheet-skeleton.is-loading::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 38%,
+    color-mix(in oklab, var(--foreground) 8%, transparent) 50%,
+    transparent 62%
+  );
+  transform: translateX(-100%);
+  animation: sheet-shimmer 1.5s ease-in-out infinite;
+}
+/* faint "content" bars so it reads as a page being prepared, not an empty box */
+.sheet-skeleton .sheet-bar {
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--foreground) 8%, transparent);
+}
+@keyframes sheet-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+@keyframes sheet-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sheet-skeleton,
+  .sheet-skeleton.is-loading::after {
+    animation: none;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
