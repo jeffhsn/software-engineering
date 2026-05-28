@@ -308,6 +308,16 @@ Die f-Funktion bekommt die 32-Bit-Hälfte R_{i−1} und den 48-Bit-Rundenschlüs
 
 Die **S-Boxen sind der kryptografische Kern** von DES: Sie sind das einzige **nichtlineare** Element (S(a) ⊕ S(b) ≠ S(a ⊕ b)) und liefern die Konfusion. Zusammen mit E und P sorgen sie für den **Avalanche-Effekt**: Spätestens nach **Runde 5** hängt jedes Bit von *jedem* Klartext- und *jedem* Schlüsselbit ab.
 
+### Schritt für Schritt: eine S-Box nachschlagen
+
+Das wird gern abgefragt, also einmal vorgemacht. Eine S-Box bekommt **6 Bit** und liefert **4 Bit**. Der Trick steckt in der Adressierung: Die **äußeren beiden Bits** (das erste und das letzte) bilden die **Zeile** (0–3), die **inneren vier Bits** die **Spalte** (0–15). Nimm die Eingabe **101101** für S-Box 1:
+
+1. Äußere Bits = das erste (1) und das letzte (1) → 11 binär = **Zeile 3**.
+2. Innere Bits = die mittleren vier 0110 → **Spalte 6**.
+3. In der offiziellen Tabelle steht S1 in Zeile 3 an Spalte 6 der Wert **1** — als 4-Bit-Ausgabe also **0001**.
+
+Genau so prüfst du auch die **Nichtlinearität** (eine beliebte Aufgabe): Rechne S(x1), S(x2) und S(x1 ⊕ x2) getrennt aus und zeige, dass S(x1) ⊕ S(x2) ≠ S(x1 ⊕ x2) — wäre die S-Box linear, wären beide Seiten gleich; dass sie es nicht sind, ist der Beweis der Nichtlinearität.
+
 ## Der Schlüsselfahrplan: woher die 16 Rundenschlüssel kommen
 
 Aus dem 64-Bit-Schlüssel werden die 16 Rundenschlüssel k_i (je 48 Bit) erzeugt:
@@ -417,6 +427,14 @@ DES/AES verschlüsseln nur einen 8- bzw. 16-Byte-Block. Für längere Nachrichte
 ![Tux-Pinguin im ECB-Modus verschlüsselt — die Umrisse bleiben sichtbar](https://commons.wikimedia.org/wiki/Special:FilePath/Tux_ECB.png "Der berühmte ECB-Pinguin: derselbe Klartextblock wird immer gleich verschlüsselt, deshalb bleiben die Muster sichtbar. Genau deshalb ist ECB unsicher.")
 
 > **Eselsbrücke (ECB-Pinguin):** ECB = jeder Block für sich → **gleicher Block, gleiches Chiffrat** → Muster bleiben sichtbar. Wenn du den Pinguin noch erkennst, ist es ECB. **CBC/OFB** würfeln das per IV durch.
+
+### Schritt für Schritt: ECB und CBC rechnen
+
+Genau so kommt es im Übungsblatt. Nimm eine winzige Blockchiffre mit 5-Bit-Blöcken, die die Bits nur umsortiert: e(b₁b₂b₃b₄b₅) = (b₂b₅b₄b₁b₃). Klartext x = **01101 11011 …**, und für CBC/OFB ist IV = **11001**.
+
+**ECB** verschlüsselt jeden Block einzeln. Erster Block 01101: hier ist b₁=0, b₂=1, b₃=1, b₄=0, b₅=1, also e(01101) = (b₂,b₅,b₄,b₁,b₃) = (1,1,0,0,1) = **11001**. Fertig — bei ECB hängt nichts vom Nachbarblock ab.
+
+**CBC** verkettet: Vor dem Verschlüsseln wird der Block mit dem vorherigen Chiffrat (beim ersten mit dem IV) ge-XOR-t. Also erst x₁ ⊕ IV = 01101 ⊕ 11001 = **10100**, dann durch die Chiffre: e(10100) hat b₁=1, b₂=0, b₃=1, b₄=0, b₅=0, ergibt (0,0,0,1,1) = **00011**. Das ist y₁. Für den zweiten Block rechnest du x₂ ⊕ y₁, dann e(…) — die Verkettung sorgt dafür, dass identische Klartextblöcke *unterschiedliche* Chiffrate bekommen.
 
 ## Warum symmetrisch nicht reicht: das Schlüsselaustauschproblem
 
@@ -659,6 +677,16 @@ Kollisionen **müssen** existieren (fester Output, unendlich viele Inputs — Sc
 
 > **Eselsbrücke (3 Hash-Eigenschaften):** **Urbild** = von h(x) *nicht* auf x zurück. **Schwache Kollision** = zu *gegebenem* x kein zweites finden. **Starke Kollision** = *irgendein* Paar mit gleichem Hash finden (am leichtesten → Geburtstag).
 
+### Schritt für Schritt: Kollisionswahrscheinlichkeit abschätzen
+
+Das Übungsblatt lässt das ausrechnen, und das Ergebnis überrascht jedes Mal. Für N mögliche Hashwerte und k zufällig eingefügte Werte nähert man die Kollisionswahrscheinlichkeit mit **P ≈ 1 − e^(−k(k−1)/2N)**. Beispiel: ein **48-Bit-Adressraum**, also N = 2⁴⁸ ≈ 2,8 · 10¹⁴, und **k = 2,3 · 10⁷** Dateien.
+
+1. Zähler: k(k−1)/2 ≈ k²/2 = (2,3 · 10⁷)² / 2 ≈ 2,6 · 10¹⁴.
+2. Exponent: −2,6 · 10¹⁴ / 2,8 · 10¹⁴ ≈ −0,94.
+3. P ≈ 1 − e^(−0,94) ≈ 1 − 0,39 ≈ **0,61**, also rund **60 %**.
+
+Über 60 % Kollisionswahrscheinlichkeit bei „nur" 23 Millionen Einträgen in einem 281-Billionen-großen Raum — genau das ist die Wucht des Geburtstagsparadoxons, und genau deshalb wählt man Hashes lieber 256 Bit lang als 128.
+
 ## MAC & HMAC: Integrität mit geteiltem Schlüssel
 
 Ein **MAC (Message Authentication Code)** ist eine kryptografische Prüfsumme. Wie Signaturen sichert er Integrität und Authentizität — aber:
@@ -771,6 +799,12 @@ Das Puzzle ist **schwer zu lösen, aber leicht zu prüfen**; das **Target** stel
 - **Transaktionsgebühren:** Output < Input; die Differenz geht an den Miner. Das hält Miner auch nach 2140 motiviert.
 
 Wie sieht ein Knoten, ob Coins schon ausgegeben sind? Über das **UTXO**-Modell (Unspent Transaction Output): Eine Transaktion hat Inputs (Adresse + unverbrauchte frühere Transaktion, je signiert) und Outputs (Adresse + Betrag); die Differenz ist die Gebühr.
+
+### Schritt für Schritt: minen und die 21 Millionen herleiten
+
+Im Übungsblatt taucht eine vereinfachte **Mining-Aufgabe** auf, und das Vorgehen ist immer dasselbe: Du bekommst eine Hash-Formel und feste Blockfelder (prev-Hash, Zeit, tx-Root) und sollst die **Nonce finden, mit der die Gültigkeitsbedingung erfüllt ist** (z. B. „Hash ≥ 90" oder „Hash < Target"). Du setzt einfach nonce = 0 ein, rechnest den Hash aus, prüfst die Bedingung; ist sie nicht erfüllt, nimmst du nonce = 1, dann 2, und so weiter, bis es passt. Das ist exakt das, was Miner tun — nur mit echten Hashes milliardenfach pro Sekunde. „Schwer zu finden, leicht zu prüfen": Hat ein Miner die Nonce, kann jeder den Hash *einmal* nachrechnen und die Gültigkeit bestätigen.
+
+Die zweite Lieblingsaufgabe ist die **maximale Münzmenge aus der Halbierung**. Der Reward startet bei 50 BTC und halbiert sich alle 210 000 Blöcke: 50, dann 25, dann 12,5, … Die Gesamtzahl ist also 210 000 · (50 + 25 + 12,5 + …) = 210 000 · 50 · (1 + ½ + ¼ + …). Die geometrische Reihe in der Klammer summiert sich zu **2**, also: 210 000 · 50 · 2 = **21 000 000**. So kommen die berühmten 21 Millionen Bitcoin zustande.
 
 ## Auf den Punkt
 
@@ -1044,6 +1078,16 @@ Zwei Verteidigungsphilosophien:
 
 Und der nächste Zug der Angreifer: **Data-Oriented Exploits / Non-Control-Data-Angriffe.** Sie verändern **keine** Kontrolldaten (keine Rücksprungadresse, kein Funktionszeiger) — sondern nur eine harmlose **Datenvariable**, z. B. ein Feld user.id, das man per Overflow auf 0 setzt, sodass eine Adminprüfung durchgeht. Weil der Kontrollfluss dem CFG treu bleibt, **umgeht das CFI vollständig**.
 
+### Schritt für Schritt: einen Passwort-Check per Overflow aushebeln
+
+Genau dieser Data-Only-Angriff ist die zentrale Übungsaufgabe, also einmal durchgespielt. Eine Funktion pw_check legt zwei lokale Variablen an: einen Puffer char pw_buffer[16] und einen Integer int auth = 0. Sie kopiert die *gesamte* Eingabe mit strcpy(pw_buffer, password) — **ohne Längenprüfung** — und setzt auth nur dann auf 1, wenn das Passwort stimmt; am Ende wird auth zurückgegeben.
+
+1. Auf dem Stack liegen pw_buffer und auth **direkt nebeneinander** (die Reihenfolge hängt vom Compiler ab — genau deshalb fragt die Übung, was bei anderer Anordnung passiert).
+2. Gibst du eine Eingabe von **mehr als 16 Zeichen** ein, läuft strcpy über das Pufferende hinaus und **überschreibt auth** mit deinen Bytes.
+3. Solange diese Bytes **nicht null** sind, ist auth ≠ 0 — die Funktion gibt „wahr" zurück, und das Programm meldet „Gut gemacht!", **obwohl dein Passwort falsch war**.
+
+Das ist ein reiner **Data-Only-Angriff**: Du hast keine Rücksprungadresse, keinen Code-Pointer und keinen Kontrollfluss angefasst, nur eine Datenvariable überschrieben — weshalb weder DEP noch CFI hier greifen. Eine Abwehr ist der **Stack-Canary** (ein Zufallswert zwischen Puffer und kritischen Daten, dessen Veränderung den Overflow auffliegen lässt) — aber auch der lässt sich umgehen, wenn man ihn auslesen oder gezielt umschreiben kann.
+
 ## Auf den Punkt
 
 Die Kurzfassung: Aus einem harmlosen C-Fehler wird hier eine komplette Rechnerübernahme — und ein jahrzehntelanges Wettrüsten. Ursache ist fehlendes Bounds-Checking: Ein Buffer Overflow überschreibt benachbarten Stack-Speicher, allen voran die Rücksprungadresse. Damit fängt der Angriff an: Code Injection legt eigenen Shellcode ab und biegt die Rücksprungadresse darauf um (neuer Knoten im Kontrollfluss). Dagegen kam DEP (Daten nicht ausführbar) — worauf die Angreifer mit Code-Reuse antworteten: return-into-libc und vor allem ROP, das aus vorhandenen Gadgets beliebige Berechnungen zusammensetzt (DEP-resistent). Die Verteidigung kennt zwei Philosophien: ASLR versteckt die Adressen, CFI erzwingt erlaubte Sprungziele (Shadow Stack für Rücksprünge). Und der letzte Zug der Angreifer sind Data-Oriented Exploits, die gar keine Kontrolldaten anfassen — nur eine harmlose Variable — und damit sogar CFI umgehen.
@@ -1150,6 +1194,16 @@ Beispiel (r = 4): Access Bracket (5, 6) → r < r1, also lesen+schreiben; (3, 4)
 
 > **Eselsbrücke (Brackets):** **Access Bracket = Daten (Lesen/Schreiben)**, **Call Bracket = Code (Ausführen)**. Beim Lesen/Schreiben gilt: je weiter *außen* (größeres r) du bist, desto weniger darfst du — erst RW, dann nur R, dann nichts. **Gate-Segment erkennst du am Call Bracket r2 < r3.** Diese „vier Fälle" sind die klassische Rechenaufgabe.
 
+### Schritt für Schritt: eine vollständige Zugriffsentscheidung
+
+Genau so sind die elf Fälle im Übungsblatt aufgebaut, also einmal komplett durchgespielt. Frage: Darf **Prozess P4 (aktuelle Ringnummer r = 2)** das **Code-Segment D** mit Access Bracket **(1, 3)** und Call Bracket **(3, 5)** ausführen — und gehört P4 zu einem Nutzer, der laut **ACL** Ausführungsrecht (e) hat?
+
+1. **Zuerst die ACL.** Steht in der Zugriffsliste des Segments ein Eintrag mit **e**, der zur Nutzer-ID von P4 (Person.Project.Tag, ggf. mit Wildcard) passt? Wenn nein → sofort verboten, egal was die Brackets sagen. Nehmen wir an, die ACL erlaubt es.
+2. **Gate-Segment?** Call Bracket (3, 5): r2 = 3 < r3 = 5 → ja, es ist ein Gate-Segment (ein Ringwechsel ist also grundsätzlich möglich).
+3. **Welcher der vier Fälle?** Aktuell r = 2. Prüfe der Reihe nach: r3 < r? 5 < 2 → nein. r2 < r ≤ r3? 3 < 2 → nein. r1 ≤ r ≤ r2? **1 ≤ 2 ≤ 3 → ja.** → Ausführung **erlaubt, ohne Ringwechsel** (P4 läuft weiter in Ring 2).
+
+Zwei Varianten zur Kontrolle: Wäre P4 in **Ring 0** (r < r1 = 1), dürfte es ebenfalls ausführen, aber mit **Ringwechsel auf r' = r1 = 1** (Herabstufung). Wäre P4 in **Ring 4** (r2 = 3 < 4 ≤ r3 = 5), ginge es **nur über das Gate**, mit **Ringwechsel auf r' = r2 = 3** (Heraufstufung — der typische Systemaufruf). Übergibt der Aufrufer dabei einen **Pointer auf Speicher in einem anderen Ring**, muss das Gate diesen zusätzlich validieren.
+
 ## Multilevel Security & Bell-LaPadula
 
 Multics war Vorreiter der **Multilevel Security (MLS)**: Jedem Segment und jedem Prozess wird eine **Geheimhaltungsstufe** zugeordnet (top-secret, secret, confidential, unclassified). Die durchgesetzte Politik ist das **Bell-LaPadula-Modell**, das **Informationsabfluss** verhindert. Die zwei Kernregeln:
@@ -1238,6 +1292,10 @@ Malware-**Typen**: Trojaner, Wurm, Virus, Cryptominer, Backdoor, Bot, Adware, **
 - **String-Obfuskation:** Strings werden unleserlich gespeichert und erst **zur Laufzeit** entschlüsselt — Tools wie strings.exe laufen ins Leere. (Die Obfuskation muss nicht „sicher" sein, nur unleserlich.)
 - **Code-Obfuskation:** Teile des Codes liegen verschleiert vor; ein **Stub** entschlüsselt sie zur Laufzeit im Speicher und springt hinein.
 - **PE-Obfuskation:** das **komplette** Binary wird verschleiert (Code, Daten, Strings, Imports, Header) — statisch ist nichts mehr sinnvoll analysierbar; ein Stub stellt das Original zur Laufzeit her.
+
+### Schritt für Schritt: einen obfuskierten C&C-Domainnamen entschlüsseln
+
+Genau diese Aufgabe stellt das Übungsblatt: Eine Malware will eine Domain auflösen, um ihren **Command-and-Control-Server** zu erreichen; als Analyst willst du den Namen herausfinden, um ihn zu sperren. Im Binary findest du aber nicht „evil-server.com", sondern den obfuskierten String **fwjm.tfswfs/dpn**. Das sieht nach Verschiebung aus — und tatsächlich ist jedes Zeichen um **+1** im Zeichensatz verschoben. Den Deobfuskierungs-Algorithmus implementierst du also, indem du jedes Zeichen um **1 zurückschiebst**: f→e, w→v, j→i, m→l, .→-, t→s, f→e, s→r, w→v, f→e, s→r, /→., d→c, p→o, n→m. Heraus kommt **evil-server.com**. Merke das Vorgehen: obfuskierten String aus dem Binary ziehen → die (oft simple) Transformation erkennen → sie umkehren. Die Obfuskation muss eben nicht *sicher* sein, nur unleserlich genug, dass das Tool **strings** allein nichts verrät.
 
 ## Dynamische Analyse erschweren
 

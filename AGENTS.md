@@ -129,28 +129,27 @@ The conversion is lossy (umlauts in older slides come out mangled, layout is fla
 
 ## Quality bar for the AI artefacts
 
-- **Explanation** — ONE single explanation per lecture (no deep/simple split), German canonical. Goal: the user must *understand the lecture on the first read and pass the exam more easily* — not become a researcher. **It is LONG and narrative**: flowing, connected prose that tells the topic as a story and *expands* every idea — the opposite of a bullet-point summary. (User's words: not summarized, "expanded… like a story"; "long explanation, long structure not short". Headings followed by terse bullets read like the slides and are exactly what to avoid.)
+- **Explanation — the system.** ONE explanation per lecture (no deep/simple split), German canonical, **LONG and narrative**. North star: after reading it once, the student *understands the slides* and *can answer any quiz question and pass the exam more easily* — the explanation is better than the slides themselves. It tells the topic as a connected **story**; bullet-summaries under headings read like the slides and are forbidden in the body. This recipe is **fixed and applies to every lecture and every future subject**.
 
-  **Ground it in BOTH sources, not just the slides:** read the lecture `lectures/NN.md` *and* the matching `uebungen/NN/aufgaben.md` (+ `loesung.md`). The Übungen reveal what the professor actually tests and where he's heading — the explanation must prepare the reader for exactly those skills/computations.
+  **Process — run these steps in order, every time:**
 
-  **Fixed structure — STORY FIRST, recap LAST** (identical across every lecture and subject):
+  1. **Read both sources.** The lecture `lectures/NN.md` *and* the matching `uebungen/NN/aufgaben.md` (+ `loesung.md`). The slides give the content; the **Übung reveals what is actually tested** and where the professor is heading. The explanation must prepare the reader for exactly those skills.
+  2. **Find the spine.** Identify the ONE core idea and the 3–6 concepts the lecture builds, ordered as a story (problem → idea → mechanism → consequence). Mark each concept as *conceptual* or *computable*.
+  3. **Source & verify enrichments.** Via exa: inline links + one diagram per visual concept. Verify every image URL resolves to an image (`curl -sIL "https://commons.wikimedia.org/wiki/Special:FilePath/<File>" | grep content-type`). Never invent a URL.
+  4. **Write it** in the structure below — long, expansive, second person.
+  5. **Verify it renders.** `npx tsc --noEmit`, then load the chapter in the browser: every image loads, no leftover literal `![…]`, 0 console errors.
 
-  1. **Lead paragraph** (no heading) — a hook that frames the lecture as a problem/story and previews the arc.
-  2. **[BODY — several `##` sections with lecture-specific names]** — the heart, written as **long flowing prose**. Each concept unfolded in connected paragraphs (second person, intuition → mechanism → *why* → how it connects forward/back), never compressed into bullets. Embed diagrams, weave inline links, drop the occasional `> **Eselsbrücke:**` callout, and include **numbered `### Schritt für Schritt`** worked examples in the *Übung's* style for anything computable. Err on the side of long and expansive.
-  3. **Only AFTER the story, the recap/reference tail:**
-     - **## Auf den Punkt** — the concise recap (now justified, because the story has been told).
-     - **## Begriffe & Notation** — glossary table for quick lookup.
-     - **## Typische Fallen** — common misunderstandings & exam traps.
-     - **## Klausur-Fokus** — honest exam prep **grounded in the matching Übung**: the concrete skills/computations the professor drills (e.g. "Cäsar/Vigenère/Transposition per Hand", "RSA-Schlüssel berechnen", "DES-Runde rechnen").
-     - **## Mehr dazu** — 2–4 curated, verified links.
+  **Structure — STORY FIRST, recap LAST:**
 
-  Tone: warm, clear, playful but substantive, no jargon left unexplained. Use the markdown that renders beautifully in `prose-notebook`: `##`/`###` headings, tables (only for genuine comparisons/reference, not as a stand-in for prose), **bold** lead-ins. **The explanation must be self-sufficient: after reading it, the user can answer any quiz question — better than the slides themselves.** Three non-negotiable enrichments:
+  - **Lead** (no heading) — a hook that frames the lecture as a problem/story and previews the arc ("auf den Folien wirkt es wie X, eigentlich geht es um Y").
+  - **Narrative body** — several `##` sections with lecture-specific names. This is the heart and the bulk. **Depth rule (non-negotiable):** *every* concept is unfolded over **multiple connected paragraphs** in the rhythm intuition/everyday-picture → precise mechanism → why it matters → how it connects forward/back. Never a heading followed by one terse paragraph or a bullet list. **For every *computable* concept, include a `### Schritt für Schritt` with a fully worked small-number example in the Übung's style** (e.g. a DES round, an ECB/CBC encryption, RSA/Diffie-Hellman by hand, a rings-&-brackets decision) — show it solved once. Weave inline links where the concept appears, embed the verified diagram where it helps, and drop a `> **Eselsbrücke:**` / `> **Merksatz:**` callout at each memorizable fact (mnemonic, acronym like E-X-S-P / S-S-M-A / Z-E-L, key formula).
+  - **Recap & reference tail (only after the story):** `## Auf den Punkt` (concise recap) → `## Begriffe & Notation` (glossary table) → `## Typische Fallen` (common mistakes, prose: trap → correction) → `## Klausur-Fokus` (honest exam prep **grounded in the Übung** — the exact hand-computations the prof drills) → `## Mehr dazu` (2–4 verified links).
 
-  - **Inline links woven into the prose** (not only in "Mehr dazu"): drop a link right where a concept appears, e.g. "[Computerphile erklärt das](url)". Only ever use URLs returned by exa or already present in the lecture MD — never invent a URL.
-  - **Embedded diagrams where they help** — `![alt](url "Bildunterschrift")`. Source from Wikimedia via exa, prefer the stable `https://commons.wikimedia.org/wiki/Special:FilePath/<File>.svg` form, and **verify every URL resolves to an image** (`curl -sIL … | grep content-type`) before using it. They render on a white card (legible in dark mode) with the title as caption. **In image titles never use a straight `"` — it closes the markdown title and breaks parsing; use German „ " or no inner quotes.**
-  - **Memory-aid callouts** as `> **Eselsbrücke:** …` / `> **Merksatz:** …` blockquotes at every memorizable fact — mnemonics, acronym expansions (E-X-S-P, S-S-M-A, Z-E-L), and for compute topics a fully worked small-number example (RSA, Diffie-Hellman) so the reader can reproduce the steps cold.
+  **Definition of done — all must be true:** story-first with no top summary; every body concept spans several paragraphs (not bullets); every computable concept has a worked example; ≥ a few inline links woven in; a verified diagram on every visual concept; memory-aid callouts at the memorizable facts; the recap tail present; Klausur-Fokus mirrors the Übung; renders with 0 console errors.
 
-  No emojis in the text. (Same backtick caveat as TS strings: avoid `` ` `` inside the content — the whole body is one template literal.)
+  **Tone & rendering:** warm, second person, playful but substantive, no jargon left unexplained, no emojis. Use the markdown that `prose-notebook` renders well: `##`/`###` headings, tables only for genuine comparisons/reference (never as a stand-in for prose), **bold** lead-ins, `>` callouts.
+
+  **Gotchas (these have bitten before):** the whole body is one TS template literal, so **never use a backtick `` ` ``** inside the content (use **bold** for code-ish terms); and **never use a straight `"` inside a markdown image title** — it closes the title and the image renders as literal text (use German „ " or no inner quotes).
 - **Quiz bank** — many sets, not one. Repetition welcome. Mix of types: factual recall, conceptual, trick/scenario, "spot the wrong answer", reverse (given answer, name the concept). Strictly grounded in the lecture MD. Anti-tells: every option roughly equal length, no give-away formatting, no obviously-filler wrong answers.
 - **Übung walkthrough** — written in the **professor's method**: grounded in the lecture MD + the Lösung MD so the steps mirror how the professor actually solves it, not a generic textbook approach.
 - **Exam walkthrough** — same, grounded in lectures + Übungen + the official solution if it exists.
