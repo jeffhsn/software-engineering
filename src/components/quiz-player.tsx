@@ -114,6 +114,10 @@ function QuizRow({
       !acc || a.score / a.total > acc.score / acc.total ? a : acc,
     undefined,
   );
+  const last = attempts[0];
+  const bestPct = best ? Math.round((best.score / best.total) * 100) : 0;
+  const lastPct = last ? Math.round((last.score / last.total) * 100) : 0;
+  const mastered = best ? best.score / best.total >= 0.9 : false;
   return (
     <li>
       <button
@@ -147,13 +151,27 @@ function QuizRow({
             <span className="font-semibold tabular-nums text-foreground">
               {quiz.questions.length} Fragen
             </span>
-            {attempts.length > 0 && (
-              <span>{attempts.length}× versucht</span>
+            {attempts.length > 0 ? (
+              <>
+                <span>
+                  {attempts.length}× versucht · zuletzt{" "}
+                  <span className="font-semibold tabular-nums text-foreground">
+                    {lastPct}%
+                  </span>
+                </span>
+                {mastered && (
+                  <span className="font-semibold text-emerald-700 dark:text-emerald-400">
+                    ✓ sitzt
+                  </span>
+                )}
+              </>
+            ) : (
+              <span className="italic">noch nicht versucht</span>
             )}
           </div>
         </div>
         <div className="ms-auto flex shrink-0 flex-col items-end gap-1.5">
-          {best && (
+          {best ? (
             <span
               className={cn(
                 "rounded-full px-2.5 py-1 text-xs font-semibold tabular-nums",
@@ -164,8 +182,35 @@ function QuizRow({
                     : "bg-red-500/10 text-red-700 dark:text-red-400",
               )}
             >
-              Beste {Math.round((best.score / best.total) * 100)}%
+              Beste {bestPct}%
             </span>
+          ) : (
+            <span className="rounded-full border border-dashed border-border px-2.5 py-1 text-xs font-medium text-muted-foreground">
+              neu
+            </span>
+          )}
+          {attempts.length > 0 && (
+            <div className="flex items-center gap-1" aria-hidden title="Letzte Versuche">
+              {attempts
+                .slice(0, 5)
+                .reverse()
+                .map((a, i) => {
+                  const p = a.score / a.total;
+                  return (
+                    <span
+                      key={i}
+                      className={cn(
+                        "h-1.5 w-1.5 rounded-full",
+                        p >= 0.8
+                          ? "bg-emerald-500"
+                          : p >= 0.5
+                            ? "bg-amber-500"
+                            : "bg-red-500",
+                      )}
+                    />
+                  );
+                })}
+            </div>
           )}
           <span
             aria-hidden
