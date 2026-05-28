@@ -4,6 +4,7 @@ import type { ReactNode, UIEvent } from "react";
 import { useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { figureComponents } from "@/components/prose-figure";
 import type { Explanation } from "@/lib/notebooks/explanation-types";
 import { useI18n } from "@/lib/i18n/client";
 import { cn } from "@/lib/utils";
@@ -95,6 +96,7 @@ export function ExplanationView({ explanation, eyebrow = "Erklärung" }: Props) 
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{
+              ...figureComponents,
               h2: ({ children }) => {
                 const text = textFromChildren(children);
                 return <h2 id={slugify(text)}>{children}</h2>;

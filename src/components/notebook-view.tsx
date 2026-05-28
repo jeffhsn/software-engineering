@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { figureComponents } from "@/components/prose-figure";
 import type {
   Exercise,
   Lesson,
@@ -571,7 +572,9 @@ function ErklaerungPanel({
       <h2 className="not-prose mb-5 font-serif text-[24px] font-semibold leading-tight text-[var(--ink)]">
         {title}
       </h2>
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{body}</ReactMarkdown>
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={figureComponents}>
+        {body}
+      </ReactMarkdown>
     </article>
   );
 }

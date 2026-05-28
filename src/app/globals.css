@@ -278,6 +278,32 @@ body {
   width: 60%;
 }
 
+/* Embedded diagrams. Always sit on a light card (with padding) so SVGs
+   with transparent backgrounds and dark strokes stay legible in dark
+   mode too. Centred, capped width, with an italic caption below. */
+.prose-notebook figure {
+  margin: 1.8rem 0;
+}
+.prose-notebook img {
+  display: block;
+  max-width: min(100%, 30rem);
+  height: auto;
+  margin: 0 auto;
+  border-radius: 0.6rem;
+  background: #fff;
+  padding: 0.9rem;
+  border: 1px solid var(--rule);
+}
+.prose-notebook figcaption {
+  margin-top: 0.6rem;
+  text-align: center;
+  font-family: var(--font-serif), Georgia, serif;
+  font-style: italic;
+  font-size: calc(0.9rem * var(--reading-scale, 1));
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
 .prose-notebook code {
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 0.9em;
