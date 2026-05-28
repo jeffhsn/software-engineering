@@ -1,5 +1,4 @@
 import type { Explanation } from "./explanation-types";
-import type { QuizSet } from "./quiz-types";
 
 /**
  * Source-grounded explanations for Cybersicherheit SoSe 2025.
@@ -20,105 +19,233 @@ const lecture01: Explanation = {
     de: "Einführung in die IT-Sicherheit: Schutzziele, Denkweise und der Start in die Kryptografie",
   },
   content: {
-    de: `Die erste Vorlesung sieht auf den Folien aus wie ein Sammelsurium: Orga-Kram, ein paar Schlagworte, dann unvermittelt Kryptografie. In Wahrheit ist sie das **Fundament für das ganze Semester** — drei Schutzziele, eine Hand voll eiserner Prinzipien und eine „Angreifer-Brille". Verinnerlichst du diese eine Stunde wirklich, liest sich jede spätere Vorlesung (Verschlüsselung, Hashes, Exploits, Malware) wie eine Variation desselben Themas. Wir bauen jeden Begriff vom Alltagsbild aus auf — Vorwissen brauchst du keins. Lies das hier einmal in Ruhe, und die Folien wirken danach fast trivial.
+    de: `Stell dir vor, du baust etwas — eine App, ein Online-Banking, ein ganzes Betriebssystem — und in genau dem Moment, in dem du fertig bist, setzt sich jemand auf die andere Seite, dessen einziges Ziel es ist, dein Werk zu belauschen, zu fälschen oder lahmzulegen. Dieser unsichtbare Gegner ist der heimliche Hauptdarsteller des ganzen Semesters. Bevor wir auch nur eine Zeile verschlüsseln, müssen wir drei Fragen beantworten, die alles andere tragen: Was heißt „sicher" überhaupt? Nach welchen eisernen Regeln verliert man dieses Spiel? Und wie muss man denken, um es zu gewinnen? Erst danach greifen wir zum ersten großen Werkzeug, der Kryptografie, und verschlüsseln am Ende dieser Lektion schon unsere erste Nachricht von Hand. Wenn du diese eine Stunde wirklich verinnerlichst, liest sich der gesamte Rest des Kurses — Verschlüsselung, Hashes, Exploits, Malware — wie immer dieselbe Geschichte in neuer Verkleidung.
 
-## Worum es in diesem Kurs wirklich geht
+## Sicherheit ist ein Zweikampf, kein Werkzeugkasten
 
-Bevor wir in Details springen, ein Bild fürs große Ganze. Cybersicherheit ist kein Werkzeugkasten voller Tricks, sondern eine Haltung. Du baust etwas — eine App, ein Netzwerk, ein Betriebssystem — und gleichzeitig sitzt dir jemand gegenüber, der genau dieses Etwas missbrauchen, belauschen oder zerstören will. Das ganze Semester dreht sich um diesen Zweikampf. Zuerst klären wir, *was* „sicher" überhaupt heißt; das sind drei Schutzziele. Dann lernst du die zwei Gesetze kennen, die danach in jedem einzelnen Kapitel wieder auftauchen. Anschließend setzt du die „Angreifer-Brille" auf, mit der echte Sicherheitsleute die Welt sehen. Und zum Schluss steigen wir in das erste große Werkzeug ein, die Kryptografie. Hast du diese Geschichte einmal verstanden, sind die kommenden Wochen nur noch Variationen davon — versprochen.
+Fangen wir mit einer Unterscheidung an, die fast alles erklärt. In den meisten Ingenieursdisziplinen kämpfst du gegen die Natur: gegen die Schwerkraft, gegen Materialermüdung, gegen den Zufall. Die Natur ist hart, aber sie ist nicht boshaft. Eine Brücke, die heute hält, stürzt morgen nicht ein, weil sich die Schwerkraft über Nacht eine fiese neue Variante ausgedacht hat. Du kannst die Natur ausrechnen, und wenn deine Rechnung stimmt, hält die Brücke.
 
-## Was „sicher" überhaupt bedeutet
+In der Cybersicherheit ist das anders, und das ist der Kern des ganzen Faches: Du kämpfst gegen einen **denkenden Gegner**. Er hält sich an keine Regeln, er benutzt dein System auf eine Weise, für die es nie gedacht war, und er tut mit Vorliebe genau das, womit niemand gerechnet hat. Sicherheit ist deshalb keine Sammlung von Tricks, die man einmal anwendet und dann abhakt, sondern ein dauerhafter Zweikampf zwischen jemandem, der etwas absichern will, und jemandem, der es brechen will. Diese Sichtweise nennt man das **Adversarial Setting** — die Annahme, dass dir immer ein aktiver, kreativer Angreifer gegenübersitzt. Halte sie von der ersten Minute an fest, denn sie ist der Boden, auf dem alles Weitere steht.
 
-„Mach das mal sicher" ist ein sinnloser Auftrag, solange niemand sagt, *was* sicher heißt. Die gesamte IT-Sicherheit beantwortet diese Frage mit drei Zielen, die man die **CIA-Triade** nennt — und nein, das hat nichts mit dem Geheimdienst zu tun, es ist nur ein Akronym aus Confidentiality, Integrity und Availability.
+Aus diesem Zweikampf folgt sofort ein brutales Ungleichgewicht, das du nie vergessen solltest. Der Verteidiger muss **jede** Tür, jedes Fenster und jeden Lüftungsschacht schließen — und zwar auch gegen Angriffstechniken, die vielleicht erst in zehn Jahren erfunden werden. Der Angreifer dagegen muss nur **eine einzige** offene Stelle finden. Verteidigen heißt, überall gleichzeitig gewinnen zu müssen; angreifen heißt, ein einziges Mal irgendwo zu gewinnen. Diese Asymmetrie ist der tiefere Grund, warum Verteidigung so viel schwerer ist als Angriff — und warum der Satz „wir haben doch eine Firewall" nie eine ausreichende Antwort ist.
 
-Das erste Ziel, **Vertraulichkeit (Confidentiality)**, ist das, woran die meisten zuerst denken: Niemand außer den Befugten soll die Daten *lesen* können. Wenn du deinem Freund eine Nachricht schickst, soll genau er sie lesen — nicht der Mobilfunkanbieter, nicht der Café-WLAN-Betreiber, nicht der Hacker am Nebentisch. Verletzt ist dieses Ziel in dem Moment, in dem ein Datenleck deine Passwörter ins Netz spült. Das klassische Gegenmittel kennst du schon dem Namen nach: Verschlüsselung.
+> **Merksatz:** Der Verteidiger muss überall gewinnen, der Angreifer nur einmal irgendwo. Verteidigung ist deshalb strukturell im Nachteil — nicht aus Schlamperei, sondern aus Logik.
 
-Das zweite Ziel ist subtiler und wird oft vergessen. **Integrität (Integrity)** bedeutet, dass niemand die Daten *unbemerkt verändern* kann. Stell dir vor, du überweist 100 € — und unterwegs macht jemand heimlich 10 000 € daraus oder tauscht die Empfänger-Kontonummer aus. Hier hat niemand etwas Geheimes „gelesen", trotzdem ist ein Riesenschaden entstanden. Genauso wichtig: Wenn dein Rechner ein Update lädt, willst du sicher sein, dass es *wirklich* vom Hersteller stammt und nicht unterwegs mit Schadcode gespickt wurde. Für Integrität sorgen später Hash-Funktionen und digitale Signaturen.
+## Was „sicher" überhaupt bedeutet: die drei Schutzziele
 
-Das dritte Ziel klingt banal, ist aber oft das, worauf es wirklich ankommt. **Verfügbarkeit (Availability)** heißt, dass das System *da ist, wenn man es braucht*. Die sicherste Datenbank der Welt nützt nichts, wenn ein Angreifer den Server mit Anfragen überflutet und kein echter Nutzer mehr durchkommt. Denk an ein Krankenhaus-System, das im Notfall einfach laufen muss. Verfügbarkeit rettet man übrigens nicht mit Mathematik, sondern mit ganz handfesten Dingen — Redundanz, Backups, Abwehr von Überlastungsangriffen.
+„Mach das mal sicher" ist ein sinnloser Auftrag, solange niemand sagt, *was* sicher heißt. Die gesamte IT-Sicherheit beantwortet diese Frage mit drei Zielen, die zusammen die **CIA-Triade** heißen. Der Name hat nichts mit dem Geheimdienst zu tun — er ist ein Akronym aus den englischen Wörtern **C**onfidentiality, **I**ntegrity und **A**vailability. Diese drei Ziele sind das Maßband, mit dem wir den ganzen Kurs über messen, ob etwas „sicher" ist. Schauen wir sie einzeln an, denn jedes steht für eine völlig andere Art von Schaden.
 
-![CIA-Triade: Confidentiality, Integrity, Availability](https://upload.wikimedia.org/wikipedia/commons/c/c5/CIAJMK1209-en.svg "Die CIA-Triade — die drei Schutzziele, auf denen die gesamte IT-Sicherheit aufbaut.")
+Das erste Ziel, **Vertraulichkeit (Confidentiality)**, ist das, woran die meisten zuerst denken: Niemand außer den Befugten soll die Daten *lesen* können. Wenn du einer Freundin eine Nachricht schickst, soll genau sie sie lesen — nicht der Mobilfunkanbieter, nicht der Betreiber des Café-WLANs, nicht der Hacker am Nebentisch. Verletzt ist dieses Ziel in dem Augenblick, in dem ein Datenleck deine Passwörter ins Netz spült oder jemand deine Chats mitliest. Das klassische Gegenmittel kennst du schon dem Namen nach: Verschlüsselung. Genau sie ist Teil 1 des Kurses.
 
-> **Eselsbrücke:** drei Verben in fester Reihenfolge — **lesen** (C), **ändern** (I), **nutzen** (A). Wer darf lesen? Wer könnte unbemerkt ändern? Was blockiert das Nutzen? Wenn in der Klausur steht „welches Schutzziel ist verletzt?", ordnest du über genau diese drei Verben zu.
+Das zweite Ziel ist subtiler und wird im Alltag ständig unterschätzt. **Integrität (Integrity)** bedeutet, dass niemand die Daten *unbemerkt verändern* kann. Stell dir vor, du überweist 100 € — und unterwegs macht jemand heimlich 10 000 € daraus oder tauscht die Empfänger-Kontonummer aus. Hier hat niemand etwas Geheimes „gelesen", und trotzdem ist ein Riesenschaden entstanden. Genauso wichtig: Wenn dein Rechner ein Software-Update lädt, willst du sicher sein, dass es *wirklich* vom Hersteller stammt und nicht unterwegs mit Schadcode gespickt wurde. Vertraulichkeit fragt „wer darf es sehen?", Integrität fragt „ist es noch echt und unverändert?" — zwei verschiedene Fragen, die man sauber trennen muss. Für Integrität sorgen später Hash-Funktionen und digitale Signaturen.
 
-Jetzt kommt der Gedanke, den die Folien nie aussprechen, der aber alles zusammenhält: **Diese drei Ziele ziehen gegeneinander.** Treibst du die Vertraulichkeit auf die Spitze — alles verschlüsselt, dreifach weggeschlossen, jeder Zugriff zehnmal geprüft —, dann leidet zwangsläufig die Verfügbarkeit, weil selbst die Berechtigten kaum noch herankommen. Sicherheit ist deshalb nie „mehr Schloss = besser", sondern immer ein Abwägen zwischen diesen drei Polen. Diese Spannung begegnet dir bis zur letzten Vorlesung, und sie ist zugleich der rote Faden durch den Stoff: Die Kryptografie der nächsten Wochen (V2–V5) kümmert sich um die Vertraulichkeit, Hashes und Signaturen (V6) um die Integrität, und für die Verfügbarkeit (V9) brauchen wir am Ende ganz andere Werkzeuge — denn keine Formel der Welt fährt einen abgestürzten Server wieder hoch. Wer die drei Ziele schnell aufgefrischt sehen will: [Professor Messer erklärt sie in fünf Minuten](https://www.youtube.com/watch?v=SBcDGb9l6yo).
+Das dritte Ziel klingt banal, ist aber im Ernstfall oft das, worauf es wirklich ankommt. **Verfügbarkeit (Availability)** heißt, dass das System *da ist, wenn man es braucht*. Die sicherste Datenbank der Welt nützt nichts, wenn ein Angreifer den Server mit Anfragen überflutet, bis kein echter Nutzer mehr durchkommt. Denk an ein Krankenhaus-System, das im Notfall einfach laufen muss. Verfügbarkeit rettet man übrigens nicht mit Mathematik, sondern mit ganz handfesten Dingen — Redundanz, Backups, mehrere Rechenzentren, Abwehr von Überlastungsangriffen. Merke dir diesen Punkt gut, denn er ist eine beliebte Klausurfalle: Verschlüsselung schützt Vertraulichkeit und Integrität, aber gegen einen abgestürzten oder überfluteten Server hilft keine Formel der Welt.
 
-## Die zwei Gesetze, die in jedem Kapitel wiederkehren
+![Die CIA-Triade: Confidentiality, Integrity, Availability](https://upload.wikimedia.org/wikipedia/commons/c/c5/CIAJMK1209-en.svg "Die drei Schutzziele der IT-Sicherheit: Vertraulichkeit, Integrität und Verfügbarkeit. Sie sind das Maßband dafür, was Sicherheit überhaupt bedeutet.")
 
-Es gibt zwei Faustregeln, die so oft auftauchen, dass du sie wie Naturgesetze behandeln solltest. Die erste lautet: ein System ist nur so stark wie sein schwächstes Glied. Denk an eine Kette. Du kannst zehn ihrer Glieder aus gehärtetem Stahl schmieden — wenn das elfte aus Pappe ist, reißt die Kette genau dort, und die ganze Mühe an den anderen zehn war umsonst. Sicherheit funktioniert exakt so. Die teuerste, mathematisch perfekte Verschlüsselung ist wertlos, sobald das Passwort „1234" heißt oder auf einem gelben Zettel am Monitor klebt. Und genau deshalb suchen Angreifer auch nie die starke Stelle, sondern immer die schwächste. Erschreckend oft ist diese schwächste Stelle nicht die Technik, sondern der Mensch: Eine gut gemachte Phishing-Mail muss keine einzige Formel knacken — sie fragt den Schlüssel einfach freundlich ab. Halte Sicherheit deshalb nie für einen Durchschnitt, sondern für ein Minimum: Nicht „wie gut ist mein bestes Bauteil?" entscheidet, sondern „wie schwach ist mein schlechtestes?".
+> **Eselsbrücke:** Drei Verben in fester Reihenfolge — **lesen** (C), **ändern** (I), **nutzen** (A). Wer darf lesen? Wer könnte unbemerkt ändern? Was blockiert das Nutzen? Wenn in der Klausur steht „welches Schutzziel ist hier verletzt?", ordnest du über genau diese drei Verben blitzschnell zu.
 
-Die zweite Regel ist die direkte Antwort auf die erste und heißt **Defense in Depth** — Verteidigung in mehreren Schichten. Wenn jeder einzelne Schutz irgendwann versagen kann, dann darfst du dich eben nicht auf einen einzigen verlassen. Das Bild dazu ist eine mittelalterliche Burg: zuerst der Wassergraben, dahinter die Mauer, dahinter die Wachen, und ganz innen das verschlossene Verlies für den Schatz. Wer den Graben durchschwimmt, steht immer noch vor der Mauer; wer über die Mauer klettert, läuft den Wachen direkt in die Arme. Kein einzelner Durchbruch gewinnt sofort das ganze Spiel. In der IT heißt das ganz konkret: Firewall *und* Authentifizierung *und* Verschlüsselung *und* Überwachung — Schichten, die einander auffangen, sodass niemals alles an einer einzigen Annahme hängt („unsere Mauer hält schon irgendwie"). Diese beiden Regeln wirst du in jedem kommenden Kapitel wiedererkennen, von der Schlüssellänge bei RSA bis zur Ringschutz-Architektur eines Betriebssystems.
+Jetzt kommt der Gedanke, der die Triade von einer Auswendiglern-Liste zu echtem Verständnis macht: **Diese drei Ziele ziehen gegeneinander.** Treibst du die Vertraulichkeit auf die Spitze — alles verschlüsselt, dreifach weggeschlossen, jeder Zugriff zehnmal geprüft —, dann leidet zwangsläufig die Verfügbarkeit, weil selbst die Berechtigten kaum noch an ihre Daten kommen. Sperrst du umgekehrt für maximale Verfügbarkeit alles weit auf, ist es um die Vertraulichkeit geschehen. Sicherheit ist deshalb nie „mehr Schloss = besser", sondern immer ein **Abwägen** zwischen drei Polen, das zur konkreten Situation passen muss. Diese Spannung ist der rote Faden durch den ganzen Stoff: Die Kryptografie der nächsten Wochen kümmert sich um Vertraulichkeit, Hashes und Signaturen um die Integrität, und für die Verfügbarkeit brauchen wir am Ende ganz andere Werkzeuge.
 
-## Warum Sicherheit anders ist als jedes andere Fach
+## Das schwächste Glied: warum Durchschnitt nicht zählt
 
-Jetzt kommt der Gedanke, der Sicherheit von normaler Softwareentwicklung trennt — und der vielen erst spät dämmert. In fast jedem anderen Ingenieursfach kämpfst du gegen die Natur: gegen Schwerkraft, gegen Materialermüdung, gegen den Zufall. Die Natur ist gnadenlos, aber sie ist nicht boshaft. Eine Brücke, die heute hält, stürzt morgen nicht plötzlich ein, weil sich die Schwerkraft über Nacht eine fiese neue Variante ausgedacht hat. In der Sicherheit dagegen kämpfst du gegen einen denkenden Gegner. Er hält sich an keine Regeln, er benutzt dein System auf eine Weise, für die es nie gedacht war, und er tut mit Vorliebe genau das, womit du nicht gerechnet hast. Schlimmer noch: Deine Architektur muss gegen *alle* Angriffe bestehen — auch gegen Techniken, die erst in zehn Jahren erfunden werden.
+Es gibt zwei Faustregeln, die so oft auftauchen, dass du sie wie Naturgesetze behandeln solltest. Die erste lautet: **Ein System ist nur so stark wie sein schwächstes Glied.** Stell dir eine Kette vor. Du kannst zehn ihrer Glieder aus gehärtetem Stahl schmieden — wenn das elfte aus Pappe ist, reißt die Kette genau dort, und die ganze Mühe an den anderen zehn war umsonst. Sicherheit funktioniert exakt so. Die teuerste, mathematisch perfekte Verschlüsselung ist wertlos, sobald das Passwort „1234" heißt oder auf einem gelben Zettel am Monitor klebt.
 
-Daraus folgt ein Ungleichgewicht, das du nie vergessen solltest. Der Verteidiger muss jede Tür, jedes Fenster und jeden Lüftungsschacht schließen. Der Angreifer muss nur eine einzige offene Stelle finden. Verteidigen heißt, überall gewinnen zu müssen; angreifen heißt, einmal irgendwo zu gewinnen. Diese Asymmetrie ist der tiefere Grund, warum Verteidigung so viel schwerer ist als Angriff — und warum „wir haben doch eine Firewall" nie eine Antwort ist.
+Daraus folgt eine Denkgewohnheit, die Anfänger oft falsch machen: Sicherheit ist **kein Durchschnitt, sondern ein Minimum**. Es zählt nicht „wie gut ist mein bestes Bauteil?", sondern „wie schwach ist mein schlechtestes?". Und weil das so ist, suchen kluge Angreifer nie die starke Stelle, sondern immer die schwächste. Erschreckend oft ist diese schwächste Stelle nicht die Technik, sondern der Mensch: Eine gut gemachte Phishing-Mail muss keine einzige Formel knacken — sie fragt den Schlüssel einfach freundlich ab, und ein gestresster Mitarbeiter gibt ihn heraus. Genau deshalb wirst du im Lauf des Kurses sehen, dass die spannendsten Angriffe selten die Mathematik brechen, sondern die Annahmen drumherum.
 
-Die Haltung, mit der man dem begegnet, heißt **Security Mindset**, und sie ist die wichtigste Gewohnheit, die du dir in diesem Kurs antrainieren sollst. Sie besteht darin, bei allem reflexartig zu fragen: „Und was passiert, wenn ich das angreife, indem ich …?" Normale Entwickler fragen, wie etwas *funktioniert*. Sicherheitsleute fragen, wie man es zum *Versagen* bringt. Bruce Schneier hat das in einem berühmten Essay so beschrieben: Gute Sicherheitsleute können keinen Laden betreten, ohne automatisch zu sehen, wie man hier klauen könnte — sie können gar nicht anders. Trainiere dir genau diesen Reflex an: Bei jedem Mechanismus, den wir in den nächsten Wochen lernen, sofort der Gegen-Gedanke „und wie breche ich das wieder?". Wer Lust auf das Original hat, liest [Schneiers „The Security Mindset"](https://www.schneier.com/blog/archives/2008/03/the_security_mi_1.html).
+> **Merksatz:** Sicherheit ist ein Minimum, kein Durchschnitt. Frag immer „wo ist mein Pappglied?" — und rechne damit, dass es der Mensch ist.
 
-## Die unbequeme Wahrheit: perfekte Sicherheit gibt es nicht
+## Defense in Depth: niemals alles an einer Annahme aufhängen
 
-Wenn man das Security Mindset ehrlich zu Ende denkt, landet man bei einer Erkenntnis, die anfangs frustriert: Es gibt keine perfekte Sicherheit. Kein System ist gegen jeden denkbaren Angriff gefeit, und — fast noch wichtiger — du musst immer irgendjemandem vertrauen. Du vertraust dem Hersteller deiner Hardware, du vertraust dem Betriebssystem, du vertraust den Administratoren deines Unternehmens. Genau aus diesem unvermeidbaren Vertrauen erwächst eine eigene Gefahr, die man **Insider-Angriffe** nennt: Wer Vertrauen genießt, kann es eben auch missbrauchen.
+Die zweite Faustregel ist die direkte Antwort auf die erste. Wenn jeder einzelne Schutz irgendwann versagen kann und das schwächste Glied über alles entscheidet, dann darfst du dich eben **nicht auf einen einzigen Schutz verlassen**. Diese Strategie heißt **Defense in Depth** — Verteidigung in mehreren Schichten. Wird ein Sicherheitsmechanismus umgangen, fangen die anderen den Angreifer immer noch ab.
 
-Wenn „alles absichern" also unmöglich ist, brauchst du eine ehrlichere Frage: *Wogegen* genau will ich mich schützen? Die Antwort darauf nennt man **Threat Model** (Bedrohungsmodell), und es ist eines der wichtigsten Werkzeuge des ganzen Fachs — obwohl es gar keine Technik ist, sondern eine Denkübung. Ein Threat Model beantwortet zwei Fragen: Welche Daten und Prozesse sind mir überhaupt wertvoll genug, sie zu schützen? Und welche Angreifer nehme ich ernst? Ein Tagebuch gegen die neugierige kleine Schwester abzusichern ist eine völlig andere Aufgabe, als dasselbe Tagebuch gegen einen Geheimdienst zu verteidigen — anderer Gegner, anderer Aufwand, andere Mittel. Und ohne ein festgelegtes Threat Model weißt du nie, ob du genug tust oder einfach das Falsche absicherst.
+Das beste Bild dafür ist eine mittelalterliche Burg: zuerst der Wassergraben, dahinter die Mauer, dahinter die Wachen, und ganz innen das verschlossene Verlies für den Schatz. Wer den Graben durchschwimmt, steht immer noch vor der Mauer; wer über die Mauer klettert, läuft den Wachen direkt in die Arme. Kein einzelner Durchbruch gewinnt sofort das ganze Spiel. In der IT übersetzt sich das in ineinandergeschachtelte Schichten — Firewall *und* Authentifizierung *und* Verschlüsselung *und* Überwachung —, sodass niemals alles an einer einzigen Annahme („unsere Mauer hält schon irgendwie") hängt. Das folgende Zwiebel-Modell zeigt genau diese Idee: der Wert in der Mitte, ringsum Schale für Schale.
 
-## Jetzt wird es konkret: der Einstieg in die Kryptografie
+![Defense in Depth als Zwiebel-Modell](https://upload.wikimedia.org/wikipedia/commons/4/4c/Defense_In_Depth_-_Onion_Model.svg "Defense in Depth: mehrere unabhängige Schutzschichten um das schützenswerte Gut. Fällt eine Schale, halten die anderen.")
 
-Mit dieser Brille steigt die Vorlesung in das erste große Werkzeug ein — und gleich zu Beginn werden drei Wörter ständig verwechselt, also trennen wir sie sauber. Der Oberbegriff ist die **Kryptologie**. Sie hat zwei Hälften, die sich wie Schwert und Schild gegenüberstehen: Die **Kryptografie** ist die Kunst des Bauens und Absicherns („wie verschlüssle ich eine Nachricht?"), die **Kryptanalyse** die Kunst des Brechens („wie knacke ich diese Verschlüsselung wieder?"). Das ist das Adversarial Setting von eben in Reinform — Bauen gegen Brechen im ewigen Wettlauf. Und es hat eine Konsequenz, die du dir merken solltest: Ein Verfahren gilt nicht deshalb als sicher, weil sein Erfinder es dafür hält, sondern erst, wenn die besten Kryptanalytiker der Welt jahrelang erfolglos daran gescheitert sind.
+Schwächstes Glied und Defense in Depth sind zwei Seiten derselben Münze, und sie kommen in jedem späteren Kapitel wieder — von der Frage, wie lang ein Schlüssel sein muss, bis zur Ring-Architektur eines Betriebssystems. Wann immer du später eine Sicherheitsmaßnahme siehst, frag dich: Was ist hier das schwächste Glied, und welche zweite Schicht fängt es auf, wenn es bricht?
 
-Die Kryptografie selbst zerfällt in drei Familien, und es lohnt sich, sie früh auseinanderzuhalten. Da sind zuerst die symmetrischen Verfahren — die klassische Form, die es seit der Antike gibt: Beide Seiten teilen sich *einen* geheimen Schlüssel, mit dem ver- und entschlüsselt wird (das werden in den nächsten Wochen die Chiffren DES und AES). Dann gibt es die asymmetrischen oder Public-Key-Verfahren, bei denen jede Person ein *Schlüsselpaar* aus einem öffentlichen und einem privaten Schlüssel besitzt (vor allem RSA). Und schließlich die Protokolle, die diese Algorithmen zu echten Anwendungen zusammensetzen — das bekannteste ist TLS, das jedes „https" in deinem Browser absichert.
+## Das Security Mindset: gewohnheitsmäßig wie ein Angreifer denken
 
-Die Jahreszahl, die hier hängenbleiben sollte, ist **1976**. Bis dahin gab es ausschließlich symmetrische Verfahren, und die hatten ein quälendes Henne-Ei-Problem: Beide Seiten müssen denselben geheimen Schlüssel kennen — aber wie tauscht man diesen Schlüssel überhaupt sicher aus, wenn der Lauscher die Leitung längst abhört? 1976 wurde die Public-Key-Kryptografie veröffentlicht und löste genau dieses Problem; ein Jahr später, 1977, kam RSA. Warum ein *öffentlicher* Schlüssel funktionieren kann, ohne dass damit jeder entschlüsseln darf, zeigt [Computerphile sehr anschaulich](https://www.youtube.com/watch?v=GSIDS_lvRv4) — und wir nehmen es in den Vorlesungen 4 und 5 in aller Ruhe auseinander.
+Wenn der Gegner denkt, musst du lernen, **wie er** zu denken. Diese Haltung heißt **Security Mindset**, und sie ist die wichtigste Gewohnheit, die du dir in diesem Kurs antrainieren sollst. Sie besteht aus einer einzigen reflexartigen Frage, die du dir bei allem stellst: „Und was passiert, wenn ich das angreife, indem ich Folgendes tue …?" Normale Entwicklerinnen und Entwickler fragen, wie etwas *funktioniert*. Sicherheitsleute fragen, wie man es zum *Versagen* bringt.
 
-## Die Bühne, auf der alles spielt: Alice, Bob und der Lauscher Oskar
+Der Sicherheitsexperte Bruce Schneier hat das einmal sehr schön beschrieben: Wer das Security Mindset verinnerlicht hat, kann keinen Laden mehr betreten, ohne automatisch zu sehen, wie man hier stehlen oder die Kasse austricksen könnte — nicht aus krimineller Energie, sondern weil das Gehirn gar nicht mehr anders kann. Trainiere dir genau diesen Reflex an: Bei jedem Mechanismus, den wir in den nächsten Wochen lernen, soll sofort der Gegen-Gedanke aufpoppen — „und wie breche ich das wieder?". Wer Lust auf das Original hat, liest [Schneiers Essay „The Security Mindset"](https://www.schneier.com/blog/archives/2008/03/the_security_mi_1.html).
 
-Fast jede Krypto-Erklärung im Kurs spielt mit derselben kleinen Besetzung, also lern sie gleich kennen. **Alice** möchte **Bob** eine Nachricht schicken. Dazwischen liegt das **Internet** — ein unsicherer Kanal, auf dem **Oskar** mitlauscht (in englischen Texten heißt er „Eve", von *eavesdropper*, also Lauscher). Bei der symmetrischen Verschlüsselung haben Alice und Bob vorab einen gemeinsamen geheimen Schlüssel vereinbart. Alice nimmt nun ihren Klartext, verwandelt ihn mit dem Schlüssel in unleserlichen Salat und schickt diesen los. Oskar fängt den Salat zwar ab, kann aber ohne den Schlüssel nichts damit anfangen. Bob dagegen besitzt denselben Schlüssel und verwandelt den Salat wieder zurück in den Klartext.
+## Keine perfekte Sicherheit: Vertrauen, Insider und das Threat Model
 
-![Symmetrische Verschlüsselung mit einem geteilten Schlüssel](https://upload.wikimedia.org/wikipedia/commons/8/80/Simple_symmetric_encryption-en.svg "Symmetrische Verschlüsselung: derselbe Schlüssel ver- und entschlüsselt. Das ist die Alice-Bob-Oskar-Bühne in einem Bild.")
+Wenn man das Security Mindset ehrlich zu Ende denkt, landet man bei einer Erkenntnis, die anfangs frustriert, dann aber befreiend wirkt: **Es gibt keine perfekte Sicherheit.** Kein System ist gegen jeden denkbaren Angriff gefeit, und — fast noch wichtiger — du musst immer *irgendjemandem* vertrauen. Du vertraust dem Hersteller deiner Hardware, du vertraust dem Betriebssystem, du vertraust den Administratoren deines Unternehmens. Aus genau diesem unvermeidbaren Vertrauen erwächst eine eigene Gefahr, die man **Insider-Angriffe** nennt: Wer Vertrauen genießt, kann es eben auch missbrauchen, und gegen den vertrauten Insider helfen viele äußere Schutzmauern nichts.
 
-Damit du die kommenden Folien überhaupt lesen kannst, brauchst du noch ein kleines Vokabular, das ab jetzt wirklich überall auftaucht. Den lesbaren Text nennt man **x** (Klartext, plaintext), den verschlüsselten Salat **y** (Chiffrat, ciphertext) und den Schlüssel **k** (key). Die Verschlüsselung schreibt man als Funktion **e** (encrypt), die Entschlüsselung als **d** (decrypt). Alices Arbeit ist also e(x) = y, Bobs Arbeit ist d(y) = x — die eine Funktion macht exakt das rückgängig, was die andere getan hat. Die Menge *aller* überhaupt möglichen Schlüssel heißt **Schlüsselraum**, und seine Größe wird später entscheidend: Sie bestimmt, wie lange ein Angreifer bräuchte, der einfach stur alle Schlüssel durchprobiert — daher kommt das berühmte „256-Bit"-Versprechen, das du sicher schon gehört hast. Ein sehr anfängerfreundliches Bild davon gibt das [Code.org-Video](https://www.youtube.com/watch?v=ZghMPWGXexs); den großen historischen Bogen von Caesar bis AES spannt [Crash Course Computer Science](https://www.youtube.com/watch?v=jhXCTbFnK8o).
+Wenn „alles absichern" also unmöglich ist, brauchst du eine ehrlichere Frage: *Wogegen genau* will ich mich schützen? Die Antwort darauf ist das **Threat Model** (Bedrohungsmodell), und es ist eines der wichtigsten Werkzeuge des ganzen Fachs — obwohl es selbst gar keine Technik ist, sondern eine Denkübung. Ein Threat Model beantwortet zwei Fragen: Welche Daten und Prozesse sind mir überhaupt wertvoll genug, sie zu schützen? Und welche Angreifer nehme ich ernst? Ein Tagebuch gegen die neugierige kleine Schwester abzusichern ist eine völlig andere Aufgabe, als dasselbe Tagebuch gegen einen Geheimdienst zu verteidigen — anderer Gegner, anderer Aufwand, andere Mittel. Ohne festgelegtes Threat Model weißt du nie, ob du genug tust oder einfach das Falsche absicherst. Erschwerend kommt hinzu, dass die Aufgabe ständig härter wird: Systeme werden immer komplexer und verändern sich kontinuierlich, und mit jeder neuen Komponente wächst die Angriffsfläche.
 
-Und damit schließt sich der Kreis zum Anfang dieser Stunde. Einer der letzten Sätze der Vorlesung lautet: Kryptografie ist nur dann nützlich, wenn der Rest des Systems sicher ist. Das ist nichts anderes als das schwächste Glied in neuer Verkleidung. Die ausgefeilteste Verschlüsselung der Welt schützt dich kein bisschen, wenn der Schlüssel unter der Fußmatte liegt — und genau deshalb war es so wichtig, erst die Prinzipien zu verstehen und dann die Mathematik.
+> **Eselsbrücke:** Ein Threat Model beantwortet zwei W-Fragen — **Was** schütze ich, und **vor wem**? Steht eine dieser beiden Antworten nicht fest, ist jede Sicherheitsmaßnahme nur geraten.
+
+## Teil 1 des Kurses: der Einstieg in die Kryptografie
+
+Mit dieser Brille auf der Nase steigen wir in das erste große Werkzeug ein — und gleich zu Beginn werden drei Wörter ständig verwechselt, also trennen wir sie sofort sauber. Der Oberbegriff für die ganze Wissenschaft von Geheimschriften ist die **Kryptologie**. Sie hat zwei Hälften, die sich wie Schwert und Schild gegenüberstehen. Die **Kryptografie** ist die Kunst des Bauens und Absicherns — „wie verschlüssele ich eine Nachricht so, dass nur der Richtige sie lesen kann?". Die **Kryptanalyse** ist die Kunst des Brechens — „wie knacke ich diese Verschlüsselung wieder, ohne den Schlüssel zu kennen?". Das ist das Adversarial Setting in Reinform: Bauen gegen Brechen, im ewigen Wettlauf.
+
+Diese Aufteilung hat eine Konsequenz, die du dir gut merken solltest, weil sie die Denkweise des ganzen Faches prägt: Ein Verfahren gilt **nicht** deshalb als sicher, weil sein Erfinder das behauptet, sondern erst, wenn die besten Kryptanalytikerinnen und Kryptanalytiker der Welt jahrelang erfolglos daran gescheitert sind. Sicherheit muss man sich verdienen, indem man Angriffe überlebt — nicht, indem man sie behauptet.
+
+Die Kryptografie selbst zerfällt in drei Familien, und es lohnt sich, sie früh auseinanderzuhalten, weil der ganze Kurs an ihnen entlang gebaut ist. Erstens die **symmetrischen Verfahren** — die klassische Form, die es seit der Antike gibt: Beide Seiten teilen sich *einen* gemeinsamen geheimen Schlüssel, mit dem ver- *und* entschlüsselt wird (später die Chiffren DES und AES). Zweitens die **asymmetrischen** oder **Public-Key-Verfahren**, bei denen jede Person ein *Schlüsselpaar* aus einem öffentlichen und einem privaten Schlüssel besitzt — der öffentliche darf in alle Welt, der private bleibt geheim (vor allem RSA). Drittens die **Protokolle**, die diese Algorithmen zu echten Anwendungen zusammensetzen; das bekannteste ist TLS, das jedes „https" in deinem Browser absichert.
+
+![Ein asymmetrisches Schlüsselpaar: öffentlicher und privater Schlüssel](https://upload.wikimedia.org/wikipedia/commons/7/70/Public_key_encryption_keys.svg "Bei Public-Key-Verfahren besitzt jede Person ein Schlüsselpaar: einen öffentlichen Schlüssel, den jeder kennen darf, und einen privaten, der geheim bleibt.")
+
+Die eine Jahreszahl, die hier wirklich hängenbleiben sollte, ist **1976**. Von der Antike bis dahin gab es ausschließlich symmetrische Verfahren, und die schleppten ein quälendes Henne-Ei-Problem mit sich herum: Beide Seiten müssen denselben geheimen Schlüssel kennen — aber wie tauscht man diesen Schlüssel überhaupt sicher aus, wenn der Lauscher die Leitung längst abhört? 1976 wurde die Public-Key-Kryptografie veröffentlicht und löste genau dieses Problem; ein Jahr später, 1977, kam RSA. Wie ein *öffentlicher* Schlüssel funktionieren kann, ohne dass damit jeder entschlüsseln darf, nehmen wir später in aller Ruhe auseinander; [Computerphile erklärt die Grundidee sehr anschaulich](https://www.youtube.com/watch?v=GSIDS_lvRv4).
+
+Ein letzter, wichtiger Satz zum großen Bild, bevor wir konkret werden: **Kryptografie ist nur dann nützlich, wenn der Rest des Systems sicher ist.** Du kannst lange darüber streiten, ob AES oder DES besser ist und ob der Schlüssel 128 oder 192 Bit haben soll — wenn der Schlüssel anschließend unter der Fußmatte liegt, war die ganze Diskussion umsonst. Das ist nichts anderes als das schwächste Glied in neuer Verkleidung, und es ist der Grund, warum wir erst die Prinzipien geklärt haben und jetzt erst die Mathematik anfassen.
+
+## Die Bühne: Alice, Bob und der Lauscher Oskar
+
+Fast jede Krypto-Erklärung im Kurs spielt mit derselben kleinen Besetzung, also lern sie gleich kennen — sie wird dir bis zur letzten Vorlesung begegnen. **Alice** möchte **Bob** eine Nachricht schicken. Dazwischen liegt das **Internet**, ein unsicherer Kanal, auf dem **Oskar** mitlauscht (in englischen Texten heißt er oft „Eve", von *eavesdropper*, dem Lauscher). Bei der symmetrischen Verschlüsselung haben Alice und Bob vorab über einen **sicheren Kanal** einen gemeinsamen geheimen Schlüssel vereinbart. Alice nimmt nun ihren lesbaren Text, verwandelt ihn mit dem Schlüssel in unleserlichen Salat und schickt diesen los. Oskar fängt den Salat zwar ab, kann aber ohne den Schlüssel nichts damit anfangen. Bob besitzt denselben Schlüssel und verwandelt den Salat wieder zurück in den lesbaren Text.
+
+![Symmetrische Verschlüsselung mit einem geteilten Schlüssel](https://upload.wikimedia.org/wikipedia/commons/8/80/Simple_symmetric_encryption-en.svg "Symmetrische Verschlüsselung: derselbe Schlüssel ver- und entschlüsselt. Genau das ist die Bühne mit Alice, Bob und dem Lauscher.")
+
+Damit du die kommenden Kapitel überhaupt lesen kannst, brauchst du ein kleines Vokabular, das ab jetzt wirklich überall auftaucht. Den lesbaren Text nennt man **x** (Klartext, englisch *plaintext*), den verschlüsselten Salat **y** (Chiffrat, Geheimtext oder Kryptogramm, englisch *ciphertext*) und den Schlüssel **k** (englisch *key*). Die Verschlüsselung ist eine Funktion **e** (von *encrypt*), die Entschlüsselung eine Funktion **d** (von *decrypt*). Alices Arbeit ist also **e(x) = y**, Bobs Arbeit ist **d(y) = x** — die eine Funktion macht exakt das rückgängig, was die andere getan hat. Die Menge *aller* überhaupt möglichen Schlüssel heißt **Schlüsselraum**, und seine Größe wird später entscheidend: Sie bestimmt, wie lange ein Angreifer bräuchte, der einfach stur alle Schlüssel der Reihe nach durchprobiert (ein sogenannter Brute-Force-Angriff). Daher kommt das berühmte „256-Bit"-Versprechen, das du sicher schon gehört hast.
+
+> **Eselsbrücke:** Fünf Buchstaben, die du nie wieder verwechseln darfst — **x** ist der Klartext (lesbar), **y** das Chiffrat (Salat), **k** der Schlüssel, **e** verschlüsselt, **d** entschlüsselt. Sprich es einmal laut: „**e** macht aus **x** das **y**, **d** macht es mit **k** rückgängig."
+
+## Klassische Chiffren von Hand: Substitution und Transposition
+
+Jetzt wird es endlich praktisch — und genau das, was hier kommt, wirst du in der ersten Übung mit Bleistift und Papier rechnen müssen. Es gibt zwei grundverschiedene Grundideen, wie man aus Klartext Geheimtext macht, und der ganze Rest der klassischen Kryptografie ist eine Kombination aus beiden. Eine **Substitutionschiffre** *ersetzt* jedes Symbol durch ein anderes (aus A wird D, aus B wird E …) — die Buchstaben bleiben an ihrem Platz, ändern aber ihre Identität. Eine **Transpositionschiffre** macht das Gegenteil: Sie *vertauscht die Reihenfolge* der Symbole, ohne sie zu verändern — dieselben Buchstaben, nur in anderer Anordnung. Substitution tauscht das Was, Transposition tauscht das Wo. Diese Unterscheidung ist klausurrelevant, also präge sie dir ein.
+
+Für das Rechnen brauchst du eine einzige Vereinbarung: Jeder Buchstabe bekommt eine Zahl von 0 bis 25. **A = 0, B = 1, C = 2, …, Z = 25.** Damit wird aus Buchstaben-Schieberei plötzlich simple Arithmetik. Und weil das Alphabet nur 26 Zeichen hat, rechnen wir „im Kreis": Nach Z (25) kommt wieder A (0). Dieses Im-Kreis-Rechnen heißt **modulo 26**, geschrieben **mod 26**, und es bedeutet schlicht: Teile durch 26 und behalte nur den Rest. So wird etwa aus 28 wieder 2 (denn 28 = 26 + 2), das heißt aus einem Schritt über Z hinaus landest du wieder bei C.
+
+### Schritt für Schritt: Caesar verschlüsseln
+
+Die berühmteste Substitutionschiffre ist die **Caesar-Chiffre**, auch **Shift-Chiffre** genannt, weil sie jeden Buchstaben um eine feste Anzahl Stellen im Alphabet weiterschiebt. Der Schlüssel **k** ist genau diese Schrittweite. Bei **k = 3** wird also aus A ein D, aus B ein E, aus C ein F — die ganze Idee in einem Bild:
+
+![Caesar-Chiffre mit einer Verschiebung um 3](https://upload.wikimedia.org/wikipedia/commons/4/4a/Caesar_cipher_left_shift_of_3.svg "Caesar-Chiffre: jeder Buchstabe wird um eine feste Zahl k weitergeschoben. Hier eine Verschiebung um 3.")
+
+Formal sieht die Verschlüsselung eines Klartextbuchstabens **x** mit Schlüssel **k** so aus: **y = (x + k) mod 26**. Und die Entschlüsselung dreht das einfach um — statt zu addieren, zieht man ab: **x = (y − k) mod 26**. Rechnen wir ein vollständiges Beispiel mit dem Wort **HALLO** und **k = 3**, Buchstabe für Buchstabe:
+
+- **H** ist Position 7. 7 + 3 = 10. Position 10 ist **K**.
+- **A** ist Position 0. 0 + 3 = 3. Position 3 ist **D**.
+- **L** ist Position 11. 11 + 3 = 14. Position 14 ist **O**.
+- **L** noch einmal: ebenfalls **O**.
+- **O** ist Position 14. 14 + 3 = 17. Position 17 ist **R**.
+
+Aus HALLO wird also **KDOOR**. Zur Probe entschlüsseln wir zurück: K (10) − 3 = 7 = H, D (3) − 3 = 0 = A, O (14) − 3 = 11 = L, O → L, R (17) − 3 = 14 = O. Wir landen wieder bei HALLO — die Umkehrung stimmt. Achte beim Abziehen auf den Kreis: Käme beim Entschlüsseln etwas Negatives heraus, etwa −2, dann addierst du 26 dazu (−2 + 26 = 24 = Y). Genau dafür ist das „mod 26" da.
+
+> **Merksatz:** Caesar = ein einziger fester Shift. Verschlüsseln **+ k**, entschlüsseln **− k**, und immer **mod 26**, damit du nach Z wieder bei A landest.
+
+### Schritt für Schritt: Caesar mit Häufigkeitsanalyse brechen
+
+Caesar fühlt sich sicher an, ist es aber überhaupt nicht — und *warum* das so ist, ist die eigentliche Lehre dieser Aufgabe. Eine Substitutionschiffre vertauscht ja nur die Identität der Buchstaben, nicht ihre Häufigkeit. In jeder Sprache kommen bestimmte Buchstaben viel öfter vor als andere. Im Deutschen ist das **E** mit Abstand der häufigste Buchstabe (rund **17 %**), gefolgt von **N**, **I**, **S** und **R**. Diese Verteilung ist wie ein Fingerabdruck der Sprache:
+
+![Häufigkeit der Buchstaben in der deutschen Sprache](https://upload.wikimedia.org/wikipedia/commons/e/ea/Buchstabenh%C3%A4ufigkeit_Deutsch.svg "Buchstabenhäufigkeit im Deutschen: E ist mit großem Abstand am häufigsten, dann folgen N, I, S, R. Diese Silhouette verrät die Sprache.")
+
+Hier ist der entscheidende Trick: Eine Caesar-Verschiebung schiebt diesen ganzen Fingerabdruck einfach um **k** Stellen zur Seite — die Form bleibt, nur der höchste Berg sitzt jetzt woanders. Du machst also eine **Häufigkeitsanalyse**: Du zählst, welcher Buchstabe im Geheimtext am häufigsten vorkommt. Mit großer Wahrscheinlichkeit ist das das verschlüsselte **E**. Aus der Verschiebung von E auf diesen Buchstaben liest du sofort **k** ab. Ein konkretes Beispiel: Verschlüsselt jemand einen deutschen Text mit **k = 5**, dann wird aus jedem E (Position 4) der Buchstabe an Position 4 + 5 = 9, also **J**. Im Geheimtext wimmelt es nun von J's. Findest du als Angreifer heraus, dass J am häufigsten ist, rechnest du rückwärts: 9 − 4 = 5 — und hast den Schlüssel geknackt, ohne auch nur einen einzigen anderen Schlüssel auszuprobieren.
+
+Daraus folgt eine zweite Beobachtung, die du in der Übung selbst nachstellst: Je **länger** der Text, desto deutlicher tritt diese Verteilung hervor, weil mehr Buchstaben mehr Statistik liefern. Bei drei Wörtern kann der Zufall die Häufigkeiten noch verzerren; bei drei Seiten passt die Silhouette fast perfekt auf die Tabelle. Genau deshalb ist Caesar gegen jeden, der zählen kann, hoffnungslos unterlegen.
+
+> **Eselsbrücke:** Caesar verschiebt die Häufigkeits-Silhouette, er zerstört sie nicht. Suche den höchsten Berg im Geheimtext, nenne ihn E, miss den Abstand — das ist dein k.
+
+### Schritt für Schritt: spaltenweise Transposition
+
+Wechseln wir die Grundidee. Bei der **Transposition** bleiben die Buchstaben, was sie sind — wir verwürfeln nur ihre Reihenfolge. Schon die Griechen taten das in der Antike mit einer **Skytale**: einem Stab, um den ein Lederstreifen gewickelt wurde; man schrieb längs über die Wicklung, und nur wer einen Stab mit demselben Durchmesser besaß, konnte den Streifen wieder lesbar aufwickeln.
+
+![Eine Skytale — frühe Transpositionschiffre der Antike](https://upload.wikimedia.org/wikipedia/commons/5/51/Skytale.png "Die Skytale: ein um einen Stab gewickelter Streifen. Der Stabdurchmesser ist der Schlüssel — eine antike Transpositionschiffre.")
+
+Die moderne Variante, die du in der Übung rechnest, ist die **spaltenweise Transposition** mit einem Schlüsselwort. Sie geht in drei Schritten: erstens den Klartext zeilenweise in ein Gitter mit so vielen Spalten schreiben, wie das Schlüsselwort Buchstaben hat; zweitens die Spalten nach der alphabetischen Reihenfolge der Schlüsselbuchstaben umsortieren; drittens das umsortierte Gitter wieder zeilenweise ablesen. Machen wir das mit dem Klartext **BEISPIELE** und dem Schlüssel **HAL** (drei Buchstaben, also drei Spalten). Zeilenweise eingetragen ergibt sich:
+
+| H | A | L |
+|---|---|---|
+| B | E | I |
+| S | P | I |
+| E | L | E |
+
+Nun sortieren wir die Schlüsselbuchstaben alphabetisch: aus **H A L** wird **A H L**. Die Spalte unter A wandert also nach vorne, dann die unter H, dann die unter L. Wir stellen die Spalten in dieser neuen Reihenfolge auf:
+
+| A | H | L |
+|---|---|---|
+| E | B | I |
+| P | S | I |
+| L | E | E |
+
+Jetzt lesen wir dieses umsortierte Gitter **zeilenweise** ab — also Zeile für Zeile von links nach rechts: E, B, I, dann P, S, I, dann L, E, E. Das ergibt den Geheimtext **EBIPSILEE**. Dieselben neun Buchstaben wie im Klartext, nur neu angeordnet — reine Transposition, keine Substitution.
+
+Das **Entschlüsseln** kehrt die Spaltenvertauschung um. Du weißt, in welche Reihenfolge der Schlüssel die Spalten gebracht hat, also stellst du sie wieder zurück. Nehmen wir die Übungsaufgabe: Geheimtext **YRCOTPCSILOO**, Schlüssel **SEC**. Zwölf Buchstaben bei drei Spalten ergeben vier Zeilen. Du schreibst den Geheimtext zuerst zeilenweise in ein Gitter — dessen Spalten stehen ja in alphabetischer Schlüsselreihenfolge (**C E S**). Dann ordnest du die Spalten in die ursprüngliche Schlüsselreihenfolge **S E C** zurück und liest erneut zeilenweise. Das Ergebnis ist das Gitter
+
+| S | E | C |
+|---|---|---|
+| C | R | Y |
+| P | T | O |
+| I | S | C |
+| O | O | L |
+
+und zeilenweise gelesen kommt **CRYPTOISCOOL** heraus — „crypto is cool", passend zum Fach. Der ganze Trick beim Entschlüsseln ist also nur: Welche Spalte stand ursprünglich wo? Die alphabetische Sortierung des Schlüssels sagt es dir.
+
+> **Merksatz:** Substitution ändert das *Was* (Buchstaben-Identität), Transposition ändert das *Wo* (Buchstaben-Reihenfolge). Bei der Transposition bleibt die Häufigkeitsverteilung der Buchstaben exakt gleich — eine Häufigkeitsanalyse läuft hier ins Leere.
+
+### Schritt für Schritt: Vigenère — viele Caesars auf einmal
+
+Caesar hatte eine offensichtliche Schwäche: ein einziger Shift für den ganzen Text, also bleibt die Häufigkeits-Silhouette erhalten. Die **Vigenère-Chiffre** repariert genau das, indem sie nicht *ein* Alphabet, sondern *viele* benutzt — man nennt das **polyalphabetische Substitution**. Der Schlüssel ist jetzt ein ganzes Wort, zum Beispiel **SICHER**, und jeder Buchstabe dieses Schlüsselworts gibt eine eigene Caesar-Verschiebung vor: S verschiebt um 18, I um 8, C um 2, H um 7, E um 4, R um 17. Der erste Klartextbuchstabe wird mit 18 verschoben, der zweite mit 8, der dritte mit 2 und so weiter. Ist der Klartext länger als das Schlüsselwort, fängst du beim Schlüssel einfach wieder von vorne an (zyklisch).
+
+Zum Nachschlagen hat sich das **Vigenère-Quadrat** durchgesetzt — eine Tabelle, in der Zeile (Schlüsselbuchstabe) und Spalte (Klartextbuchstabe) den Geheimtextbuchstaben kreuzen:
+
+![Das Vigenère-Quadrat](https://upload.wikimedia.org/wikipedia/commons/2/25/Vigen%C3%A8re_square.svg "Das Vigenère-Quadrat: Zeile = Schlüsselbuchstabe, Spalte = Klartextbuchstabe, Kreuzung = Geheimtextbuchstabe. Es ist nichts anderes als 26 gestapelte Caesar-Alphabete.")
+
+Rechnen kannst du es aber auch ganz ohne Quadrat, denn jeder Schritt ist nur ein Caesar: **y = (x + k) mod 26**, wobei k diesmal von Buchstabe zu Buchstabe wechselt. Verschlüsseln wir den Anfang von **CYBER** mit dem Schlüssel **SICHER**:
+
+- **C** (2) + **S** (18) = 20 → **U**
+- **Y** (24) + **I** (8) = 32, und 32 mod 26 = 6 → **G**
+- **B** (1) + **C** (2) = 3 → **D**
+- **E** (4) + **H** (7) = 11 → **L**
+- **R** (17) + **E** (4) = 21 → **V**
+
+Aus CYBER wird also **UGDLV**. Beachte das **Y**: 24 + 8 = 32 sprengt das Alphabet, also rechnest du mod 26 und landest bei 6, einem G. Genau dafür ist der Kreis da. Entschlüsselt wird wieder durch Abziehen desselben Schlüsselbuchstabens: U (20) − S (18) = 2 = C, und so weiter.
+
+Und jetzt der eigentliche Gewinn, den du in der Übung auch im Häufigkeitsdiagramm siehst: Weil dasselbe E im Klartext je nach Position mit *unterschiedlichen* Schlüsselbuchstaben verschlüsselt wird, landet es im Geheimtext mal als ein, mal als ein anderer Buchstabe. Die schöne, hohe E-Spitze aus dem deutschen Fingerabdruck wird dadurch **verschmiert** — die Häufigkeitsverteilung wird viel flacher und gleichmäßiger. Genau deshalb scheitert die simple Häufigkeitsanalyse, die Caesar sofort knackt, an Vigenère. (Wirklich unknackbar ist Vigenère trotzdem nicht — aber das ist eine Geschichte für später.)
+
+> **Eselsbrücke:** Vigenère = viele Caesars im Reißverschluss. Der Schlüssel **SICHER** ist die Folge der Verschiebungen 18-8-2-7-4-17, die sich zyklisch wiederholt. Mehrere Shifts verschmieren die E-Spitze — und damit fällt die Häufigkeitsanalyse aus.
 
 ## Auf den Punkt
 
-Jetzt, wo die ganze Geschichte erzählt ist, die Kurzfassung zum Wiederholen: IT-Sicherheit heißt, drei konkurrierende Ziele auszubalancieren — Vertraulichkeit, Integrität, Verfügbarkeit (CIA). Zwei Gesetze ziehen sich durch alles: ein System ist nur so stark wie sein schwächstes Glied, und man verteidigt in mehreren Schichten (Defense in Depth). Sicherheit ist besonders, weil der Gegner *denkt* — er braucht nur eine Lücke, du musst alle schließen; deshalb das Security Mindset („wie breche ich das?"). Perfekte Sicherheit gibt es nicht, also definiert man ein Threat Model (was schütze ich, gegen wen?). Und der Einstieg in die Kryptografie: Kryptologie = Kryptografie (bauen) + Kryptanalyse (brechen); symmetrisch (ein geteilter Schlüssel), asymmetrisch (Schlüsselpaar, seit 1976), Protokolle; auf der Bühne Alice, Bob und der Lauscher Oskar mit der Notation x, y, k, e, d.
+Jetzt, wo die ganze Geschichte erzählt ist, die Kurzfassung zum Wiederholen. IT-Sicherheit ist ein Zweikampf gegen einen **denkenden Gegner**, mit einer eingebauten Asymmetrie: Der Verteidiger muss überall gewinnen, der Angreifer nur einmal. „Sicher" misst man an drei Schutzzielen — **Vertraulichkeit, Integrität, Verfügbarkeit (CIA)** —, die gegeneinander ziehen und abgewogen werden müssen. Zwei eiserne Regeln ziehen sich durch alles: Ein System ist nur so stark wie sein **schwächstes Glied** (oft der Mensch), und deshalb verteidigt man in mehreren Schichten (**Defense in Depth**). Weil es **keine perfekte Sicherheit** gibt und man immer jemandem vertrauen muss (Insider-Gefahr), definiert man ein **Threat Model**: Was schütze ich, vor wem? Dann beginnt Teil 1, die Kryptografie: **Kryptologie = Kryptografie (bauen) + Kryptanalyse (brechen)**; drei Familien — **symmetrisch** (ein geteilter Schlüssel), **asymmetrisch** (Schlüsselpaar, seit **1976**) und **Protokolle** (z. B. TLS). Auf der Bühne stehen **Alice, Bob und der Lauscher Oskar**, mit der Notation **x, y, k, e, d** und dem **Schlüsselraum**. Und von Hand beherrschst du jetzt vier klassische Verfahren: **Caesar** (ein Shift, **+k / −k mod 26**), die **Häufigkeitsanalyse** (E ist der häufigste deutsche Buchstabe — sie bricht Caesar), die **spaltenweise Transposition** (Spalten nach Schlüssel sortieren) und **Vigenère** (viele Shifts, verschmiert die Häufigkeit).
 
 ## Begriffe & Notation
 
 | Begriff | Bedeutung |
 |---|---|
 | **x** | Klartext (plaintext) — die lesbare Nachricht |
-| **y** | Chiffrat / Geheimtext (ciphertext) |
+| **y** | Chiffrat / Geheimtext (ciphertext) — der verschlüsselte Text |
 | **k** | Schlüssel (key) |
 | **e( )** | Verschlüsselung (encryption): aus x wird y |
 | **d( )** | Entschlüsselung (decryption): aus y wird x |
-| **Schlüsselraum** | Menge *aller* möglichen Schlüssel |
-| **CIA-Triade** | Confidentiality, Integrity, Availability |
-| **Threat Model** | Festlegung, was wogegen geschützt wird |
+| **Schlüsselraum** | Menge *aller* möglichen Schlüssel — bestimmt den Aufwand für Brute Force |
+| **CIA-Triade** | Confidentiality, Integrity, Availability — die drei Schutzziele |
+| **Schwächstes Glied** | Sicherheit ist ein Minimum, kein Durchschnitt |
+| **Defense in Depth** | mehrere unabhängige Schutzschichten |
+| **Threat Model** | Festlegung: was wird wogegen geschützt? |
+| **Security Mindset** | reflexhaft fragen „wie breche ich das?" |
 | **Kryptologie** | Oberbegriff: Kryptografie + Kryptanalyse |
+| **Kryptografie / Kryptanalyse** | Verfahren bauen / Verfahren brechen |
+| **Substitution / Transposition** | Symbole ersetzen / Reihenfolge vertauschen |
+| **mod 26** | „im Kreis" rechnen: nur den Rest nach Teilung durch 26 behalten |
 
 ## Typische Fallen
 
-- **CIA ≠ der Geheimdienst.** Es steht für die drei Schutzziele. Klausur-Reflex: lesen→C, unbemerkt ändern→I, Ausfall→A.
-- **„Stärkste Komponente = sicher" ist falsch.** Es zählt das **schwächste** Glied, nicht das stärkste.
-- **Verschlüsselung ≠ Verfügbarkeit.** Krypto liefert C und I, aber nie A — gegen Ausfälle helfen nur Redundanz/Backups.
-- **Asymmetrisch ist nicht „besser" als symmetrisch.** Es löst ein *anderes* Problem (Schlüsselaustausch) und ist deutlich langsamer (V4–V5).
-- **„Geheimer Algorithmus = sicher" ist falsch.** Security by Obscurity ersetzt keine echte Sicherheit (formal: Kerckhoffs, V2).
-- **Perfekte Sicherheit gibt es nicht** — wer sie verspricht, hat das Threat Model nicht verstanden.
+- **CIA ist nicht der Geheimdienst.** Es steht für die drei Schutzziele. Klausur-Reflex: lesen → C, unbemerkt ändern → I, Ausfall → A.
+- **Verschlüsselung liefert keine Verfügbarkeit.** Krypto schützt Vertraulichkeit und Integrität, aber gegen einen überfluteten oder abgestürzten Server hilft nur Redundanz, niemals eine Formel.
+- **„Stärkste Komponente = sicher" ist falsch.** Es zählt das **schwächste** Glied. Sicherheit ist ein Minimum, kein Durchschnitt.
+- **Asymmetrisch ist nicht „besser" als symmetrisch.** Es löst ein *anderes* Problem (den Schlüsselaustausch) und ist deutlich langsamer. Beide werden gebraucht.
+- **„Geheimes Verfahren = sicher" ist falsch.** Sicherheit muss im Schlüssel stecken, nicht in der Geheimhaltung des Algorithmus (formal: Kerckhoffs, nächste Vorlesung).
+- **Substitution und Transposition werden verwechselt.** Substitution ersetzt Buchstaben (Caesar, Vigenère); Transposition vertauscht ihre Reihenfolge (Skytale, spaltenweise Transposition). Nur die Substitution verändert die Buchstaben-Identität.
+- **Häufigkeitsanalyse gegen Transposition läuft ins Leere.** Da die Buchstaben nur umsortiert werden, bleibt ihre Häufigkeit gleich — das verrät der Analyse nichts über den Klartext.
+- **Beim Entschlüsseln das „mod" nicht vergessen.** Wird beim Abziehen eine negative Zahl frei, addiere 26 dazu, sonst landest du außerhalb des Alphabets.
 
 ## Klausur-Fokus
 
-Aus den Folien dieser Vorlesung kommen vor allem **Verständnisfragen** — die solltest du frei beantworten können: die **CIA-Triade** definieren und an einem Beispiel das verletzte Ziel zuordnen; **schwächstes Glied** und **Defense in Depth** mit einem eigenen Bild erklären; begründen, warum der **denkende Gegner** (die Asymmetrie Angreifer/Verteidiger) Sicherheit so schwer macht; sagen können, was ein **Threat Model** ist und warum es **keine perfekte Sicherheit** gibt; und **Kryptologie / Kryptografie / Kryptanalyse** sauber trennen, die drei Familien (symmetrisch / asymmetrisch / Protokoll) einordnen, die Jahreszahl **1976** kennen und die Notation **x, y, k, e, d** flüssig lesen.
+Aus dieser Lektion kommen zwei Sorten Aufgaben. Die **Verständnisfragen** solltest du frei formulieren können: die **CIA-Triade** definieren und an einem Beispiel das verletzte Ziel zuordnen; **schwächstes Glied** und **Defense in Depth** mit einem eigenen Bild erklären; begründen, warum der **denkende Gegner** und die Asymmetrie Angreifer/Verteidiger Sicherheit so schwer machen; sagen, was ein **Threat Model** ist und warum es **keine perfekte Sicherheit** gibt; **Kryptologie / Kryptografie / Kryptanalyse** sauber trennen, die drei Familien (symmetrisch / asymmetrisch / Protokoll) einordnen, die Jahreszahl **1976** kennen und die Notation **x, y, k, e, d** flüssig lesen.
 
-Das **erste Übungsblatt** zeigt aber schon, wohin der Professor praktisch will, und genau das wird gern *gerechnet*: die **klassische Kryptografie per Hand**. Du solltest die **Cäsar-Chiffre** mit der Formel e(x) = (x + k) mod 26 ver- und entschlüsseln, eine **Häufigkeitsanalyse** mit der deutschen Buchstabenverteilung (E ≈ 17 %, dann N, I, S, R …) durchführen, eine **spaltenweise Transposition** mit einem Schlüsselwort ver-/entschlüsseln und die **Vigenère-Chiffre** (ein Schlüsselwort, das die Verschiebung pro Buchstabe vorgibt) anwenden können. Die Mechanik dieser Verfahren bauen wir in Vorlesung 2 vollständig aus — aber merke dir jetzt schon: Hier wird *gerechnet*, nicht nur erzählt.
+Die erste Übung zeigt aber, wohin der Professor praktisch will, und genau das wird *gerechnet*: klassische Kryptografie mit Bleistift und Papier. Du musst die **Caesar-Chiffre** mit **y = (x + k) mod 26** ver- und mit **x = (y − k) mod 26** entschlüsseln können (und dabei sicher mit dem A = 0 … Z = 25-Schema und dem „mod" umgehen); eine **Häufigkeitsanalyse** durchführen, also über den häufigsten deutschen Buchstaben **E** den Caesar-Schlüssel erraten und verstehen, warum längere Texte das leichter machen; eine **spaltenweise Transposition** mit einem Schlüsselwort ver- und entschlüsseln (Spalten alphabetisch nach dem Schlüssel ordnen, dann zeilenweise lesen); und die **Vigenère-Chiffre** per Hand anwenden sowie erklären, warum sie die Häufigkeitsverteilung verschmiert und damit die einfache Analyse aushebelt. Wenn du diese vier Verfahren einmal sauber von Hand gerechnet hast, ist die Übung — und der dazugehörige Klausurteil — geschenkt.
 
 ## Mehr dazu
 
 - **Professor Messer — The CIA Triad** (~5 Min., EN): die drei Schutzziele knapp mit Beispielen. https://www.youtube.com/watch?v=SBcDGb9l6yo
 - **Bruce Schneier — „The Security Mindset"** (Essay, EN): Originalquelle des „Denke wie ein Angreifer"-Prinzips. https://www.schneier.com/blog/archives/2008/03/the_security_mi_1.html
-- **Crash Course Computer Science #33 — Cryptography** (~12 Min., EN): lebendiger Überblick über Verschlüsselung von Caesar bis AES. https://www.youtube.com/watch?v=jhXCTbFnK8o
-- **Code.org — Encryption & Public Keys** (~7 Min., EN): anfängerfreundlich zu Klartext, Schlüssel, symmetrischer Verschlüsselung. https://www.youtube.com/watch?v=ZghMPWGXexs`,
+- **Computerphile — Public Key Cryptography** (~6 Min., EN): warum ein öffentlicher Schlüssel funktionieren kann. https://www.youtube.com/watch?v=GSIDS_lvRv4
+- **Khan Academy — Caesar Cipher** (interaktiv, EN): Shift-Chiffre und Häufigkeitsanalyse zum Ausprobieren. https://www.khanacademy.org/computing/computer-science/cryptography/crypt/v/caesar-cipher
+- **Crash Course Computer Science #33 — Cryptography** (~12 Min., EN): lebendiger Bogen von Caesar bis AES. https://www.youtube.com/watch?v=jhXCTbFnK8o`,
   },
 };
 
@@ -129,69 +256,112 @@ const lecture02: Explanation = {
     de: "Einführung in die Kryptografie: Substitutionschiffren, modulare Arithmetik und Stromchiffren",
   },
   content: {
-    de: `Diese Vorlesung beantwortet zwei Fragen, die untrennbar zusammengehören: Wie verschlüsselt man klassisch — und wie zerbricht man so eine Verschlüsselung wieder? Aus diesem Hin und Her wächst die erste echte Lektion der Kryptografie, und sie ist überraschend: Ein riesiger Schlüsselraum allein macht gar nichts sicher. Auf dem Weg dorthin lernst du außerdem das mathematische Werkzeug kennen, das die gesamte spätere Krypto trägt (modulare Arithmetik), und den schlanksten Verschlüsselungstyp überhaupt — die Stromchiffre, die am Ende nur aus einer einzigen Operation besteht. Lass uns die Geschichte von vorne erzählen.
+    de: `Dieses Kapitel erzählt die Kryptografie als Wettlauf zwischen zwei Lagern: Eine Seite baut eine Geheimschrift, die andere versucht, sie zu zerbrechen. Aus diesem Hin und Her fällt die erste echte Lektion des Faches heraus, und sie ist erstaunlich unbequem — ein riesiger Vorrat an möglichen Schlüsseln macht eine Verschlüsselung noch lange nicht sicher. Auf dem Weg dorthin lernst du das mathematische Werkzeug kennen, das die gesamte spätere Kryptografie trägt: das Rechnen im Kreis, die modulare Arithmetik. Und am Ende steht der schlankste Verschlüsseler überhaupt, die Stromchiffre, die im Kern nur aus einer einzigen Bit-Operation besteht — wunderbar einfach und genau deshalb auch gefährlich leicht zu manipulieren. Lass uns die Geschichte von vorne aufrollen.
 
-## Kerckhoffs' Prinzip: Sicherheit steckt im Schlüssel, nicht im Verfahren
+## Die erste Grundsatzfrage: was darf der Feind wissen?
 
-Eine naheliegende, aber falsche Idee: „Wenn niemand weiß, *wie* ich verschlüssele, ist es sicher." **Kerckhoffs' Prinzip** sagt das Gegenteil: Ein Verfahren muss sicher bleiben, selbst wenn der Angreifer Ver- und Entschlüsselungsalgorithmus vollständig kennt. Geheim ist *nur der Schlüssel*. Warum? Algorithmen sprechen sich herum, werden reverse-engineered, stecken in Hardware. Verlässt sich Sicherheit auf Geheimhaltung des Verfahrens („Security by Obscurity"), ist sie verloren, sobald das Verfahren bekannt wird. Das ist der Grund, warum DES und AES *öffentlich* sind und trotzdem sicher.
+Bevor wir irgendetwas verschlüsseln, müssen wir eine Frage klären, an der sich Anfänger und Profis unterscheiden: Wie viel von unserem Verfahren darf der Angreifer eigentlich kennen, ohne dass es unsicher wird? Die verlockende Anfängerantwort lautet: „Am besten gar nichts — wenn niemand weiß, *wie* ich verschlüssele, kann es auch keiner knacken." Diese Idee hat sogar einen Namen, **Security by Obscurity**, Sicherheit durch Verschleierung, und sie ist fast immer eine Falle.
 
-## Die Substitutionschiffre und wie man sie knackt
+Die richtige Antwort gibt das **Kerckhoffs'sche Prinzip**: Ein kryptografisches Verfahren muss auch dann sicher bleiben, wenn der Angreifer den Ver- und Entschlüsselungsalgorithmus *vollständig* kennt. Das Einzige, was geheim bleiben darf — und muss —, ist der **Schlüssel**. Warum diese strenge Forderung? Weil Algorithmen sich immer herumsprechen: Sie stecken in Software, die man auseinandernehmen kann, in Hardware, die man aufschneiden kann, in Köpfen von Mitarbeitern, die kündigen. Hängt deine Sicherheit an der Geheimhaltung des Verfahrens, dann ist sie in dem Moment verloren, in dem das Verfahren bekannt wird — und dieser Moment kommt mit Sicherheit. Hängt sie dagegen nur am Schlüssel, kannst du den Algorithmus sogar veröffentlichen und die ganze Welt jahrelang daran knabbern lassen. Genau das ist passiert: DES und AES sind komplett öffentlich, jede Zeile ihres Aufbaus ist bekannt — und trotzdem sicher, weil das Geheimnis ausschließlich im Schlüssel sitzt. Das ist auch dieselbe Idee wie das schwächste Glied aus dem ersten Kapitel: Verlass dich nie auf eine Annahme, die jederzeit zusammenbrechen kann.
 
-Die **Substitutionschiffre** (schon in der Antike genutzt) ersetzt jeden Buchstaben durch einen anderen — gemäß einer festen Tabelle (C→U, Y→N, …). Der Schlüssel ist die ganze Tabelle.
+> **Merksatz:** Geheim ist *nur der Schlüssel*, niemals das Verfahren. Ein Algorithmus, der nur sicher ist, solange ihn keiner kennt, ist gar nicht sicher — er hat bloß noch nicht verloren.
 
-**Wie groß ist der Schlüsselraum?** Der erste Buchstabe hat 26 mögliche Bilder, der zweite 25, usw. — also 26! = 26 × 25 × … × 1 ≈ 2^88. Das sind unvorstellbar viele Schlüssel. Trotzdem ist die Chiffre unsicher. Zwei Angriffe zeigen warum:
+## Die Substitutionschiffre — und warum ein riesiger Schlüsselraum nichts nützt
 
-1. **Brute-Force:** alle Schlüssel durchprobieren. Funktioniert, wenn der Schlüsselraum klein ist (siehe Cäsar unten), bei 2^88 aber zu groß.
-2. **Frequenzanalyse:** der eigentliche Killer. Jede Sprache hat charakteristische Buchstabenhäufigkeiten (im Deutschen ist „E" am häufigsten). Eine Substitution lässt diese Häufigkeiten *unangetastet* — sie verschiebt sie nur. Der häufigste Geheimtextbuchstabe ist also wahrscheinlich „E", der zweithäufigste „N", und so weiter. Man rekonstruiert den Klartext, ohne je den Schlüssel zu raten. [Crypto Corner zeigt das Schritt für Schritt](https://crypto.interactive-maths.com/frequency-analysis-breaking-the-code.html).
+Schauen wir uns die älteste Idee der Geheimschrift an, die **Substitutionschiffre**. Sie ersetzt jeden Buchstaben des Alphabets fest durch einen anderen — eine komplette Vertauschungstabelle, etwa C wird zu U, Y wird zu N, B wird zu I, E wird zu D, R wird zu E. Der Schlüssel ist hier nicht eine einzelne Zahl, sondern diese *ganze Tabelle*. Wendet man sie auf jeden Buchstaben an, entsteht ein Geheimtext, der auf den ersten Blick völlig unleserlich wirkt.
 
-> **Eselsbrücke (Frequenzanalyse):** Eine Substitution *tarnt* die Buchstaben, aber nicht ihre **Häufigkeit**. Der Fingerabdruck der Sprache bleibt — und verrät alles. Im Deutschen: **E** ist König, dann **N, I, S, R**.
+Jetzt kommt der entscheidende Gedanke: Wie schwer ist es, das zu knacken? Die naheliegende Idee ist der **Brute-Force-Angriff** — die vollständige Schlüsselsuche, bei der man stur jeden möglichen Schlüssel durchprobiert, bis lesbarer Text herauskommt. Also zählen wir, wie viele Schlüssel es überhaupt gibt, den **Schlüsselraum**. Für den ersten Buchstaben hast du 26 mögliche Bilder, für den zweiten bleiben 25, für den dritten 24, und so weiter. Das ergibt 26 × 25 × 24 × … × 2 × 1, also **26 Fakultät (26!)**, und das sind rund **2^88** Schlüssel — eine Zahl mit 27 Stellen, weit jenseits dessen, was irgendein Computer je durchprobieren könnte.
 
-Daraus die **zwei zentralen Lektionen** der Vorlesung:
+Und hier ist die große Überraschung, die du dir wirklich einprägen solltest: Obwohl dieser Schlüsselraum gigantisch ist, ist die Substitutionschiffre **trivial zu brechen**. Brute-Force scheitert zwar an den 2^88 Schlüsseln — aber es gibt einen viel klügeren Angriff, der den riesigen Schlüsselraum einfach umgeht. Wie groß der Schlüsselraum sein muss, damit Brute-Force aussichtslos ist, fasst man grob so zusammen:
 
-> Ein großer Schlüsselraum bedeutet **nicht** automatisch Sicherheit. Eine gute Chiffre muss die **statistischen Eigenschaften** des Klartextes verbergen.
+| Schlüssellänge | Sicherheit gegen Brute-Force |
+|---|---|
+| 56–64 Bit | nur kurzfristig — in Stunden bis Tagen knackbar |
+| 112–128 Bit | langfristig sicher (Jahrzehnte, solange es keine Quantencomputer gibt) |
+| 256 Bit | langfristig sicher, selbst gegen Quantencomputer |
 
-Die Kryptanalyse insgesamt teilt sich übrigens in klassische, mathematische und Brute-Force-Analyse sowie Implementierungsangriffe und Social Engineering.
+> **Eselsbrücke:** Großer Schlüsselraum ≠ sicher. Die Substitution hat 2^88 Schlüssel und fällt trotzdem in Minuten. Brute-Force ist nur *einer* von vielen Angriffen — und meist nicht der schlauste.
 
-## Modulare Arithmetik: Rechnen „im Kreis"
+## Frequenzanalyse: der Fingerabdruck der Sprache verrät alles
 
-Fast alle Verfahren rechnen auf einer *endlichen* Zahlenmenge — wie eine Uhr, die nach 12 wieder bei 1 anfängt. Formal: a ≡ r (mod m) heißt „m teilt a − r". m ist der **Modul**, r der **Rest**.
+Der Angriff, der die Substitutionschiffre erledigt, heißt **Frequenz- oder Häufigkeitsanalyse**, und sein Grundgedanke ist so einfach wie mächtig. Eine Substitution tarnt zwar die *Identität* jedes Buchstabens — aus E wird vielleicht ein D —, aber sie lässt eine Sache völlig unangetastet: *wie oft* jeder Buchstabe vorkommt. Wenn im deutschen Klartext jeder zwanzigste Buchstabe ein E ist, dann ist im Geheimtext eben jeder zwanzigste Buchstabe das Zeichen, durch das E ersetzt wurde. Die Häufigkeiten wandern mit, sie verschwinden nicht.
 
-Wichtig: Der Rest ist **nicht eindeutig**. 12 ≡ 3 (mod 9), aber auch 12 ≡ 21 ≡ −6 (mod 9). Alle Zahlen mit demselben Rest bilden eine **Restklasse** (… −6, 3, 12, 21 …). Konvention: man nimmt den kleinsten positiven Rest.
+Und jede Sprache hat eine ganz charakteristische Häufigkeitsverteilung, einen statistischen Fingerabdruck. Im Deutschen ist das **E** mit rund **17 %** der mit Abstand häufigste Buchstabe, gefolgt von **N**, **I**, **S** und **R**. Diese Silhouette sieht so aus:
 
-Der praktische Trick, der später (RSA!) Gold wert ist: **Modulo darf man auf Zwischenergebnisse anwenden**, um klein zu rechnen. Beispiel 3^8 mod 7: statt 3^8 = 6561 auszurechnen, nimmt man 3^8 = 81 × 81 ≡ 4 × 4 = 16 ≡ 2 (mod 7). Gleiches Ergebnis, winzige Zahlen.
+![Häufigkeit der Buchstaben in der deutschen Sprache](https://upload.wikimedia.org/wikipedia/commons/e/ea/Buchstabenh%C3%A4ufigkeit_Deutsch.svg "Buchstabenhäufigkeit im Deutschen: E ist mit großem Abstand am häufigsten, gefolgt von N, I, S, R. Dieser Fingerabdruck überlebt jede Substitution.")
 
-### Schritt für Schritt: Cäsar-Chiffre
+Damit knackst du die Chiffre, ohne auch nur einen Schlüssel zu raten: Du zählst, welches Zeichen im Geheimtext am häufigsten auftaucht — das ist mit großer Wahrscheinlichkeit das verschlüsselte E. Das zweithäufigste ist wahrscheinlich N, dann I, und so weiter. Stück für Stück baust du die Vertauschungstabelle rückwärts auf, bis lesbarer Text erscheint. Je länger der Geheimtext, desto verlässlicher funktioniert das, denn mehr Buchstaben liefern mehr Statistik — bei drei Wörtern kann der Zufall die Verteilung noch verzerren, bei drei Seiten passt sie fast perfekt. [Crypto Corner zeigt das Schritt für Schritt an einem echten Text](https://crypto.interactive-maths.com/frequency-analysis-breaking-the-code.html).
 
-Die **Cäsar-Chiffre** ist der Spezialfall der Substitution: jeder Buchstabe wird um eine feste Zahl verschoben (Römer nutzten 3: A→D, B→E, …). Verschlüsseln, modular gedacht:
+Daraus folgen die **zwei zentralen Lektionen** dieses Kapitels, und beide solltest du wörtlich parat haben:
 
-1. Buchstaben in Zahlen umwandeln (A=0, B=1, …, Z=25).
-2. Schlüssel k addieren: y = (x + k) mod 26.
-3. Zurück in Buchstaben.
+> Erstens: Ein großer Schlüsselraum bedeutet **nicht** automatisch, dass ein Verfahren sicher ist. Zweitens: Eine gute Chiffre muss die **statistischen Eigenschaften** des Klartextes verbergen.
 
-![Cäsar-Chiffre mit Verschiebung um 3](https://commons.wikimedia.org/wiki/Special:FilePath/Caesar_cipher_left_shift_of_3.svg "Cäsar-Chiffre: das ganze Alphabet wird um einen festen Betrag verschoben — hier um 3. Der Schlüssel ist genau diese eine Zahl.")
+Genau an dieser zweiten Lektion entscheidet sich, warum manche klassischen Chiffren besser sind als andere. Die **Verschiebe- oder Cäsar-Chiffre** aus dem ersten Kapitel ist der Spezialfall der Substitution mit nur *einer* festen Verschiebung als Schlüssel; sie verschiebt die Häufigkeits-Silhouette bloß um k Stellen und ist deshalb noch leichter zu brechen (ihr Schlüsselraum ist sogar nur 26, da reicht schon Brute-Force in Sekunden). Die **Vigenère-Chiffre**, ebenfalls aus dem ersten Kapitel, verschlüsselt denselben Klartextbuchstaben je nach Position mit *unterschiedlichen* Verschiebungen und *verschmiert* damit die Häufigkeiten — die simple Frequenzanalyse läuft hier ins Leere. Und die **spaltenweise Transposition** ändert die Buchstaben gar nicht, sondern nur ihre Reihenfolge; ihre Häufigkeitsverteilung ist sogar identisch mit der des Klartextes, aber genau das verrät dem Angreifer nichts über den Inhalt. Wenn du diese drei noch einmal in Ruhe von Hand rechnen willst, findest du sie ausführlich im ersten Kapitel — hier ging es um die übergeordnete Einsicht, *warum* Substitution scheitert und Verschmieren hilft.
 
-Wie sicher? Sehr unsicher: Der Schlüsselraum ist nur **26** — Brute-Force in Sekunden, und Frequenzanalyse geht ohnehin.
+Übrigens ist die Frequenzanalyse nur ein Teil der **Kryptanalyse** insgesamt. Man unterscheidet die klassische Kryptanalyse (Statistik wie hier), die mathematische Kryptanalyse (Schwächen im mathematischen Aufbau), den reinen Brute-Force-Angriff, dazu Implementierungsangriffe (die nicht das Verfahren, sondern seine konkrete Umsetzung attackieren) und schließlich Social Engineering (den Menschen überlisten). Den ganzen Werkzeugkasten wirst du im Lauf des Semesters Stück für Stück öffnen.
 
-> **Eselsbrücke (Cäsar):** Substitution mit nur *einer Zahl* als Schlüssel — **y = (x + k) mod 26**. Bei Cäsar selbst war k = 3. Genau diese Formel mit kleinem k taucht in der Klausur als Mini-Rechenaufgabe auf.
+## Modulare Arithmetik: das Rechnen, das die ganze Kryptografie trägt
 
-## Zwei klassische Chiffren, die das Übungsblatt wirklich abfragt: Transposition & Vigenère
+Jetzt wird es kurz mathematisch, aber keine Sorge — du benutzt diese Mathematik längst jeden Tag. Fast alle Verschlüsselungsverfahren, die symmetrischen wie die asymmetrischen, rechnen nicht auf den unendlich vielen ganzen Zahlen, sondern auf einer *endlichen* Menge. Das beste Alltagsbild dafür ist eine Uhr: Auf dem Zifferblatt geht es nach der 12 nicht weiter zu 13, sondern wieder zurück zur 1. Die Zahlen laufen im Kreis. Genau das ist **modulare Arithmetik** — Rechnen, bei dem man nach Erreichen einer festen Grenze wieder von vorne beginnt.
 
-Hier ein Hinweis, der dir Punkte rettet: Das erste Übungsblatt geht über die Folien hinaus und lässt dich zwei weitere klassische Verfahren *per Hand* rechnen. Es lohnt sich also, sie kurz zu verstehen.
+![Modulare Arithmetik als Zifferblatt](https://upload.wikimedia.org/wikipedia/commons/a/a4/Clock_group.svg "Rechnen modulo 12 wie auf einer Uhr: nach der höchsten Zahl beginnt man wieder bei null. Genau dieses Im-Kreis-Rechnen trägt die gesamte Kryptografie.")
 
-Die **spaltenweise Transposition** ist grundverschieden von der Substitution: Sie *ersetzt* keine Buchstaben, sie *vertauscht ihre Reihenfolge*. Du schreibst den Klartext zeilenweise in so viele Spalten, wie das Schlüsselwort Buchstaben hat, und liest die Spalten dann in der alphabetischen Reihenfolge der Schlüsselbuchstaben wieder aus. Beispiel mit Schlüssel **HAL** und Klartext „Beispiele": Du füllst drei Spalten (B-E-I / S-P-I / E-L-E). Sortierst du H, A, L alphabetisch zu A, H, L, dann kommt die A-Spalte (die zweite) zuerst, dann die H-Spalte (die erste), dann die L-Spalte (die dritte) — heraus kommt „EBIPSILEE". Zum Entschlüsseln gehst du den Weg rückwärts: Spaltenlängen bestimmen, Buchstaben spaltenweise zurücksortieren. (Die antike Skytale, ein Lederstreifen um einen Stab gewickelt, ist übrigens dieselbe Idee.)
+Etwas formaler schreibt man **a ≡ r (mod m)** und liest das als „a ist kongruent zu r modulo m". Es bedeutet schlicht: m teilt die Differenz a − r ohne Rest. Dabei heißt **m** der **Modul** und **r** der **Rest**. Bei einer Uhr ist m = 12; sagst du „in 100 Stunden", rechnest du 100 mod 12 und bekommst den Rest 4, also vier Stunden weiter auf dem Zifferblatt.
 
-Die **Vigenère-Chiffre** ist die clevere Erweiterung von Cäsar gegen die Frequenzanalyse: Statt *einer* festen Verschiebung benutzt sie ein ganzes **Schlüsselwort**, dessen Buchstaben der Reihe nach die Verschiebung vorgeben — der erste Klartextbuchstabe wird mit dem ersten Schlüsselbuchstaben verschoben, der zweite mit dem zweiten, und ist das Schlüsselwort zu Ende, fängt es wieder von vorne an. Mit Schlüssel „SICHER" wird der 1. Buchstabe also um S (=18) verschoben, der 2. um I (=8), und so weiter. Der Trick dahinter: Weil derselbe Klartextbuchstabe je nach Position verschieden verschlüsselt wird, *verschmiert* Vigenère die Buchstabenhäufigkeiten — die simple Frequenzanalyse aus dem letzten Abschnitt läuft ins Leere. Das macht Vigenère zu einer **polyalphabetischen** Chiffre (mehrere Alphabete) im Gegensatz zu Cäsars *einem* Alphabet.
+Ein Punkt verwirrt am Anfang fast jeden, also halte ihn bewusst fest: **Der Rest ist nicht eindeutig.** Es gibt zu jeder Zahl viele gültige Reste. So gilt zum Beispiel 12 ≡ 3 (mod 9), aber genauso 12 ≡ 21 (mod 9) und sogar 12 ≡ −6 (mod 9) — denn 9 teilt sowohl 12 − 3 als auch 12 − 21 als auch 12 − (−6). Alle Zahlen, die denselben Rest liefern, bilden zusammen eine **Restklasse**: Für unser Beispiel ist das die Menge …, −6, 3, 12, 21, 30, … . Damit man sich auf eine Schreibweise einigt, gilt die **Konvention**, stets den kleinsten positiven Rest zu wählen — hier also die 3.
 
-## Stromchiffren: Verschlüsseln mit XOR
+Warum ist das für die Kryptografie Gold wert? Weil alle Zahlen einer Restklasse sich gleich verhalten, darf man **die Modulo-Reduktion schon auf Zwischenergebnisse anwenden** und so mit winzigen Zahlen rechnen, statt mit astronomisch großen. Diese eine Technik ist später bei RSA der Unterschied zwischen „läuft in Millisekunden" und „läuft nie".
 
-Jetzt die Trennung, die du dir merken musst: **Stromchiffren** verschlüsseln Bit für Bit, **Blockchiffren** (DES/AES, ab Vorlesung 3) ganze Blöcke.
+### Schritt für Schritt: clever modulo rechnen
 
-Eine Stromchiffre erzeugt einen **Schlüsselstrom** s und verknüpft jedes Klartextbit damit per Addition modulo 2:
+Nehmen wir die Aufgabe **3^8 mod 7** (drei hoch acht, modulo sieben). Der naive Weg wäre, erst 3^8 = 6561 auszurechnen und dann durch 7 zu teilen — schon bei diesen kleinen Zahlen unhandlich, bei kryptografischen Größen unmöglich. Der clevere Weg reduziert unterwegs:
 
-- Verschlüsselung: y_i = x_i + s_i (mod 2)
-- Entschlüsselung: x_i = y_i + s_i (mod 2)
+- Zerlege die Potenz: 3^8 = 3^4 × 3^4.
+- Rechne 3^4 = 81. Reduziere sofort: 81 = 11 × 7 + 4, also 81 ≡ 4 (mod 7).
+- Setze das reduzierte Zwischenergebnis ein: 3^8 ≡ 4 × 4 = 16 (mod 7).
+- Reduziere erneut: 16 = 2 × 7 + 2, also 16 ≡ 2 (mod 7).
 
-Addition modulo 2 ist **XOR** (exklusives Oder). XOR eignet sich perfekt, weil es **ausbalanciert** ist: bei zufälligem s ist y mit je 50 % 0 oder 1.
+Ergebnis: **3^8 ≡ 2 (mod 7)** — und du hast nie mit einer Zahl größer als 81 hantiert. Genau dieses „nach jedem Schritt klein machen" ist die Lektion, die du dir merken sollst.
+
+> **Eselsbrücke:** Modulo ist eine Uhr — nach m fängt alles wieder bei 0 an. Und beim Potenzieren gilt: *erst reduzieren, dann weiterrechnen*, damit die Zahlen klein bleiben.
+
+## Bits und Binärzahlen: die Sprache der Maschine
+
+Damit die nächste Chiffre Sinn ergibt, brauchen wir noch eine zweite Rechen-Grundlage: das Binärsystem. Ein Computer kennt nur zwei Ziffern, **0** und **1**, und stellt jede Zahl als Folge solcher Bits dar. Das funktioniert genau wie unser gewohntes Dezimalsystem, nur mit der Basis 2 statt 10: Jede Stelle steht für eine Zweierpotenz. Die Binärzahl 1011 bedeutet also 1×2^3 + 0×2^2 + 1×2^1 + 1×2^0.
+
+### Schritt für Schritt: binär ↔ dezimal und Binäraddition
+
+Erst **binär nach dezimal**. Du multiplizierst jede Stelle mit ihrer Zweierpotenz und addierst: 1011 = 1×8 + 0×4 + 1×2 + 1×1 = 8 + 2 + 1 = **11**. Die Binärzahl 1011 ist also die dezimale 11.
+
+Umgekehrt **dezimal nach binär** über fortgesetzte Division durch 2, bei der man sich die Reste merkt. Für die 13:
+
+- 13 : 2 = 6 Rest **1**
+- 6 : 2 = 3 Rest **0**
+- 3 : 2 = 1 Rest **1**
+- 1 : 2 = 0 Rest **1**
+
+Die Reste von unten nach oben gelesen ergeben **1101** — und Probe: 1×8 + 1×4 + 0×2 + 1×1 = 13. Stimmt.
+
+Und schließlich die **Binäraddition**, die genauso geht wie schriftliches Addieren im Dezimalen, nur dass schon 1 + 1 = 10 einen Übertrag erzeugt (denn binär gibt es keine Ziffer 2). Addieren wir 10101 und 11110:
+
+- ganz rechts: 1 + 0 = 1
+- nächste Stelle: 0 + 1 = 1
+- nächste: 1 + 1 = 10 → schreibe 0, Übertrag 1
+- nächste: 0 + 1 + Übertrag 1 = 10 → schreibe 0, Übertrag 1
+- nächste: 1 + 1 + Übertrag 1 = 11 → schreibe 1, Übertrag 1
+- der letzte Übertrag wandert nach vorne: 1
+
+Ergebnis: **110011**. Probe im Dezimalen: 10101 = 21, 11110 = 30, und 110011 = 32 + 16 + 2 + 1 = 51 = 21 + 30. Passt.
+
+## Stromchiffren: verschlüsseln Bit für Bit mit XOR
+
+Jetzt zur schlanksten Chiffre überhaupt. Zuerst die große Einteilung, die du sicher beherrschen musst: **Stromchiffren** verschlüsseln eine Nachricht **Bit für Bit**, während **Blockchiffren** (DES und AES, die ab dem nächsten Kapitel kommen) immer ganze Blöcke von vielen Bits auf einmal verarbeiten.
+
+Eine Stromchiffre erzeugt aus dem Schlüssel einen langen **Schlüsselstrom** s — eine Folge möglichst zufälliger Bits — und verknüpft jedes Klartextbit mit dem passenden Schlüsselstrombit durch Addition modulo 2. Verschlüsselung heißt dann **y_i = (x_i + s_i) mod 2** und Entschlüsselung **x_i = (y_i + s_i) mod 2**. Diese Addition modulo 2 hat einen berühmten Namen: Sie ist das **XOR**, das exklusive Oder, geschrieben als ⊕.
+
+![Das Schaltsymbol des XOR-Gatters](https://upload.wikimedia.org/wikipedia/commons/1/17/XOR_ANSI_Labelled.svg "Das XOR-Gatter: Ausgang 1 genau dann, wenn die beiden Eingänge verschieden sind. Es ist nichts anderes als die Addition modulo 2.")
+
+XOR gibt genau dann eine 1 aus, wenn die beiden Eingänge *verschieden* sind, und eine 0, wenn sie gleich sind. Für die Kryptografie ist es ideal, weil es perfekt **ausbalanciert** ist: Ist das Schlüsselstrombit zufällig, dann ist auch das Chiffratbit mit jeweils 50 % Wahrscheinlichkeit 0 oder 1 — der Geheimtext verrät statistisch nichts. Die vollständige Wahrheitstabelle:
 
 | x | s | y = x ⊕ s |
 |---|---|---|
@@ -200,60 +370,83 @@ Addition modulo 2 ist **XOR** (exklusives Oder). XOR eignet sich perfekt, weil e
 | 1 | 0 | 1 |
 | 1 | 1 | 0 |
 
-Schön daran: dasselbe XOR mit s macht die Verschlüsselung wieder rückgängig (y ⊕ s = x). Beispiel aus der Praxis: A5/1 in der GSM-Mobilfunkverschlüsselung.
+Das Schönste daran ist die Symmetrie: Dieselbe XOR-Operation mit demselben Schlüsselstrom macht die Verschlüsselung wieder rückgängig, denn y ⊕ s = (x ⊕ s) ⊕ s = x. Ver- und Entschlüsseln sind also exakt dieselbe Rechnung.
 
-Genau diese Einfachheit hat aber eine gefährliche Kehrseite, die das Übungsblatt liebt: die **Formbarkeit (Malleability)**. Weil das Chiffrat einfach „Klartext XOR Schlüsselstrom" ist, kann ein Angreifer das Chiffrat *gezielt* verändern, *ohne den Klartext zu kennen*. Kippt er im Chiffrat das Bit an Position i (XOR mit 1), dann kippt nach dem Entschlüsseln genau das Klartextbit an Position i mit — der Schlüsselstrom fällt bei der Rechnung heraus. Stell dir vor, ein Kontostand wird als Stromchiffre übertragen: Der Angreifer weiß nicht, welche Zahl drinsteht, aber er kann durch das Kippen der richtigen Bits aus einer kleinen Zahl eine riesige machen. Oder, wenn er den Klartext an einer Stelle *kennt* (known-plaintext), etwa den Buchstaben „m": Dann ist s = y ⊕ „m", und er kann das Chiffrat so umbauen, dass dort plötzlich ein „p" steht. Diese Schwäche ist der Grund, warum man Verschlüsselung in der Praxis immer mit einem **Integritätsschutz** (MAC, Vorlesung 6) kombiniert — Verschlüsselung allein garantiert eben *nicht*, dass die Nachricht unverändert ankommt.
+### Schritt für Schritt: eine Stromchiffre von Hand
 
-> **Eselsbrücke (Bit-Flip):** Bei einer Stromchiffre gilt: **Bit im Chiffrat kippen = dasselbe Bit im Klartext kippen.** Der Angreifer braucht den Klartext nicht zu kennen, um ihn gezielt zu manipulieren. Vertraulichkeit ≠ Integrität.
+Verschlüsseln wir den Klartext **x = 1011** mit dem Schlüsselstrom **s = 1101**, Bit für Bit per XOR:
+
+- 1 ⊕ 1 = 0
+- 0 ⊕ 1 = 1
+- 1 ⊕ 0 = 1
+- 1 ⊕ 1 = 0
+
+Das Chiffrat ist **y = 0110**. Zur Probe entschlüsseln wir mit demselben s zurück: 0 ⊕ 1 = 1, 1 ⊕ 1 = 0, 1 ⊕ 0 = 1, 0 ⊕ 1 = 1 — also wieder **1011**, der ursprüngliche Klartext. In der Praxis steckt genau so eine Stromchiffre zum Beispiel im Mobilfunkstandard GSM, dort heißt sie A5/1.
+
+## Die gefährliche Kehrseite: Formbarkeit und der Bit-Flip-Angriff
+
+Diese betörende Einfachheit hat eine Schattenseite, die in Übungen und Klausuren immer wieder auftaucht: die **Formbarkeit (Malleability)**. Weil das Chiffrat nichts anderes ist als „Klartext XOR Schlüsselstrom", kann ein Angreifer das Chiffrat **gezielt verändern, ohne den Klartext oder den Schlüssel zu kennen**. Der Grund steckt in der Algebra des XOR.
+
+### Schritt für Schritt: ein Bit-Flip-Angriff
+
+Stell dir vor, Oskar fängt das Chiffrat y ab und kippt darin ein einzelnes Bit an Position i, indem er es mit 1 XOR-t. Was passiert beim Entschlüsseln? Bob rechnet x' = (y ⊕ 1) ⊕ s an dieser Stelle. Umsortiert ist das (y ⊕ s) ⊕ 1 = x ⊕ 1 — der Schlüsselstrom s fällt sauber heraus, und genau das Klartextbit an Position i ist umgekippt. **Ein gekipptes Bit im Chiffrat = dasselbe gekippte Bit im Klartext.** Oskar muss überhaupt nicht wissen, welche Zahl im Klartext steht; überträgt jemand etwa einen Kontostand, kann der Angreifer durch das Kippen der richtigen höherwertigen Bits aus einer kleinen Zahl eine riesige machen. Kennt er den Klartext an einer Stelle sogar (ein known-plaintext-Szenario, etwa weil dort ein „m" steht), dann berechnet er den Schlüsselstrom direkt als s = y ⊕ „m" und baut das Chiffrat so um, dass an dieser Stelle plötzlich ein „p" steht.
+
+Die Lehre daraus ist eine der wichtigsten des ganzen Kurses: Verschlüsselung schützt die **Vertraulichkeit**, aber sie garantiert **nicht** die **Integrität**. Eine Nachricht kann verschlüsselt *und* trotzdem unbemerkt manipuliert sein. Deshalb kombiniert man Verschlüsselung in der Praxis immer mit einem eigenen Integritätsschutz, einem MAC — aber das ist die Geschichte eines späteren Kapitels.
+
+> **Eselsbrücke:** Bei der Stromchiffre gilt — *Bit im Chiffrat kippen = dasselbe Bit im Klartext kippt*. Der Angreifer braucht den Klartext nicht zu kennen, um ihn zu verändern. Vertraulichkeit ≠ Integrität.
 
 ## Zufall ist alles: RNGs und das One-Time-Pad
 
-Die ganze Sicherheit einer Stromchiffre hängt am **Schlüsselstrom**. Drei Typen von Zufallsgeneratoren:
+Wenn das Chiffrat nur so gut versteckt wie der Schlüsselstrom zufällig ist, dann hängt die ganze Sicherheit einer Stromchiffre an *einer* Frage: Woher kommt der Zufall? Man unterscheidet drei Sorten von Zufallsgeneratoren, und der Unterschied ist klausurrelevant. Ein **TRNG**, ein True Random Number Generator, schöpft echten physikalischen Zufall aus der Natur, etwa aus elektronischem Rauschen — unvorhersagbar, aber langsam und aufwendig. Ein **PRNG**, ein Pseudo Random Number Generator, berechnet seine Zahlenfolge aus einem Startwert, dem Seed; das ist schnell, aber die Folge ist reproduzierbar und damit grundsätzlich *vorhersagbar*. Und ein **CSPRNG**, ein Cryptographically Secure PRNG, ist ein PRNG, dessen Ausgabe sich nachweislich *nicht* vorhersagen lässt — und nur das ist gut genug für die Kryptografie.
 
-- **TRNG** (True RNG): echter physikalischer Zufall (z. B. Rauschen).
-- **PRNG** (Pseudo-RNG): aus einem Startwert (Seed) berechnet — reproduzierbar, *vorhersagbar*.
-- **CSPRNG** (Cryptographically Secure PRNG): wie PRNG, aber **nicht vorhersagbar** — das, was Krypto braucht.
+Das theoretische Ideal der Stromchiffren ist das **One-Time-Pad (OTP)**. Sein Schlüsselstrom wird mit einem echten TRNG erzeugt, ist nur den legitimen Teilnehmern bekannt und wird **nur ein einziges Mal** verwendet. Unter diesen Bedingungen ist das OTP **beweisbar sicher** — und zwar informationstheoretisch, das heißt: Keine Rechenleistung der Welt, kein noch so guter Computer und kein Quantencomputer kann es brechen, weil der Geheimtext bei einem wirklich zufälligen Schlüssel schlicht *jeden* Klartext gleich wahrscheinlich macht.
 
-Das theoretische Ideal ist das **One-Time-Pad (OTP)**: Schlüsselstrom per TRNG erzeugt, nur den Teilnehmern bekannt, **nur einmal** verwendet. Das OTP ist *beweisbar sicher* (informationstheoretisch — keine Rechenleistung der Welt bricht es) — und wird trotzdem kaum genutzt. Der Grund ist das größte Problem: Der Schlüssel muss **genauso lang** sein wie die Nachricht und darf sich nie wiederholen. In der Praxis nutzt man darum einen CSPRNG mit einem kurzen geheimen Schlüssel k als Seed; effiziente Hardware-Stromchiffren bauen auf linear rückgekoppelten Schieberegistern (LFSR) wie A5/1. Die [Wikipedia-Seite zum One-Time-Pad](https://en.wikipedia.org/wiki/One-time_pad) fasst Beweis und Bedingungen kompakt zusammen.
+![Schema des One-Time-Pads](https://upload.wikimedia.org/wikipedia/commons/6/60/One-time_pad.svg "One-Time-Pad: Klartext XOR ein echt zufälliger, gleich langer, nur einmal verwendeter Schlüsselstrom ergibt einen beweisbar sicheren Geheimtext.")
 
-> **Eselsbrücke (OTP — die 3 Bedingungen):** **Z-E-L** — der Schlüssel ist **Z**ufällig (echter Zufall), **E**inmalig (nie wiederverwendet) und **L**ang (mindestens so lang wie die Nachricht). Fehlt eine davon, fällt der Beweis.
+Wenn es beweisbar sicher ist — warum benutzt es dann fast niemand? Weil seine drei Bedingungen in der Praxis brutal teuer sind, vor allem die letzte: Der Schlüssel muss **genauso lang** sein wie die Nachricht selbst und darf sich nie wiederholen. Wer ein Gigabyte sicher verschicken will, muss vorher ein Gigabyte echten Zufallsschlüssel sicher austauschen — und hätte dann das ursprüngliche Problem (etwas Geheimes sicher übertragen) nur verschoben. Deshalb behilft man sich in der Praxis: Man nimmt einen kurzen geheimen Schlüssel k als Seed für einen CSPRNG und lässt diesen einen langen Schlüsselstrom erzeugen. Für effiziente Hardware baut man solche Stromchiffren gern aus linear rückgekoppelten Schieberegistern (LFSR), wie es A5/1 und A5/2 im GSM-Mobilfunk tun. Die [Wikipedia-Seite zum One-Time-Pad](https://en.wikipedia.org/wiki/One-time_pad) fasst Beweis und Bedingungen kompakt zusammen.
+
+> **Eselsbrücke (OTP — die drei Bedingungen):** **Z-E-L** — der Schlüssel ist **Z**ufällig (echter Zufall), **E**inmalig (nie ein zweites Mal benutzt) und **L**ang (mindestens so lang wie die Nachricht). Fehlt nur eine dieser drei, bricht der Sicherheitsbeweis zusammen.
 
 ## Auf den Punkt
 
-Die Kurzfassung der Geschichte: Sicherheit darf nur am Schlüssel hängen, nie an der Geheimhaltung des Verfahrens (Kerckhoffs). Die klassische Substitution hat zwar einen gewaltigen Schlüsselraum (26! ≈ 2^88), fällt aber trivial durch Frequenzanalyse — denn sie tarnt die Buchstaben, nicht ihre Häufigkeit. Daraus die Kernlektion: großer Schlüsselraum ≠ sicher; eine gute Chiffre muss die Statistik des Klartextes verbergen (das tut Vigenère mit mehreren Alphabeten, Transposition durch Umstellen statt Ersetzen). Das Rechen-Fundament ist die modulare Arithmetik (Rechnen „im Kreis", Reduktion auf Zwischenergebnisse). Und die schlankste Chiffre ist die Stromchiffre: Klartext XOR Schlüsselstrom — perfekt sicher als One-Time-Pad (zufällig, einmalig, lang), aber formbar, weshalb sie allein keine Integrität garantiert.
+Die Kurzfassung der ganzen Geschichte: Sicherheit darf nur am Schlüssel hängen, nie an der Geheimhaltung des Verfahrens — das ist **Kerckhoffs' Prinzip**. Die klassische **Substitutionschiffre** hat zwar einen gewaltigen Schlüsselraum (26! ≈ 2^88), fällt aber trivial durch **Frequenzanalyse**, weil sie die Buchstaben tarnt, nicht ihre Häufigkeit. Daraus die zwei Kernlektionen: großer Schlüsselraum ≠ sicher, und eine gute Chiffre muss die **Statistik** des Klartextes verbergen (das schafft Vigenère durch mehrere Alphabete, Transposition durch Umstellen statt Ersetzen). Das Rechen-Fundament ist die **modulare Arithmetik** — Rechnen im Kreis, Reduktion schon auf Zwischenergebnisse — ergänzt um das **Binärsystem**. Die schlankste Chiffre ist die **Stromchiffre**: Klartext XOR Schlüsselstrom, ver- und entschlüsseln mit derselben Operation. Als **One-Time-Pad** (zufällig, einmalig, lang) ist sie beweisbar sicher, aber wegen der Schlüssellänge unpraktisch — und weil sie **formbar** ist (Bit-Flip!), garantiert sie allein keine Integrität.
 
 ## Begriffe & Notation
 
 | Begriff | Bedeutung |
 |---|---|
 | **Kerckhoffs' Prinzip** | nur der Schlüssel ist geheim, nicht der Algorithmus |
-| **Substitutionschiffre** | jeder Buchstabe wird ersetzt; Schlüssel = Tabelle |
-| **Cäsar-Chiffre** | Substitution mit fester Verschiebung; y = (x+k) mod 26 |
-| **Brute-Force** | alle Schlüssel durchprobieren |
-| **Frequenzanalyse** | Buchstabenhäufigkeiten ausnutzen |
-| **a ≡ r (mod m)** | m teilt a − r; r ist der Rest |
-| **Restklasse** | alle Zahlen mit gleichem Rest |
+| **Security by Obscurity** | (falsche) Sicherheit allein durch Verschleierung des Verfahrens |
+| **Substitutionschiffre** | jeder Buchstabe wird ersetzt; Schlüssel = ganze Tabelle |
+| **Brute-Force** | alle Schlüssel des Schlüsselraums durchprobieren |
+| **Frequenzanalyse** | Buchstabenhäufigkeiten ausnutzen, um Substitution zu brechen |
+| **a ≡ r (mod m)** | m teilt a − r; m ist der Modul, r der Rest |
+| **Restklasse** | alle Zahlen mit demselben Rest modulo m |
 | **Stromchiffre** | Bit-für-Bit-Verschlüsselung per XOR |
-| **XOR (⊕)** | Addition modulo 2 |
-| **TRNG / PRNG / CSPRNG** | echter / pseudo- / krypto-sicherer Zufall |
-| **One-Time-Pad** | beweisbar sichere Stromchiffre, Schlüssel so lang wie Nachricht |
+| **Blockchiffre** | verschlüsselt ganze Blöcke (DES/AES) |
+| **XOR (⊕)** | exklusives Oder = Addition modulo 2 |
+| **TRNG / PRNG / CSPRNG** | echter / pseudozufälliger / krypto-sicherer Generator |
+| **One-Time-Pad (OTP)** | beweisbar sichere Stromchiffre; Schlüssel zufällig, einmalig, lang |
+| **Malleability** | Formbarkeit: Chiffrat gezielt änderbar ohne Schlüsselkenntnis |
 
 ## Typische Fallen
 
-- **Großer Schlüsselraum = sicher? Nein.** 26! ist gewaltig, die Substitution fällt trotzdem durch Frequenzanalyse. Das ist *die* Kernaussage der Vorlesung.
-- **„Geheimer Algorithmus = mehr Sicherheit"** verstößt gegen Kerckhoffs. Geheim ist nur k.
-- **Rest ist eindeutig? Nein.** Es gibt unendlich viele gültige Reste (eine Restklasse); per Konvention der kleinste positive.
-- **PRNG ≠ CSPRNG.** Ein normaler PRNG ist vorhersagbar und damit unsicher für Krypto.
-- **OTP ist sicher, aber unpraktisch** — wegen Schlüssellänge und Einmaligkeit, nicht weil es „schwach" wäre.
+- **Großer Schlüsselraum = sicher? Nein.** 26! ist gewaltig, die Substitution fällt trotzdem durch Frequenzanalyse. Das ist *die* zentrale Aussage des Kapitels.
+- **Geheimer Algorithmus = mehr Sicherheit? Nein.** Das verstößt gegen Kerckhoffs. Geheim ist ausschließlich der Schlüssel.
+- **Der Rest ist eindeutig? Nein.** Zu jeder Zahl gehört eine ganze Restklasse möglicher Reste; per Konvention nimmt man den kleinsten positiven.
+- **PRNG ist sicher genug? Nein.** Ein gewöhnlicher PRNG ist vorhersagbar; für Kryptografie braucht es einen CSPRNG.
+- **Verschlüsselung = Integrität? Nein.** Eine Stromchiffre ist formbar — ein Bit-Flip im Chiffrat kippt gezielt das Klartextbit. Vertraulichkeit und Integrität sind zwei verschiedene Ziele.
+- **OTP ist schwach, weil es kaum benutzt wird? Nein.** Es ist beweisbar sicher; unpraktisch ist nur die Schlüssellänge und die Einmaligkeit.
 
 ## Klausur-Fokus
 
-Das Übungsblatt zu diesem Thema ist fast reine **Rechnerei per Hand** — und genau so kommt es in der Klausur. Du solltest die **Cäsar-Chiffre** mit y = (x + k) mod 26 sicher ver- und entschlüsseln und ebenso die **Vigenère-Chiffre** mit einem Schlüsselwort (Verschiebung pro Buchstabe, zyklisch) sowie die **spaltenweise Transposition** mit einem Schlüsselwort (Spalten alphabetisch umsortieren) — beide vorwärts *und* rückwärts. Du musst eine **Häufigkeitsanalyse** mit der deutschen Verteilung (E ≈ 17 %, dann N, I, S, R) durchführen und erklären, warum sie Substitution bricht, Vigenère aber nicht. Beim **One-Time-Pad / Vernam** wirst du den **Schlüsselraum zählen** (für Länge n gibt es 26^n Schlüssel) und daraus eine **Brute-Force-Dauer** ausrechnen (Schlüsselzahl × Operationen ÷ Rechenleistung). Und ganz wichtig, weil es immer wieder drankommt: die **Formbarkeit der Stromchiffre** erklären und einen konkreten **Bit-Flip-Angriff** durchführen (Bit im Chiffrat kippen → gleiches Klartextbit kippt; bei bekanntem Klartext s = y ⊕ x berechnen und gezielt umschreiben). Dazu die Konzepte sicher im Griff: **Kerckhoffs**, **modulo** rechnen (inkl. Reduktion auf Zwischenergebnisse wie 3^8 mod 7), die **XOR-Tabelle** und die drei **OTP-Bedingungen** (Z-E-L).
+Das erste Übungsblatt zu diesem Stoff ist fast reine **Rechnerei von Hand** — und genau so kommt es in der Klausur. Die vier Handchiffren aus dem ersten Kapitel musst du sicher beherrschen, vorwärts *und* rückwärts: die **Cäsar-Chiffre** mit y = (x + k) mod 26, die **Vigenère-Chiffre** mit einem Schlüsselwort (Verschiebung pro Position, zyklisch) und die **spaltenweise Transposition** (Spalten alphabetisch nach dem Schlüssel umsortieren). Dazu die **Häufigkeitsanalyse** mit der deutschen Verteilung (E ≈ 17 %, dann N, I, S, R) und die Begründung, warum sie Substitution und Cäsar bricht, Vigenère und Transposition aber nicht. Auf der Rechen-Seite solltest du sicher **modulo** rechnen — inklusive der cleveren Reduktion auf Zwischenergebnisse wie bei 3^8 mod 7 — und **zwischen binär und dezimal umrechnen** sowie **binär addieren**. Beim **One-Time-Pad / Vernam** wird gern der **Schlüsselraum gezählt** (für Länge n gibt es 26^n bzw. bei Bits 2^n Schlüssel) und daraus eine **Brute-Force-Dauer** abgeschätzt (Anzahl Schlüssel × Aufwand ÷ Rechenleistung). Und fast sicher drankommt die **Formbarkeit der Stromchiffre**: einen konkreten **Bit-Flip-Angriff** durchführen und bei bekanntem Klartext den Schlüsselstrom als s = y ⊕ x bestimmen. Halte außerdem die Konzepte parat: **Kerckhoffs**, die **XOR-Wahrheitstabelle**, der Unterschied **TRNG / PRNG / CSPRNG** und die drei OTP-Bedingungen **Z-E-L**.
 
 ## Mehr dazu
 
-- **Crypto Corner — Frequency Analysis: Breaking the Code** (Artikel, EN): zeigt genau die Kernaussage — warum Substitution an der Buchstaben-Statistik scheitert. https://crypto.interactive-maths.com/frequency-analysis-breaking-the-code.html
-- **Wikipedia — One-Time Pad** (EN): die vier Bedingungen, der Beweis der perfekten Sicherheit und warum es in der Praxis unpraktisch ist. https://en.wikipedia.org/wiki/One-time_pad
+- **Crypto Corner — Frequency Analysis: Breaking the Code** (Artikel, EN): zeigt genau die Kernaussage, warum Substitution an der Buchstaben-Statistik zerbricht. https://crypto.interactive-maths.com/frequency-analysis-breaking-the-code.html
+- **Khan Academy — Cryptography** (interaktiv, EN): modulare Arithmetik, Substitution und Zufall zum Ausprobieren. https://www.khanacademy.org/computing/computer-science/cryptography
+- **Wikipedia — One-Time Pad** (EN): die Bedingungen, der Beweis der perfekten Sicherheit und warum es praktisch kaum genutzt wird. https://en.wikipedia.org/wiki/One-time_pad
 - **Crash Course Computer Science #33 — Cryptography** (~12 Min., EN): ordnet Substitution, Schlüssel und Stromchiffren historisch ein. https://www.youtube.com/watch?v=jhXCTbFnK8o`,
   },
 };
@@ -265,118 +458,132 @@ const lecture03: Explanation = {
     de: "Symmetrische Kryptografie: der Data Encryption Standard (DES)",
   },
   content: {
-    de: `DES ist die erste „echte" Blockchiffre des Kurses und der Prototyp, an dem man versteht, wie moderne Verschlüsselung überhaupt gebaut ist: Man nimmt zwei erstaunlich einfache Zutaten — Konfusion und Diffusion — und mischt sie viele Runden lang, bis aus dem Klartext heilloser Salat geworden ist. Auf den Folien wirkt das wie ein undurchdringlicher Diagramm-Dschungel; in Wahrheit ist es eine Kette aus vier Ideen, die wir der Reihe nach durchgehen: ein genialer Struktur-Trick (Feistel), ein Innenleben (die f-Funktion), ein Schlüsselfahrplan, und am Ende der Grund, warum DES heute zu schwach geworden ist.
+    de: `Bisher waren unsere Chiffren entweder uralt (Caesar, Vigenère) oder so schlank, dass sie nur aus einer einzigen Bit-Operation bestanden (die Stromchiffre). Jetzt bauen wir die erste *echte* moderne Verschlüsselung — eine **Blockchiffre** namens DES, an der man begreift, wie industrielle Kryptografie überhaupt konstruiert ist. Das Rezept ist überraschend bodenständig: Man nimmt zwei einfache Zutaten, die Claude Shannon **Konfusion** und **Diffusion** nannte, und rührt sie viele Runden lang durcheinander, bis aus dem Klartext heilloser Salat geworden ist. Auf einem Schaubild sieht DES aus wie ein undurchdringlicher Pfeil-und-Kasten-Dschungel, aber dahinter steckt eine Kette aus genau vier Ideen, die wir der Reihe nach auseinandernehmen: ein Struktur-Trick (Feistel), ein Innenleben (die f-Funktion), ein Schlüsselfahrplan und am Ende der Grund, warum DES heute zu schwach geworden ist. Wer diese vier versteht, versteht auch AES, das im nächsten Kapitel kommt — denn es folgt demselben Bauplan.
 
-## Etwas Geschichte (warum 56 Bit?)
+## Etwas Geschichte — und warum ausgerechnet 56 Bit?
 
-1972 schreibt das NBS (heute NIST) einen Standard aus; 1974 liefert IBM den besten Vorschlag — basierend auf einer **Feistel-Chiffre**. Gerücht und Streitpunkt: Die NSA soll Einfluss genommen und die Schlüssellänge auf **56 Bit** reduziert haben (was Brute-Force erleichtert). Ein Verdacht auf eine Hintertür in den S-Boxen hat sich dagegen *nicht* bestätigt — die S-Boxen waren sogar besonders robust gewählt. 1977 wird DES veröffentlicht.
+Die Geschichte erklärt eine Zahl, über die du in der Klausur stolpern wirst. 1972 schrieb die US-Behörde NBS (heute NIST) einen offenen Wettbewerb für einen Verschlüsselungsstandard aus. 1974 lieferte IBM den überzeugendsten Vorschlag, der auf einer **Feistel-Chiffre** beruhte und ursprünglich Blöcke von 64 Bit mit einem **128-Bit-Schlüssel** verschlüsselte. Dann kam die NSA ins Spiel, und zwei Gerüchte ranken sich bis heute darum. Das erste: Die NSA habe darauf gedrängt, die Schlüssellänge auf **56 Bit** zu reduzieren — was einen Brute-Force-Angriff überhaupt erst denkbar macht. Das zweite, schwerwiegendere: In den geheimnisvollen S-Boxen stecke eine absichtliche Hintertür. Dieser zweite Verdacht hat sich nie bestätigt; im Gegenteil, Jahrzehnte später stellte sich heraus, dass die S-Boxen *besonders robust* gegen Angriffe gewählt worden waren, die die Öffentlichkeit damals noch gar nicht kannte. 1977 wurde die Chiffre schließlich als **Data Encryption Standard** veröffentlicht. Merke dir die Spannung zwischen den beiden Zahlen: eingegeben werden 64 Bit, aber wirksam (effektiv) sind nur 56 — und genau diese Verkürzung ist später der Sargnagel von DES.
 
-## Konfusion & Diffusion: die zwei Zutaten jeder guten Blockchiffre
+## Konfusion und Diffusion: die zwei Zutaten jeder Blockchiffre
 
-Claude Shannon hat die beiden Bausteine benannt, aus denen jede sichere Chiffre besteht:
+Bevor wir DES aufschrauben, brauchst du die zwei Begriffe, mit denen Claude Shannon beschrieb, was eine Chiffre eigentlich leisten muss. Der erste ist die **Konfusion**: Sie soll den Zusammenhang zwischen Schlüssel und Chiffrat *verschleiern*, sodass man aus dem Geheimtext nicht auf den Schlüssel zurückrechnen kann. Wenn du ein einziges Schlüsselbit umlegst, soll sich das Chiffrat auf unvorhersehbare Weise verändern. Das typische Werkzeug dafür ist die Substitution — eine Tabelle, die Bitmuster durch andere ersetzt, in DES sind das die S-Boxen.
 
-- **Konfusion** — den Zusammenhang zwischen Schlüssel und Chiffrat *verschleiern*. Beispiel: Substitutionstabellen (S-Boxen). Ändert man ein Schlüsselbit, soll sich das Chiffrat unvorhersehbar ändern.
-- **Diffusion** — den Einfluss *eines* Klartextsymbols auf *viele* Chiffratsymbole *streuen*. Beispiel: Bitpermutationen. Ändert man ein Klartextbit, sollen sich viele Chiffratbits ändern.
+Der zweite Begriff ist die **Diffusion**: Sie soll den Einfluss *eines* Klartextsymbols über *viele* Chiffratsymbole *streuen*. Kippst du ein einziges Klartextbit, sollen sich möglichst viele Chiffratbits mitverändern, sodass jede lokale Struktur des Klartextes über den ganzen Block verschmiert wird. Das typische Werkzeug dafür ist die Permutation — das Umsortieren von Bits.
 
-Moderne Blockchiffren schalten Konfusion und Diffusion in **wiederholten Runden** hintereinander. Genau das macht DES 16-mal.
+Eine einzige Runde Konfusion oder Diffusion reicht nie aus; die Kunst moderner Blockchiffren ist, beide **abwechselnd in vielen Runden hintereinanderzuschalten**, bis sich der Effekt aufschaukelt. DES tut das 16-mal. Behalte die Zuordnung im Kopf, denn sie ist eine klassische Klausurfrage: Konfusion kommt von den S-Boxen, Diffusion von Expansion und Permutation.
+
+> **Eselsbrücke:** **K**onfusion verschleiert den Schlüssel (Substitution, S-Boxen); **D**iffusion verstreut den Klartext (Permutation). „Confusion confuses the *key*, diffusion diffuses the *text*."
 
 ## Die Feistel-Struktur: der geniale Trick
 
-Der 64-Bit-Block wird (nach einer Eingangspermutation IP) in zwei Hälften L_0 und R_0 geteilt. Jede Runde macht nur zwei Dinge:
+Jetzt der eine Einfall, der DES (und Dutzende spätere Chiffren) erst praktikabel macht. Der 64-Bit-Klartextblock durchläuft zuerst eine feste **Eingangspermutation IP**, die die Bits nach einer Tabelle umsortiert, und wird dann in zwei 32-Bit-Hälften zerlegt, eine linke **L₀** und eine rechte **R₀**. Jede der 16 Runden tut anschließend nur zwei Dinge, und die solltest du wirklich auswendig können:
 
-- **L_i = R_{i−1}** (die rechte Hälfte wandert unverändert nach links)
-- **R_i = L_{i−1} ⊕ f(R_{i−1}, k_i)** (die neue rechte Hälfte ist die alte linke, XOR-verknüpft mit dem Ergebnis der f-Funktion)
+Die neue linke Hälfte ist einfach die alte rechte: **Lᵢ = Rᵢ₋₁.** Und die neue rechte Hälfte ist die alte linke, XOR-verknüpft mit dem Ergebnis einer geheimnisvollen Funktion f, die auf die alte rechte Hälfte und den Rundenschlüssel angewandt wird: **Rᵢ = Lᵢ₋₁ ⊕ f(Rᵢ₋₁, kᵢ).** Das gesamte Schaubild von DES besteht aus dieser einen Idee, 16-mal gestapelt; ganz am Ende macht eine Ausgangspermutation **IP⁻¹** die Eingangspermutation wieder rückgängig (es gilt also IP⁻¹(IP(x)) = x), und heraus fällt das Chiffrat y = DESₖ(x).
 
-![Eine Runde der Feistel-Struktur](https://commons.wikimedia.org/wiki/Special:FilePath/Feistel_cipher_diagram_en.svg "Eine Feistel-Runde: die rechte Hälfte geht durch f, wird mit der linken ge-XOR-t, dann werden die Hälften getauscht. Entschlüsseln = dieselbe Struktur rückwärts.")
+![Die Gesamtstruktur von DES: Eingangspermutation, 16 Feistel-Runden, Ausgangspermutation](https://upload.wikimedia.org/wikipedia/commons/6/6a/DES-main-network.png "DES als Ganzes: nach der Eingangspermutation IP folgen 16 Feistel-Runden mit je einem eigenen Rundenschlüssel, am Ende die Ausgangspermutation IP⁻¹.")
 
-Pro Runde wird also **nur eine Hälfte** verschlüsselt — das ist *die* Eigenschaft der Feistel-Struktur. Konfusion und Diffusion stecken komplett in der f-Funktion. Nach 16 Runden folgt die Ausgangspermutation IP⁻¹ (die exakte Umkehrung von IP), und man erhält y = DES_k(x).
+Fällt dir die Schönheit auf? Pro Runde wird **nur eine Hälfte** wirklich verschlüsselt — die rechte wandert unverändert nach links. Konfusion und Diffusion stecken vollständig in der Funktion f. Und jetzt kommt der wahre Geniestreich: Diese Struktur ist **umkehrbar, ohne dass f selbst umkehrbar sein muss.** f darf eine völlig beliebige, nicht invertierbare Funktion sein — die Feistel-Anordnung garantiert trotzdem, dass man aus Lᵢ und Rᵢ die vorherigen Lᵢ₋₁ und Rᵢ₋₁ exakt zurückrechnen kann. Das ist der Grund, warum die Entschlüsselung im Wesentlichen *dieselbe* Operation ist wie die Verschlüsselung.
 
-Warum ist das genial? Weil die Feistel-Struktur **umkehrbar ist, ohne dass f umkehrbar sein muss** — f darf eine beliebige (auch nicht invertierbare) Funktion sein. Dadurch ist die Entschlüsselung im Wesentlichen dieselbe Operation wie die Verschlüsselung. [Computerphile erklärt genau diese Eleganz](https://www.youtube.com/watch?v=FGhj3CGxl8I).
+![Eine einzelne Feistel-Runde](https://upload.wikimedia.org/wikipedia/commons/f/fa/Feistel_cipher_diagram_en.svg "Eine Feistel-Runde: die rechte Hälfte geht durch f und wird mit der linken ge-XOR-t, dann tauschen die Hälften. Genau diese Anordnung ist auch rückwärts berechenbar.")
 
-> **Eselsbrücke (Feistel):** „**rechts geht rein, links wird ge-XOR-t, dann getauscht**". Merke die zwei Zeilen L_i = R_{i−1} und R_i = L_{i−1} ⊕ f(R_{i−1}, k_i) — damit kannst du eine Runde *vorwärts und rückwärts* rechnen, und genau das wird in der Klausur verlangt.
+### Schritt für Schritt: eine Feistel-Runde vor- und rückwärts
 
-## Eine DES-Runde von innen: die f-Funktion
+Rechnen wir das einmal mit Mini-Hälften von je 4 Bit, damit der Mechanismus greifbar wird. Angenommen, nach der Eingangspermutation haben wir **L₀ = 1010** und **R₀ = 0110**, und die f-Funktion liefert für diesen Rundenschlüssel den Wert **f(R₀, k₁) = 1101** (die innere Rechnung tun wir gleich, hier nehmen wir das Ergebnis als gegeben an).
 
-Die f-Funktion bekommt die 32-Bit-Hälfte R_{i−1} und den 48-Bit-Rundenschlüssel k_i. Vier Schritte:
+- Die neue linke Hälfte: **L₁ = R₀ = 0110.**
+- Die neue rechte Hälfte: **R₁ = L₀ ⊕ f(R₀, k₁) = 1010 ⊕ 1101 = 0111.**
 
-1. **Expansion E:** 32 Bit werden auf 48 Bit aufgeweitet (4-Bit-Blöcke → 6 Bit). Erhöht die Diffusion und passt die Länge an k_i an.
-2. **XOR mit dem Rundenschlüssel** k_i.
-3. **S-Boxen:** die 48 Bit werden in acht 6-Bit-Blöcke geteilt; jede S-Box (S1…S8) bildet **6 Bit auf 4 Bit** ab (äußere 2 Bit = Zeile, innere 4 Bit = Spalte). Ergebnis: wieder 32 Bit.
-4. **Permutation P:** verwürfelt die 32 Bit, sodass die Ausgangsbits einer S-Box in der nächsten Runde *mehrere* S-Boxen beeinflussen.
+Nach Runde 1 steht also L₁ = 0110 und R₁ = 0111. Und jetzt die Entschlüsselung, die zeigt, warum f nicht invertierbar sein muss: Aus L₁ kennen wir sofort wieder **R₀ = L₁ = 0110.** Damit können wir f(R₀, k₁) erneut ausrechnen (es ist wieder 1101) und die linke Hälfte zurückgewinnen: **L₀ = R₁ ⊕ f(R₀, k₁) = 0111 ⊕ 1101 = 1010.** Wir sind exakt wieder bei L₀ = 1010, R₀ = 0110 — ohne f jemals umgekehrt zu haben. Genau dieser Trick wird in der Klausur abgefragt.
 
-> **Eselsbrücke (f-Funktion):** **E – X – S – P** = **E**xpansion → **X**OR mit k_i → **S**-Boxen → **P**ermutation. Nur die **S** ist nichtlinear (= Konfusion); E und P liefern die Diffusion.
+> **Eselsbrücke (Feistel):** „rechts geht rein, links wird ge-XOR-t, dann getauscht." Die zwei Zeilen **Lᵢ = Rᵢ₋₁** und **Rᵢ = Lᵢ₋₁ ⊕ f(Rᵢ₋₁, kᵢ)** musst du vorwärts *und* rückwärts rechnen können.
 
-Die **S-Boxen sind der kryptografische Kern** von DES: Sie sind das einzige **nichtlineare** Element (S(a) ⊕ S(b) ≠ S(a ⊕ b)) und liefern die Konfusion. Zusammen mit E und P sorgen sie für den **Avalanche-Effekt**: Spätestens nach **Runde 5** hängt jedes Bit von *jedem* Klartext- und *jedem* Schlüsselbit ab.
+## Das Innenleben: die f-Funktion
+
+Steigen wir in die f-Funktion hinab, denn dort sitzt die eigentliche Kryptografie. f bekommt zwei Dinge: die 32-Bit-Hälfte Rᵢ₋₁ und den 48-Bit-Rundenschlüssel kᵢ. In vier Schritten macht sie daraus 32 neue Bit.
+
+Zuerst die **Expansion E**: Die 32 Eingangsbits werden auf 48 Bit aufgeweitet, indem die sogenannte E-Box jeweils 4-Bit-Gruppen auf 6 Bit streckt (manche Bits werden dabei doppelt verwendet). Das hat zwei Zwecke — es bringt die Länge auf die 48 Bit des Rundenschlüssels, und es erhöht die Diffusion. Im zweiten Schritt wird dieses 48-Bit-Ergebnis per **XOR mit dem Rundenschlüssel kᵢ** verknüpft; das ist die Stelle, an der das Schlüsselgeheimnis überhaupt in die Rechnung eingeht. Im dritten Schritt kommen die **S-Boxen**: Die 48 Bit werden in acht 6-Bit-Häppchen zerschnitten, und jedes läuft durch eine eigene S-Box (S1 bis S8), die aus 6 Bit genau 4 Bit macht — am Ende sind wir wieder bei 32 Bit. Im vierten Schritt verwürfelt eine **Permutation P** diese 32 Bit so, dass die Ausgangsbits einer einzelnen S-Box in der nächsten Runde gleich *mehrere* S-Boxen füttern — das streut den Einfluss weiter.
+
+![Die vier Schritte der f-Funktion: Expansion, XOR mit dem Rundenschlüssel, S-Boxen, Permutation](https://upload.wikimedia.org/wikipedia/commons/a/a3/DES-f-function.png "Die f-Funktion von DES: Expansion E (32→48 Bit), XOR mit dem Rundenschlüssel, acht S-Boxen (je 6→4 Bit) und die Permutation P.")
+
+> **Eselsbrücke (f-Funktion):** **E – X – S – P** = **E**xpansion → **X**OR mit kᵢ → **S**-Boxen → **P**ermutation. Nur das **S** ist nichtlinear und liefert die Konfusion; **E** und **P** liefern die Diffusion.
+
+Die **S-Boxen sind das Herz von DES**, denn sie sind das einzige *nichtlineare* Element der ganzen Chiffre. Nichtlinear heißt: S(a) ⊕ S(b) ist im Allgemeinen *nicht* gleich S(a ⊕ b) — und genau diese Eigenschaft macht es unmöglich, DES durch simple lineare Gleichungen aufzulösen. Zusammen mit Expansion und Permutation erzeugen die S-Boxen den berühmten **Avalanche-Effekt** (Lawineneffekt): Schon nach der fünften Runde hängt jedes einzelne Chiffratbit von *jedem* Klartextbit und *jedem* Schlüsselbit ab. Eine gute S-Box muss dafür mehrere Kriterien erfüllen, die du als Stichworte kennen solltest: **Vollständigkeit** (jedes Ausgabebit hängt von jedem Eingabebit ab), **Avalanche** (das Kippen eines Eingabebits ändert im Mittel die Hälfte der Ausgabebits), **Nichtlinearität** und **Korrelationsimmunität** (aus einem Teil der Bits lässt sich nichts über den Rest schließen).
 
 ### Schritt für Schritt: eine S-Box nachschlagen
 
-Das wird gern abgefragt, also einmal vorgemacht. Eine S-Box bekommt **6 Bit** und liefert **4 Bit**. Der Trick steckt in der Adressierung: Die **äußeren beiden Bits** (das erste und das letzte) bilden die **Zeile** (0–3), die **inneren vier Bits** die **Spalte** (0–15). Nimm die Eingabe **101101** für S-Box 1:
+Das Nachschlagen einer S-Box wird fast immer abgefragt, also machen wir es einmal sauber vor. Eine S-Box bekommt 6 Bit und liefert 4 Bit, und der Trick steckt in der Adressierung: Die **äußeren beiden Bits** — das allererste und das allerletzte — bilden die **Zeilennummer** (0 bis 3), die **inneren vier Bits** die **Spaltennummer** (0 bis 15). Nimm als Beispiel die Eingabe **101101** für die S-Box 1:
 
-1. Äußere Bits = das erste (1) und das letzte (1) → 11 binär = **Zeile 3**.
-2. Innere Bits = die mittleren vier 0110 → **Spalte 6**.
-3. In der offiziellen Tabelle steht S1 in Zeile 3 an Spalte 6 der Wert **1** — als 4-Bit-Ausgabe also **0001**.
+- Äußere Bits: das erste ist 1, das letzte ist 1 → zusammen 11 binär = **Zeile 3**.
+- Innere Bits: die mittleren vier sind 0110 → binär 6 = **Spalte 6**.
+- In der offiziellen Tabelle der S-Box 1 steht in Zeile 3, Spalte 6 der Wert **1** — als 4-Bit-Zahl geschrieben **0001**.
 
-Genau so prüfst du auch die **Nichtlinearität** (eine beliebte Aufgabe): Rechne S(x1), S(x2) und S(x1 ⊕ x2) getrennt aus und zeige, dass S(x1) ⊕ S(x2) ≠ S(x1 ⊕ x2) — wäre die S-Box linear, wären beide Seiten gleich; dass sie es nicht sind, ist der Beweis der Nichtlinearität.
+Die Eingabe 101101 wird von S1 also auf 0001 abgebildet. Beachte, wie verlustreich das ist: Aus 64 möglichen Eingaben werden nur 16 mögliche Ausgaben — viele Eingaben landen auf demselben Ausgang, und genau das macht die S-Box nicht-umkehrbar (was dank Feistel kein Problem ist).
+
+### Schritt für Schritt: Nichtlinearität einer S-Box beweisen
+
+Hier ist die andere beliebte Aufgabe: zeigen, dass eine S-Box nichtlinear ist. Wäre S1 linear, müsste für alle Eingaben S1(x₁) ⊕ S1(x₂) = S1(x₁ ⊕ x₂) gelten. Wir suchen ein Gegenbeispiel mit x₁ = 000000 und x₂ = 000001:
+
+- **S1(000000):** äußere Bits 0 und 0 → Zeile 0; innere 0000 → Spalte 0; Tabellenwert 14 = **1110**.
+- **S1(000001):** äußere Bits 0 und 1 → Zeile 1; innere 0000 → Spalte 0; Tabellenwert 0 = **0000**.
+- **x₁ ⊕ x₂ = 000001**, also S1(x₁ ⊕ x₂) = S1(000001) = **0000**.
+
+Jetzt vergleichen wir: die linke Seite ist S1(x₁) ⊕ S1(x₂) = 1110 ⊕ 0000 = **1110**, die rechte Seite ist S1(x₁ ⊕ x₂) = **0000**. Da 1110 ≠ 0000, ist die Gleichung verletzt — die S-Box ist also **nichtlinear**. Mehr ist für den Beweis nicht nötig: ein einziges Gegenbeispiel genügt.
 
 ## Der Schlüsselfahrplan: woher die 16 Rundenschlüssel kommen
 
-Aus dem 64-Bit-Schlüssel werden die 16 Rundenschlüssel k_i (je 48 Bit) erzeugt:
+Jede der 16 Runden braucht ihren eigenen 48-Bit-Rundenschlüssel kᵢ, und alle werden aus dem einen 64-Bit-Hauptschlüssel erzeugt. Den Anfang macht die **Permuted Choice 1 (PC-1)**: Sie wirft jedes achte Bit weg — das waren ursprünglich Paritätsbits zur Fehlererkennung, daher die Lücke zwischen 64 eingegebenen und 56 wirksamen Bit — und permutiert den Rest auf 56 Bit, die in zwei 28-Bit-Hälften C₀ und D₀ zerfallen. In jeder Runde werden diese beiden Hälften dann **rotiert** (ein Linksrotieren, kein bloßes Schieben): um genau 1 Bit in den Runden 1, 2, 9 und 16, in allen übrigen Runden um 2 Bit. Aus den so verschobenen Hälften wählt die **Permuted Choice 2 (PC-2)** schließlich 48 Bit aus, und das ist der Rundenschlüssel kᵢ.
 
-1. **PC-1** (Permuted Choice 1) wirft jedes 8. Bit weg (das waren Paritätsbits) → 56 Bit, permutiert; aufgeteilt in zwei 28-Bit-Hälften C_0, D_0.
-2. In jeder Runde werden C und D **rotiert** (Left Rotate): um 1 Bit in den Runden 1, 2, 9, 16, sonst um 2 Bit.
-3. **PC-2** (Permuted Choice 2) wählt aus den rotierten Hälften 48 Bit als Rundenschlüssel k_i aus.
+Ein hübsches Detail, das die Entschlüsselung erst möglich macht: Zählt man alle Rotationen zusammen, ergibt sich 4×1 + 12×2 = 28 — also genau eine volle Umdrehung der 28-Bit-Hälften. Deshalb gilt am Ende **C₀ = C₁₆ und D₀ = D₁₆**; der Schlüsselfahrplan schließt sich zum Kreis, und beim Entschlüsseln kann man ihn einfach rückwärts (rechts rotierend) durchlaufen.
 
-Ein Detail, das die Entschlüsselung möglich macht: Die Gesamtzahl der Rotationen ist 4×1 + 12×2 = 28 ⇒ **C_0 = C_16 und D_0 = D_16**. Der Schlüsselfahrplan „schließt sich" also zum Kreis.
+> **Eselsbrücke (Rotationen):** nur **1 Bit** in den Runden **1, 2, 9, 16** — sonst immer **2 Bit**. Vier Einer plus zwölf Zweier ergeben 28 = eine volle Runde, also ist man am Ende wieder am Anfang (C₀ = C₁₆).
 
-> **Eselsbrücke (Rotationen):** nur **1 Bit** in den Runden **1, 2, 9, 16** — sonst immer **2 Bit**. Die vier „Einer" plus zwölf „Zweier" ergeben 28 = volle Runde ⇒ am Ende ist man wieder am Anfang (C_0 = C_16). Ein tafelartiger Durchgang der ganzen Struktur ist [Neso Academy](https://www.youtube.com/watch?v=8l9xAvuGJFo).
+## Entschlüsselung und das Ende von DES
 
-## Entschlüsselung & das Ende von DES
+Dank der Feistel-Struktur ist die **Entschlüsselung dieselbe Operation** wie die Verschlüsselung — man dreht nur den Schlüsselfahrplan um: Die Rundenschlüssel werden in umgekehrter Reihenfolge k₁₆, k₁₅, …, k₁ angewandt, was man durch Rechtsrotieren statt Linksrotieren erreicht. Die erste Entschlüsselungsrunde macht die letzte Verschlüsselungsrunde rückgängig, und so weiter. Diese Symmetrie spart enorm Hardware, denn man braucht nur eine einzige Schaltung für beide Richtungen.
 
-Dank Feistel ist die **Entschlüsselung dieselbe Operation** — nur der Schlüsselfahrplan läuft rückwärts (rechts statt links rotieren), sodass die Rundenschlüssel in umgekehrter Reihenfolge k_16, k_15, …, k_1 verwendet werden.
-
-Abschließende Bewertung:
-
-- **Mathematisch ist DES robust** — keine praktikablen Schwächen, die S-Boxen sind gut gewählt.
-- **Aber der Schlüssel ist zu kurz:** 56 Bit lassen sich heute per Brute-Force in Stunden durchsuchen.
-- **Lösung Triple-DES (3DES):** drei DES-Operationen hintereinander (Encrypt-Decrypt-Encrypt), **112 Bit effektive** Schlüssellänge. Deshalb steckt DES/3DES bis heute z. B. in EC-Karten.
-- **Nachteile:** in Software ineffizient (3DES dreimal langsamer), kleine 64-Bit-Blockgröße, und nicht quantensicher.
+Wie steht es um die Sicherheit? Die ernüchternde Bilanz: **Mathematisch ist DES erstaunlich robust** — trotz jahrzehntelanger Angriffe wurde keine praktikable strukturelle Schwäche gefunden, und die S-Boxen haben sich als hervorragend gewählt erwiesen. Das Problem ist allein der **zu kurze 56-Bit-Schlüssel**: Mit heutiger Hardware lässt sich der Schlüsselraum von 2⁵⁶ in Stunden komplett durchprobieren. Die naheliegende Rettung heißt **Triple-DES (3DES)**: dreimal DES hintereinander im Muster Encrypt–Decrypt–Encrypt, was eine **effektive Schlüssellänge von 112 Bit** ergibt (nicht 168, weil ein Meet-in-the-Middle-Angriff einen Teil der Stärke auffrisst). Genau deshalb steckt DES beziehungsweise 3DES bis heute in EC-Karten und Ausweisdokumenten. Die Nachteile bleiben aber: DES ist in Software langsam (3DES dreimal langsamer), die Blockgröße von nur 64 Bit ist klein, und gegen Quantencomputer ist es ohnehin nicht gewappnet. Genau diese Schwächen motivieren den Nachfolger AES, den wir im nächsten Kapitel bauen.
 
 ## Auf den Punkt
 
-Die Kurzfassung: DES ist eine Blockchiffre mit 64-Bit-Blöcken, 56-Bit-Schlüssel und 16 Runden. Jede Runde mischt die zwei Shannon-Zutaten — Konfusion (Verschleiern des Schlüssel-Chiffrat-Zusammenhangs, via S-Boxen) und Diffusion (Streuen eines Klartextbits auf viele Chiffratbits, via Expansion und Permutation). Der Trick, der alles zusammenhält, ist die Feistel-Struktur: L_i = R_{i−1}, R_i = L_{i−1} ⊕ f(R_{i−1}, k_i) — dadurch ist Entschlüsseln dieselbe Operation, nur der Schlüsselfahrplan läuft rückwärts. Im Inneren der f-Funktion stecken Expansion, XOR mit dem Rundenschlüssel, die nichtlinearen S-Boxen und eine Permutation. Mathematisch ist DES robust, aber der 56-Bit-Schlüssel ist heute per Brute-Force in Stunden zu knacken — deshalb Triple-DES mit 112 Bit effektiver Länge.
+Die Kurzfassung der ganzen Geschichte: DES ist eine **Blockchiffre** mit 64-Bit-Blöcken, 56 wirksamen Schlüssel-Bit und **16 Runden**. Jede Runde mischt die zwei Shannon-Zutaten — **Konfusion** (Schlüssel-Chiffrat-Zusammenhang verschleiern, über die S-Boxen) und **Diffusion** (ein Klartextbit über viele Chiffratbits streuen, über Expansion und Permutation). Zusammengehalten wird alles von der **Feistel-Struktur** Lᵢ = Rᵢ₋₁ und Rᵢ = Lᵢ₋₁ ⊕ f(Rᵢ₋₁, kᵢ), die das Entschlüsseln zur selben Operation macht und es erlaubt, dass f gar nicht umkehrbar ist. Im Inneren der f-Funktion sitzt die Kette **E-X-S-P** (Expansion, XOR mit dem Rundenschlüssel, die nichtlinearen S-Boxen, Permutation), die nach fünf Runden den **Avalanche-Effekt** erzeugt. Der **Schlüsselfahrplan** (PC-1, Rotationen, PC-2) liefert die 16 Rundenschlüssel und schließt sich zum Kreis (C₀ = C₁₆). Mathematisch ist DES robust, aber der Schlüssel ist zu kurz — daher **Triple-DES** mit 112 Bit effektiver Länge.
 
 ## Begriffe & Notation
 
 | Begriff | Bedeutung |
 |---|---|
-| **Blockchiffre** | verschlüsselt feste Blöcke (DES: 64 Bit) |
-| **Konfusion** | Zusammenhang Schlüssel↔Chiffrat verschleiern (S-Boxen) |
-| **Diffusion** | ein Klartextbit auf viele Chiffratbits streuen (Permutation) |
-| **Feistel-Struktur** | L_i = R_{i−1}, R_i = L_{i−1} ⊕ f(R_{i−1}, k_i) |
-| **f-Funktion** | E → XOR k_i → S-Boxen → P |
-| **S-Box** | 6→4 Bit, nichtlinear, kryptografischer Kern |
-| **Avalanche-Effekt** | nach Runde 5 hängt jedes Bit von allem ab |
-| **IP / IP⁻¹** | Eingangs-/Ausgangspermutation (zueinander invers) |
-| **PC-1 / PC-2** | Schlüsselfahrplan: 64→56 Bit / Auswahl 48-Bit-Rundenschlüssel |
-| **Triple-DES** | EDE, 112 Bit effektiv |
+| **Blockchiffre** | verschlüsselt feste Blöcke (DES: 64 Bit) statt einzelner Bits |
+| **Konfusion** | Zusammenhang Schlüssel ↔ Chiffrat verschleiern (S-Boxen) |
+| **Diffusion** | ein Klartextbit auf viele Chiffratbits streuen (Expansion, Permutation) |
+| **Feistel-Struktur** | Lᵢ = Rᵢ₋₁, Rᵢ = Lᵢ₋₁ ⊕ f(Rᵢ₋₁, kᵢ) |
+| **f-Funktion** | E → XOR kᵢ → S-Boxen → P |
+| **S-Box** | bildet 6 Bit auf 4 Bit ab; nichtlinear; kryptografischer Kern |
+| **Avalanche-Effekt** | nach Runde 5 hängt jedes Bit von jedem Klartext- und Schlüsselbit ab |
+| **IP / IP⁻¹** | Eingangs- und Ausgangspermutation (zueinander invers) |
+| **PC-1 / PC-2** | Schlüsselfahrplan: 64 → 56 Bit / Auswahl des 48-Bit-Rundenschlüssels |
+| **Triple-DES (3DES)** | dreimal DES (EDE), 112 Bit effektive Schlüssellänge |
 
 ## Typische Fallen
 
-- **DES-Schlüssel: 64 oder 56 Bit?** Eingegeben 64, *effektiv* 56 — 8 Paritätsbits fallen in PC-1 weg.
-- **S-Boxen = Diffusion? Nein.** S-Boxen liefern **Konfusion** (nichtlinear). Diffusion kommt von Expansion und Permutation.
-- **Feistel braucht eine umkehrbare f-Funktion? Nein** — gerade nicht. Der Witz ist, dass f beliebig sein darf.
-- **DES ist „geknackt"?** Nicht mathematisch — es ist nur der *Schlüssel zu kurz* (Brute-Force).
-- **3DES = dreifacher Schlüssel = 168 Bit Sicherheit?** Effektiv nur **112 Bit** (Meet-in-the-Middle), und EDE, nicht EEE.
+- **DES-Schlüssel: 64 oder 56 Bit?** Eingegeben werden 64, *wirksam* sind nur 56 — die 8 Paritätsbits fallen in PC-1 weg.
+- **S-Boxen = Diffusion? Nein.** S-Boxen liefern **Konfusion** (sie sind nichtlinear). Die Diffusion kommt von Expansion und Permutation.
+- **Feistel braucht eine umkehrbare f-Funktion? Nein** — gerade nicht. Der ganze Witz ist, dass f beliebig sein darf und die Struktur trotzdem umkehrbar bleibt.
+- **DES ist mathematisch geknackt? Nein.** Es ist nur der *Schlüssel zu kurz* — der einzige praktikable Angriff ist Brute-Force.
+- **3DES = dreifacher Schlüssel = 168 Bit Sicherheit? Nein.** Effektiv sind es nur **112 Bit** (Meet-in-the-Middle), und das Muster ist EDE (Encrypt-Decrypt-Encrypt), nicht EEE.
+- **Zeile/Spalte der S-Box vertauscht?** Die *äußeren* zwei Bit sind die Zeile, die *inneren* vier die Spalte — nicht umgekehrt.
 
 ## Klausur-Fokus
 
-Das DES-Übungsblatt zeigt sehr klar, was abgefragt wird — und das ist eine Mischung aus Wissen und Zeichnen/Rechnen. Du solltest **ein Feistelnetzwerk skizzieren** können (mindestens zwei Runden, mit IP, der Aufteilung in L und R, der f-Funktion und dem Tausch) und die **Feistel-Gleichungen** L_i = R_{i−1} und R_i = L_{i−1} ⊕ f(R_{i−1}, k_i) auswendig anwenden, vorwärts wie rückwärts. Du musst **Konfusion und Diffusion** definieren *und* sagen, welche Bausteine von DES sie umsetzen (Konfusion = S-Boxen; Diffusion = Expansion + Permutation), sowie die Geschichte der **Schlüssellänge** parat haben (ursprünglich 128 Bit, von der NSA auf 56 Bit effektiv reduziert). Ein beliebter Rechenpunkt ist die **Nichtlinearität der S-Boxen**: An konkreten 6-Bit-Eingaben zeigen, dass S(x1) ⊕ S(x2) ≠ S(x1 ⊕ x2) ist (S-Box nachschlagen, beide Seiten ausrechnen, Ungleichheit zeigen). Dazu solltest du die **vier Schritte der f-Funktion** und den **Avalanche-Effekt** erklären, den **Schlüsselfahrplan** (PC-1 → Rotation → PC-2, C_0 = C_16) skizzieren und begründen, warum DES unsicher ist und wie 3DES (EDE, 112 Bit) das mildert. Als Bonus tauchen die **schwachen Schlüssel** auf (Subkeys, die alle gleich sind → Ver- und Entschlüsselung identisch; es gibt 4 davon).
+Das zugehörige Übungsblatt mischt drei Welten, also bereite alle drei vor. Erstens die **Stromchiffren-Reste** aus dem letzten Kapitel: Du sollst die **Vernam-Chiffre** (Vigenère mit Schlüssel so lang wie der Klartext) per Hand verschlüsseln — Buchstaben in Zahlen, plus Schlüssel, mod 26; etwa wird aus „VORLESUNG" mit dem Schlüssel „SECUNIDUE" das Chiffrat „NSTFRAXHK". Du sollst den **Schlüsselraum zählen** (für Klartextlänge n gibt es 26ⁿ Schlüssel; eine doppelte Vernam-Verschlüsselung bringt nichts, weil zwei Additionen mod 26 wieder nur einer Addition entsprechen — der Raum bleibt 26ⁿ) und daraus eine **Brute-Force-Dauer** abschätzen (Anzahl Schlüssel × Operationen pro Schlüssel ÷ Operationen pro Sekunde). Und du sollst den **Bit-Flip-Angriff** auf eine Stromchiffre durchführen (Bit im Chiffrat kippen kippt dasselbe Klartextbit; bei bekanntem Klartext den Schlüsselstrom als s = y ⊕ x bestimmen) — die volle Mechanik dazu steht im vorigen Kapitel.
+
+Zweitens das **DES-Wissen**: ein **Feistelnetzwerk skizzieren** (mindestens zwei Runden, mit IP, der Teilung in L und R, der f-Funktion und dem Tausch); **Konfusion und Diffusion** definieren und die DES-Bausteine zuordnen (Konfusion = S-Boxen, Diffusion = Expansion + Permutation); die **Schlüssellängen-Geschichte** kennen (ursprünglich 128 Bit, von der NSA auf effektiv 56 reduziert); die vier Schritte **E-X-S-P** und den **Avalanche-Effekt** erklären; und den **Schlüsselfahrplan** (PC-1 → Rotation → PC-2, C₀ = C₁₆) beschreiben.
+
+Drittens die **Rechnerei an der S-Box**: eine **S-Box nachschlagen** (äußere Bits = Zeile, innere Bits = Spalte) und die **Nichtlinearität beweisen**, indem du an konkreten 6-Bit-Eingaben zeigst, dass S(x₁) ⊕ S(x₂) ≠ S(x₁ ⊕ x₂). Als Bonus tauchen die **schwachen Schlüssel** auf — Hauptschlüssel, deren Rundenschlüssel alle gleich sind, sodass Ver- und Entschlüsselung identisch werden (es gibt davon genau 4).
 
 ## Mehr dazu
 
-- **Computerphile — Feistel Cipher** (EN): die Feistel-Idee anschaulich erklärt — warum Ver- und Entschlüsselung gleich sind. https://www.youtube.com/watch?v=FGhj3CGxl8I
-- **Neso Academy — Feistel Cipher Structure** (EN): ruhiger, tafelartiger Durchgang der Struktur und Designparameter. https://www.youtube.com/watch?v=8l9xAvuGJFo
-- **DES-Zusatzmaterial (Wikipedia): IP, E, S-Boxen, P als Tabellen** — gut zum Nachschlagen beim Üben. https://en.wikipedia.org/wiki/DES_supplementary_material`,
+- **Computerphile — Feistel Cipher** (~8 Min., EN): die Feistel-Idee anschaulich — warum Ver- und Entschlüsselung dieselbe Operation sind. https://www.youtube.com/watch?v=FGhj3CGxl8I
+- **Neso Academy — Feistel Cipher Structure** (EN): ruhiger, tafelartiger Durchgang der Struktur und der Designparameter. https://www.youtube.com/watch?v=8l9xAvuGJFo
+- **DES-Zusatzmaterial (Wikipedia)** — IP, Expansion E, alle S-Boxen und die Permutation P als fertige Tabellen zum Nachschlagen beim Üben. https://en.wikipedia.org/wiki/DES_supplementary_material`,
   },
 };
 
@@ -387,86 +594,110 @@ const lecture04: Explanation = {
     de: "AES, Betriebsmodi und der Einstieg in die asymmetrische Kryptografie",
   },
   content: {
-    de: `Zwei große Themen treffen hier aufeinander. Erst der Nachfolger von DES — **AES**, das heute den Großteil der Welt verschlüsselt und anders gebaut ist (Schichten statt Feistel). Dann ein Bruch: Symmetrische Verfahren haben ein Problem, das keine noch so gute Chiffre löst — *wie tauschen Alice und Bob überhaupt den Schlüssel aus?* Die Antwort ist die **asymmetrische Kryptografie**, die hier vorbereitet wird. Dazwischen die praktische Frage, wie man Nachrichten verschlüsselt, die länger als ein Block sind (Betriebsmodi).
+    de: `Dieses Kapitel hat drei Akte, und sie bauen aufeinander auf. Im ersten lernst du den Nachfolger von DES kennen — **AES**, die Chiffre, die heute fast das gesamte Internet verschlüsselt und ganz anders gebaut ist als DES (Schichten statt Feistel). Im zweiten klären wir eine Frage, die jede Blockchiffre offen lässt: Was tut man eigentlich mit Nachrichten, die länger sind als ein einzelner Block? Das beantworten die **Betriebsmodi** ECB, CBC und OFB — und einer davon (ECB) ist eine wunderschöne Lektion darüber, wie man eine starke Chiffre durch falsche Anwendung wieder kaputt macht. Im dritten Akt stoßen wir an die Wand, vor der alle symmetrischen Verfahren stehen: Wie tauschen Alice und Bob den geheimen Schlüssel überhaupt aus, wenn der einzige Kanal das abgehörte Internet ist? Die Antwort ist eine der größten Ideen der Informatik — die **asymmetrische Kryptografie** mit ihrem öffentlichen und privaten Schlüsselpaar, die wir hier aufschlagen und im nächsten Kapitel mit RSA vollenden.
 
-## AES: vier Schichten statt Feistel
+## AES: vier Schichten statt einer Feistel-Struktur
 
-Nach einem öffentlichen Wettbewerb (1997 ausgeschrieben, 5 Finalisten, 2000 gewinnt **Rijndael**) wurde AES der Standard. Unterschiede zu DES auf einen Blick:
+Als klar wurde, dass DES mit seinen 56 Bit zu schwach geworden war, schrieb das NIST 1997 einen offenen, weltweiten Wettbewerb für einen Nachfolger aus — anders als bei DES diesmal völlig transparent, mit drei öffentlichen Evaluierungsrunden. Gefordert waren Effizienz in Software *und* Hardware, hohe Sicherheit und drei wählbare Schlüssellängen. 1999 erreichten fünf Finalisten die letzte Runde, und 2000 gewann der belgische Entwurf **Rijndael** von Joan Daemen und Vincent Rijmen — seither heißt er **Advanced Encryption Standard (AES)**. Stell ihn dir am besten im direkten Vergleich zu DES vor, denn die Unterschiede sind genau das, was abgefragt wird:
 
 | | DES | AES |
 |---|---|---|
 | Blockgröße | 64 Bit | **128 Bit** |
 | Schlüssel | 56 Bit | 128 / 192 / 256 Bit |
 | Runden | 16 | **10 / 12 / 14** |
-| Struktur | Feistel (halbe Hälfte/Runde) | **Schichten** (ganze 128 Bit/Runde) |
-| arbeitet auf | Bits | **Bytes** |
+| Struktur | Feistel (nur eine Hälfte pro Runde) | **Schichten** (ganze 128 Bit pro Runde) |
+| arbeitet auf | einzelnen Bits | ganzen **Bytes** |
 
-AES verschlüsselt in jeder Runde den **kompletten** Block über aufeinanderfolgende Schichten. Die Anzahl der Runden hängt von der Schlüssellänge ab (128→10, 192→12, 256→14).
+Der wichtigste Unterschied steckt in der Zeile „Struktur". DES verschlüsselte pro Runde nur eine seiner zwei Hälften; AES bearbeitet in *jeder* Runde den **kompletten** 128-Bit-Block, indem es mehrere Schichten hintereinander anwendet. Die Anzahl der Runden hängt an der Schlüssellänge: 10 Runden bei 128 Bit, 12 bei 192, 14 bei 256. Man stellt sich den 128-Bit-Block dabei als eine 4×4-Matrix aus 16 Bytes vor, den sogenannten **State**, der von Schicht zu Schicht umgeformt wird.
 
 ## Die vier Schichten einer AES-Runde
 
-Man stellt den 16-Byte-Block als 4×4-Matrix („State") vor. Eine Runde wendet vier Schichten an:
+Eine AES-Runde besteht aus vier Schichten, die der Reihe nach auf den State wirken. Verstehst du, was jede tut und ob sie für Konfusion oder Diffusion sorgt, hast du AES verstanden.
 
-1. **SubBytes (Byte-Substitution):** jedes Byte durch die **S-Box** ersetzen. Anders als bei DES gibt es nur *eine* S-Box (8 Bit rein, 8 Bit raus), und sie ist keine Zufallstabelle, sondern eine mathematische Operation über dem endlichen Körper GF(2^8) (Inverse + affine Abbildung). Das ist das **einzige nichtlineare** Element → liefert **Konfusion**.
-2. **ShiftRows:** die Zeilen der Matrix zyklisch verschieben (Zeile 2 um 1, Zeile 3 um 2, Zeile 4 um 3) → **Diffusion**.
-3. **MixColumns:** jede Spalte mit einer festen 4×4-Matrix multiplizieren → **Diffusion**. Zusammen sorgen ShiftRows + MixColumns dafür, dass nach **2 Runden** jedes Byte von *allen 16* Klartext-Bytes abhängt.
-4. **AddRoundKey (Key-Addition):** die State-Matrix mit dem Rundenschlüssel XOR-verknüpfen.
+Die erste Schicht ist **SubBytes**, die Byte-Substitution: Jedes der 16 Bytes wird durch eine **S-Box** ersetzt. Hier zeigt sich der erste große Unterschied zu DES — AES hat nur *eine* einzige S-Box (8 Bit hinein, 8 Bit heraus), und sie ist keine zufällig aussehende Tabelle, sondern eine saubere mathematische Operation über dem endlichen Körper GF(2⁸), bestehend aus einer Inversenbildung und einer affinen Abbildung. SubBytes ist das **einzige nichtlineare** Element von AES und liefert damit die gesamte **Konfusion**.
 
-Zwei Feinheiten: AES nutzt **Key Whitening** — ein zusätzliches AddRoundKey ganz am Anfang (vor Runde 1) und am Ende. Und die **letzte Runde lässt MixColumns weg**. Der **Schlüsselfahrplan** ist wortbasiert (1 Wort = 32 Bit): eine nichtlineare g-Funktion (Rotation + S-Box + Rundenkonstante) erzeugt rekursiv die Rundenschlüssel. AES ist effizient in Soft- und Hardware (Intel **AES-NI**), und die NSA erlaubt AES-128 für SECRET, AES-192/256 für TOP SECRET. [Spanning Tree animiert die ganze Runde sehr klar](https://www.youtube.com/watch?v=C4ATDMIz5wc); [Computerphile gibt die Idee dahinter](https://www.youtube.com/watch?v=O4xNJsjtN6E).
+![AES-Schicht SubBytes: jedes Byte des State wird durch die S-Box ersetzt](https://upload.wikimedia.org/wikipedia/commons/a/a4/AES-SubBytes.svg "SubBytes: jedes der 16 State-Bytes läuft durch dieselbe AES-S-Box. Das ist das einzige nichtlineare Element und liefert die Konfusion.")
 
-> **Eselsbrücke (AES-Runde):** **S – S – M – A** = **S**ubBytes → **S**hiftRows → **M**ixColumns → **A**ddRoundKey. Nur das erste **S** (SubBytes) ist nichtlinear (= Konfusion); ShiftRows + MixColumns sind Diffusion. Und: **letzte Runde ohne MixColumns**.
+Die zweite Schicht ist **ShiftRows**: Die vier Zeilen der State-Matrix werden zyklisch verschoben — die erste bleibt, die zweite um eine, die dritte um zwei, die vierte um drei Positionen. Das mischt Bytes über die Spaltengrenzen hinweg und sorgt für **Diffusion**.
 
-## Betriebsmodi: mehr als einen Block verschlüsseln
+![AES-Schicht ShiftRows: die Zeilen des State werden zyklisch verschoben](https://upload.wikimedia.org/wikipedia/commons/6/66/AES-ShiftRows.svg "ShiftRows: jede Zeile der State-Matrix wird um eine wachsende Zahl von Positionen zyklisch verschoben — eine Diffusionsschicht.")
 
-DES/AES verschlüsseln nur einen 8- bzw. 16-Byte-Block. Für längere Nachrichten braucht man einen **Betriebsmodus**:
+Die dritte Schicht ist **MixColumns**: Jede Spalte des State wird mit einer festen 4×4-Matrix multipliziert (im Galois-Körper), wodurch sich die vier Bytes einer Spalte gründlich vermischen. ShiftRows und MixColumns zusammen erzeugen die Diffusion, und sie tun das so wirkungsvoll, dass schon nach **zwei Runden** jedes einzelne State-Byte von *allen 16* Klartext-Bytes abhängt.
 
-- **ECB (Electronic Codebook):** jeden Block separat verschlüsseln und aneinanderhängen. **Problem: deterministisch** — gleicher Klartextblock → gleicher Chiffratblock. Muster bleiben sichtbar (das berühmte „verschlüsselte Pinguin-Bild"), und ein Angreifer kann Blöcke austauschen. **Nicht benutzen.**
-- **CBC (Cipher Block Chaining):** jeder Block wird vor der Verschlüsselung mit dem *vorherigen Chiffrat* XOR-verknüpft: y_i = e_k(x_i ⊕ y_{i−1}); der erste Block nutzt einen **Initialisierungsvektor** IV: y_1 = e_k(x_1 ⊕ IV). Dadurch wird die Verschlüsselung **probabilistisch** — gleicher Klartext liefert (mit anderem IV) anderes Chiffrat.
-- **OFB (Output Feedback):** die Blockchiffre erzeugt einen Schlüsselstrom (s_1 = e_k(IV), s_i = e_k(s_{i−1})), der per XOR auf den Klartext gelegt wird — so wird aus einer Blockchiffre eine **Stromchiffre**.
+![AES-Schicht MixColumns: jede Spalte wird mit einer festen Matrix multipliziert](https://upload.wikimedia.org/wikipedia/commons/7/76/AES-MixColumns.svg "MixColumns: jede Spalte des State wird mit einer festen Matrix multipliziert und dadurch durchmischt — die zweite Diffusionsschicht.")
 
-![Tux-Pinguin im ECB-Modus verschlüsselt — die Umrisse bleiben sichtbar](https://commons.wikimedia.org/wiki/Special:FilePath/Tux_ECB.png "Der berühmte ECB-Pinguin: derselbe Klartextblock wird immer gleich verschlüsselt, deshalb bleiben die Muster sichtbar. Genau deshalb ist ECB unsicher.")
+Die vierte Schicht ist **AddRoundKey**: Der State wird Byte für Byte per XOR mit dem aktuellen Rundenschlüssel verknüpft — erst hier fließt das Schlüsselgeheimnis ein. Zwei Feinheiten solltest du dir merken, weil sie gern gefragt werden: AES benutzt **Key Whitening**, das heißt, es gibt ein zusätzliches AddRoundKey schon *vor* der ersten Runde und eines am Ende, damit der Angreifer nie einen unverschlüsselten Zwischenzustand sieht. Und die **allerletzte Runde lässt MixColumns weg** — das macht die Entschlüsselung symmetrischer, ohne die Sicherheit zu verändern. Die 16 Rundenschlüssel erzeugt ein wortbasierter **Schlüsselfahrplan** (ein Wort sind 32 Bit): Eine nichtlineare g-Funktion (Rotation, S-Box-Substitution, Addition einer Rundenkonstante) speist sich rekursiv durch die Wörter. AES ist dadurch in Soft- und Hardware sehr schnell — Intel-Prozessoren haben sogar einen eigenen Befehlssatz **AES-NI** dafür —, und die NSA gibt AES-128 für SECRET und AES-192/256 für TOP SECRET frei. [Spanning Tree animiert die ganze Runde sehr klar](https://www.youtube.com/watch?v=C4ATDMIz5wc).
 
-> **Eselsbrücke (ECB-Pinguin):** ECB = jeder Block für sich → **gleicher Block, gleiches Chiffrat** → Muster bleiben sichtbar. Wenn du den Pinguin noch erkennst, ist es ECB. **CBC/OFB** würfeln das per IV durch.
+> **Eselsbrücke (AES-Runde):** **S – S – M – A** = **S**ubBytes → **S**hiftRows → **M**ixColumns → **A**ddRoundKey. Nur das *erste* S (SubBytes) ist nichtlinear und liefert Konfusion; ShiftRows und MixColumns sind Diffusion. Und: die **letzte Runde ohne MixColumns**.
 
-### Schritt für Schritt: ECB und CBC rechnen
+## Betriebsmodi: wie man mehr als einen Block verschlüsselt
 
-Genau so kommt es im Übungsblatt. Nimm eine winzige Blockchiffre mit 5-Bit-Blöcken, die die Bits nur umsortiert: e(b₁b₂b₃b₄b₅) = (b₂b₅b₄b₁b₃). Klartext x = **01101 11011 …**, und für CBC/OFB ist IV = **11001**.
+AES verschlüsselt genau 16 Byte auf einmal, DES genau 8. Aber echte Nachrichten sind länger. Ein **Betriebsmodus** legt fest, wie man die Blockchiffre wiederholt anwendet, um eine beliebig lange Nachricht zu verschlüsseln — und die Wahl des Modus entscheidet über Sicherheit oder Desaster.
 
-**ECB** verschlüsselt jeden Block einzeln. Erster Block 01101: hier ist b₁=0, b₂=1, b₃=1, b₄=0, b₅=1, also e(01101) = (b₂,b₅,b₄,b₁,b₃) = (1,1,0,0,1) = **11001**. Fertig — bei ECB hängt nichts vom Nachbarblock ab.
+Der naive Modus heißt **ECB (Electronic Codebook)**: Man zerlegt die Nachricht in Blöcke, verschlüsselt jeden einzeln und hängt die Chiffrate aneinander; passt der letzte Block nicht genau, füllt man ihn mit einem Padding auf. Das klingt harmlos, hat aber einen tödlichen Fehler: ECB ist **deterministisch**. Derselbe Klartextblock ergibt bei demselben Schlüssel *immer* dasselbe Chiffrat. Verschlüsselt man damit ein Bild, bleiben alle Flächen gleicher Farbe auch im Chiffrat als gleiche Muster sichtbar — das berühmteste Beispiel ist der Linux-Pinguin Tux, dessen Umrisse nach der ECB-Verschlüsselung immer noch klar zu erkennen sind:
 
-**CBC** verkettet: Vor dem Verschlüsseln wird der Block mit dem vorherigen Chiffrat (beim ersten mit dem IV) ge-XOR-t. Also erst x₁ ⊕ IV = 01101 ⊕ 11001 = **10100**, dann durch die Chiffre: e(10100) hat b₁=1, b₂=0, b₃=1, b₄=0, b₅=0, ergibt (0,0,0,1,1) = **00011**. Das ist y₁. Für den zweiten Block rechnest du x₂ ⊕ y₁, dann e(…) — die Verkettung sorgt dafür, dass identische Klartextblöcke *unterschiedliche* Chiffrate bekommen.
+![Das Originalbild des Pinguins Tux vor der Verschlüsselung](https://upload.wikimedia.org/wikipedia/commons/5/56/Tux.jpg "Tux im Original — gleich sehen wir, was der ECB-Modus daraus macht.")
 
-## Warum symmetrisch nicht reicht: das Schlüsselaustauschproblem
+![Tux im ECB-Modus verschlüsselt — die Umrisse bleiben klar sichtbar](https://upload.wikimedia.org/wikipedia/commons/f/f0/Tux_ecb.jpg "Tux nach ECB-Verschlüsselung: weil gleiche Klartextblöcke immer gleich verschlüsselt werden, bleibt das Muster erhalten. Genau deshalb ist ECB unsicher.")
 
-So stark AES ist — symmetrische Verfahren haben drei eingebaute Schwächen:
+Schlimmer noch: Weil jeder Block für sich verschlüsselt wird, kann ein Angreifer ganze Chiffratblöcke austauschen oder umsortieren, ohne den Schlüssel zu kennen — etwa seine eigene verschlüsselte Kontonummer in den Block einer fremden Überweisung kopieren. Die Lehre: **ECB niemals für echte Daten benutzen.**
 
-1. **Schlüsselaustauschproblem:** Der Kanal, über den die Nachricht läuft (das Internet), darf nicht für den Schlüssel benutzt werden — sonst hört Oskar ihn mit. Wie tauscht man also den geheimen Schlüssel sicher aus?
-2. **Anzahl der Schlüssel:** Für jedes Paar von Partnern braucht es einen eigenen Schlüssel — bei n Teilnehmern wächst das quadratisch.
-3. **Keine Nichtabstreitbarkeit (Non-Repudiation):** Weil beide denselben Schlüssel haben, kann man nicht beweisen, *wer* eine Nachricht erzeugt hat.
+Die Rettung sind **probabilistische** Modi, die mit einem zufälligen **Initialisierungsvektor (IV)** dafür sorgen, dass gleiche Klartexte verschiedene Chiffrate ergeben. Der wichtigste ist **CBC (Cipher Block Chaining)**: Vor dem Verschlüsseln wird jeder Klartextblock per XOR mit dem *vorherigen Chiffratblock* verkettet, also yᵢ = eₖ(xᵢ ⊕ yᵢ₋₁); der allererste Block wird mit dem IV ge-XOR-t: y₁ = eₖ(x₁ ⊕ IV). So fließt jeder Block in den nächsten ein, und identische Klartextblöcke werden je nach Vorgeschichte unterschiedlich verschlüsselt. Der dritte Modus, **OFB (Output Feedback)**, verwandelt die Blockchiffre in eine Stromchiffre: Aus dem IV erzeugt man einen Schlüsselstrom (s₁ = eₖ(IV), sᵢ = eₖ(sᵢ₋₁)) und legt ihn per XOR auf den Klartext (yᵢ = sᵢ ⊕ xᵢ).
 
-## Asymmetrische Kryptografie: Einwegfunktionen und der öffentliche Briefkasten
+![Cipher Block Chaining (CBC): jeder Block wird vor der Verschlüsselung mit dem vorherigen Chiffrat verkettet](https://upload.wikimedia.org/wikipedia/commons/8/80/CBC_encryption.svg "CBC: jeder Klartextblock wird per XOR mit dem vorherigen Chiffrat verknüpft, der erste mit dem Initialisierungsvektor — so wird die Verschlüsselung probabilistisch.")
 
-Die Lösung (1976 von Diffie, Hellman, Merkle veröffentlicht; RSA 1977; Großbritanniens GCHQ kannte das Prinzip schon 1972 geheim): ein **Schlüsselpaar** (k_pub, k_pr). Die zentrale, anfangs verblüffende Eigenschaft: **Der Schlüssel zum Verschlüsseln ist nicht geheim.** Bild dazu: ein **öffentlicher Briefkasten** — jeder kann etwas einwerfen (mit dem öffentlichen Schlüssel verschlüsseln), aber nur der Besitzer mit dem privaten Schlüssel kann ihn leeren (entschlüsseln).
+### Schritt für Schritt: ECB, CBC und OFB von Hand
 
-![Asymmetrische Verschlüsselung: öffentlicher Schlüssel verschlüsselt, privater entschlüsselt](https://commons.wikimedia.org/wiki/Special:FilePath/Public_key_encryption.svg "Asymmetrisch: Bob verschlüsselt mit Alices öffentlichem Schlüssel, nur Alice entschlüsselt mit ihrem privaten. Der öffentliche Briefkasten in einem Bild.")
+Genau das rechnet das Übungsblatt, also machen wir es einmal vollständig vor. Wir nehmen die winzige Blockchiffre mit 5-Bit-Blöcken, die die Bits nur umsortiert: **e(b₁b₂b₃b₄b₅) = (b₂b₅b₄b₁b₃)**. Der Klartext ist x = **01101 11011 11010 00110**, und für CBC und OFB ist IV = **11001**.
 
-> **Eselsbrücke (öffentlich vs. privat):** **Verschlüsseln mit öffentlich, entschlüsseln mit privat** — wie ein Briefkasten: einwerfen kann jeder, leeren nur der Besitzer. Warum das mathematisch geht (Einwegfunktion), zeigt [Computerphile](https://www.youtube.com/watch?v=GSIDS_lvRv4).
+**ECB** verschlüsselt jeden Block für sich. Beim ersten Block 01101 ist b₁=0, b₂=1, b₃=1, b₄=0, b₅=1, also e(01101) = (b₂,b₅,b₄,b₁,b₃) = 11001. Genauso die anderen drei Blöcke: 11011 → 11110, 11010 → 10110, 00110 → 00101. Das Chiffrat ist **y = 11001 11110 10110 00101**.
 
-Damit das geht, braucht jedes asymmetrische Verfahren eine **Einwegfunktion**: y = f(x) leicht zu berechnen, x = f⁻¹(y) praktisch unmöglich. Die beiden in der Praxis:
+**CBC** verkettet. Zuerst x₁ ⊕ IV = 01101 ⊕ 11001 = 10100, dann e(10100) = 00011, also y₁ = **00011**. Der zweite Block: x₂ ⊕ y₁ = 11011 ⊕ 00011 = 11000, dann e(11000) = 10010, also y₂ = **10010**. Schon hier siehst du den Effekt — obwohl der erste und kein weiterer Block je gleich aussehen, hängt jedes Chiffrat von allem davor ab.
 
-- **Faktorisierung großer Zahlen** → RSA (Vorlesung 5).
-- **Diskreter Logarithmus** → Diffie-Hellman und Elliptische Kurven.
+**OFB** erzeugt zuerst einen Schlüsselstrom aus dem IV. s₁ = e(IV) = e(11001) = 11010, und y₁ = s₁ ⊕ x₁ = 11010 ⊕ 01101 = **10111**. Dann s₂ = e(s₁) = e(11010) = 10110, und y₂ = s₂ ⊕ x₂ = 10110 ⊕ 11011 = **01101**. Hier wird die Blockchiffre nur noch benutzt, um Zufallsbits zu erzeugen — verschlüsselt wird wie bei einer Stromchiffre per XOR.
 
-Es gibt nur **drei große Familien**: RSA, Diffie-Hellman, Elliptische Kurven. Ein Haken: asymmetrische Verfahren sind **viel langsamer** als symmetrische. Deshalb nutzt man in der Praxis **Hybridprotokolle** (SSL/TLS): asymmetrisch *nur* zum Austausch eines symmetrischen Sitzungsschlüssels, danach symmetrisch weiter. Und weil die Mathematik mit riesigen Zahlen rechnet, brauchen asymmetrische Schlüssel viel mehr Bits für dieselbe Sicherheit:
+> **Eselsbrücke (ECB-Pinguin):** Erkennst du im Chiffrat noch den Pinguin, war es ECB. **Gleicher Block → gleiches Chiffrat** = deterministisch = unsicher. CBC und OFB würfeln das per IV durch.
 
-| symmetrisch | Elliptische Kurven | RSA / Diffie-Hellman |
+## Die Wand der symmetrischen Kryptografie
+
+So stark AES auch ist — es teilt mit jeder symmetrischen Chiffre drei eingebaute Schwächen, und genau die motivieren den nächsten großen Sprung. Die erste und schwerwiegendste ist das **Schlüsselaustauschproblem**: Alice und Bob brauchen denselben geheimen Schlüssel, aber der einzige Kanal zwischen ihnen ist das Internet — und genau dort lauscht Oskar. Schickt Alice den Schlüssel über diesen Kanal, hat Oskar ihn sofort. Die zweite Schwäche ist die **Anzahl der Schlüssel**: Jedes Paar von Teilnehmern braucht seinen eigenen geheimen Schlüssel, und das wächst quadratisch — bei 120 Mitarbeitern sind das schon 120·119/2 = 7140 Schlüssel, die alle erzeugt, verteilt und geheim gehalten werden müssen. Die dritte Schwäche ist die fehlende **Nichtabstreitbarkeit (Non-Repudiation)**: Weil beide Seiten denselben Schlüssel besitzen, kann man im Streitfall nicht beweisen, *wer* von beiden eine Nachricht erzeugt hat — beide hätten es gekonnt.
+
+## Asymmetrische Kryptografie: der öffentliche Briefkasten
+
+Die Lösung ist so elegant, dass sie bei der Veröffentlichung 1976 (durch Whitfield Diffie, Martin Hellman und Ralph Merkle; das RSA-Verfahren folgte 1977, und Großbritanniens Geheimdienst kannte das Prinzip schon 1972) wie ein Zaubertrick wirkte. Statt eines einzigen geheimen Schlüssels bekommt jede Person ein **Schlüsselpaar** aus einem öffentlichen Schlüssel k_pub und einem privaten Schlüssel k_pr. Und jetzt der verblüffende Teil: **Der Schlüssel zum Verschlüsseln ist nicht geheim.** Das beste Bild dafür ist ein öffentlicher Briefkasten. Jeder darf einen Brief einwerfen — das entspricht dem Verschlüsseln mit dem öffentlichen Schlüssel, den die ganze Welt kennen darf. Aber leeren, also entschlüsseln, kann den Kasten nur, wer den privaten Schlüssel besitzt. Will Bob also Alice etwas Geheimes schicken, verschlüsselt er es mit *Alices* öffentlichem Schlüssel; nur Alice kann es mit ihrem privaten wieder lesen — und das Schlüsselaustauschproblem löst sich in Luft auf, denn der öffentliche Schlüssel darf ruhig über den abgehörten Kanal wandern.
+
+![Asymmetrische Verschlüsselung: mit dem öffentlichen Schlüssel verschlüsseln, mit dem privaten entschlüsseln](https://upload.wikimedia.org/wikipedia/commons/f/f0/Orange_blue_public_key_cryptography_en.svg "Asymmetrisch: verschlüsselt wird mit dem öffentlichen Schlüssel des Empfängers, entschlüsselt nur mit dessen privatem Schlüssel. Der öffentliche Briefkasten in einem Bild.")
+
+Damit das überhaupt funktionieren kann, braucht jedes asymmetrische Verfahren eine **Einwegfunktion** — eine Funktion, deren Vorwärtsrichtung y = f(x) leicht zu berechnen ist, deren Umkehrung x = f⁻¹(y) aber praktisch unmöglich bleibt. Zwei solche Funktionen tragen die ganze Public-Key-Welt: die **Faktorisierung großer Zahlen** (man multipliziert zwei riesige Primzahlen mühelos, aber das Produkt wieder in seine Faktoren zu zerlegen ist aussichtslos) — darauf baut RSA — und der **diskrete Logarithmus**, auf dem Diffie-Hellman und die elliptischen Kurven beruhen. Mehr als diese drei großen Familien (RSA, Diffie-Hellman, elliptische Kurven) gibt es im Grunde nicht.
+
+> **Eselsbrücke (öffentlich vs. privat):** **verschlüsseln mit öffentlich, entschlüsseln mit privat** — wie ein Briefkasten: einwerfen darf jeder, leeren nur der Besitzer.
+
+### Schritt für Schritt: ein RSA-Schlüsselpaar erzeugen und benutzen
+
+RSA setzt die Faktorisierungs-Einwegfunktion in fünf Schritten um, und das Übungsblatt lässt dich genau das mit kleinen Zahlen durchrechnen. Die fünf Schritte der Schlüsselerzeugung sind: **(1)** zwei große Primzahlen p und q wählen; **(2)** ihr Produkt N = p·q bilden; **(3)** Eulers Totient T = (p−1)·(q−1) berechnen; **(4)** zwei Zahlen e und d so wählen, dass (e·d) mod T = 1 ist (wobei e teilerfremd zu T und kleiner als T sein muss); **(5)** den öffentlichen Schlüssel als Paar (N, e) und den privaten als (N, d) festlegen. Verschlüsselt wird dann mit y = xᵉ mod N und entschlüsselt mit x = yᵈ mod N (für jeden Klartextwert x < N).
+
+Rechnen wir das mit den winzigen Übungswerten p = 2, q = 7. Dann ist N = 2·7 = 14 und T = (2−1)·(7−1) = 6. Wir wählen e = 5 (teilerfremd zu 6) und suchen d mit (5·d) mod 6 = 1 — das ist d = 11, denn 5·11 = 55 und 55 mod 6 = 1. Damit ist der **öffentliche Schlüssel (14, 5)** und der **private Schlüssel (14, 11)**. Verschlüsseln wir die Nachricht **BCD**, also mit der Buchstabentabelle die Zahlen B = 1, C = 2, D = 3, jeweils mit y = x⁵ mod 14:
+
+- B = 1: 1⁵ = 1, und 1 mod 14 = **1**.
+- C = 2: 2⁵ = 32, und 32 mod 14 = **4**.
+- D = 3: 3⁵ = 243, und 243 mod 14 = **5** (denn 17·14 = 238).
+
+Das Chiffrat ist also die Zahlenfolge **1, 4, 5**. Zur Probe entschlüsseln wir mit x = y¹¹ mod 14: 1¹¹ mod 14 = 1 (B), 4¹¹ mod 14 = 2 (C) und 5¹¹ mod 14 = 3 (D) — wir landen wieder bei BCD. (Beim Nachrechnen der Potenzen reduzierst du natürlich nach jedem Schritt modulo 14, genau die clevere Technik aus dem zweiten Kapitel.) *Warum* RSA funktioniert — warum das Verschlüsseln mit e und das Entschlüsseln mit d sich exakt aufheben —, das ist die Mathematik des nächsten Kapitels.
+
+## Warum man am Ende beides braucht: Hybridprotokolle
+
+Es gibt einen Haken, der erklärt, warum die asymmetrische Kryptografie die symmetrische *nicht* ersetzt hat: Sie ist **dramatisch langsamer**. Rechne es am Beispiel eines 1-GB-Videos durch. Mit einer typischen RSA-Geschwindigkeit von 100 kbit/s bräuchtest du rund 80 000 Sekunden, also über 22 Stunden. Dasselbe Video mit AES bei 17 Mbit/s ist in etwa 8 Minuten fertig. Asymmetrische Verfahren sind also um Größenordnungen teurer, und sie brauchen für dieselbe Sicherheit auch viel längere Schlüssel — 128 Bit symmetrisch entsprechen grob 3072 Bit bei RSA. Deshalb vergleicht man Schlüssellängen niemals zwischen den beiden Welten.
+
+| symmetrisch | elliptische Kurven | RSA / Diffie-Hellman |
 |---|---|---|
 | 64 Bit | 128 Bit | 700 Bit |
 | 128 Bit | 256 Bit | 3072 Bit |
 
+Die Praxis nimmt deshalb das Beste aus beiden Welten und kombiniert sie in einem **Hybridprotokoll**, wie es SSL/TLS hinter jedem „https" tut: Man benutzt die langsame asymmetrische Kryptografie nur ein einziges Mal am Anfang, um einen frischen symmetrischen Sitzungsschlüssel sicher auszutauschen — und verschlüsselt danach die eigentlichen, großen Datenmengen schnell und symmetrisch mit AES. So löst der asymmetrische Teil das Schlüsselaustauschproblem, und der symmetrische Teil liefert das Tempo.
+
 ## Auf den Punkt
 
-Die Kurzfassung: AES löste DES ab und ist anders gebaut — 128-Bit-Blöcke, Schlüssel 128/192/256 Bit, 10/12/14 Runden, und statt Feistel arbeitet es mit vier Schichten, die jede Runde den ganzen Block bearbeiten: SubBytes (die einzige nichtlineare, sorgt für Konfusion), ShiftRows und MixColumns (Diffusion) und AddRoundKey (Schlüssel einbringen). Weil eine Chiffre nur einen Block fasst, braucht man für längere Nachrichten einen Betriebsmodus: ECB (deterministisch, deshalb unsicher — der Pinguin bleibt sichtbar), CBC (verkettet jeden Block per XOR mit dem vorherigen Chiffrat plus IV) oder OFB (macht aus der Blockchiffre eine Stromchiffre). Symmetrische Verfahren stoßen aber an drei Grenzen — Schlüsselaustausch, quadratisch viele Schlüssel, keine Nichtabstreitbarkeit — und genau die löst die asymmetrische Kryptografie mit einem öffentlich/privaten Schlüsselpaar und einer Einwegfunktion (Faktorisierung bei RSA, diskreter Logarithmus bei Diffie-Hellman/ECC). In der Praxis kombiniert man beides hybrid (TLS).
+Die Kurzfassung der drei Akte: **AES** löste DES ab und ist anders gebaut — 128-Bit-Blöcke, Schlüssel mit 128/192/256 Bit, 10/12/14 Runden, und statt Feistel arbeitet es mit vier Schichten, die jede Runde den ganzen Block bearbeiten: **SubBytes** (die einzige nichtlineare Schicht, Konfusion), **ShiftRows** und **MixColumns** (Diffusion) und **AddRoundKey** (Schlüssel per XOR einbringen), mit Key Whitening und ohne MixColumns in der letzten Runde. Für Nachrichten, die länger als ein Block sind, braucht man einen **Betriebsmodus**: **ECB** (deterministisch, deshalb unsicher — der Pinguin bleibt sichtbar), **CBC** (verkettet jeden Block per XOR mit dem vorherigen Chiffrat plus IV) oder **OFB** (macht aus der Blockchiffre eine Stromchiffre). Symmetrisch stößt an drei Grenzen — Schlüsselaustausch, quadratisch viele Schlüssel, keine Nichtabstreitbarkeit —, die die **asymmetrische Kryptografie** mit einem öffentlich/privaten Schlüsselpaar und einer **Einwegfunktion** löst (Faktorisierung bei RSA, diskreter Logarithmus bei Diffie-Hellman/ECC). Weil asymmetrisch viel langsamer ist, kombiniert die Praxis beides **hybrid** (TLS).
 
 ## Begriffe & Notation
 
@@ -476,31 +707,33 @@ Die Kurzfassung: AES löste DES ab und ist anders gebaut — 128-Bit-Blöcke, Sc
 | **State** | 4×4-Byte-Matrix, auf der AES arbeitet |
 | **SubBytes** | S-Box-Ersetzung; einziges nichtlineares Element (Konfusion) |
 | **ShiftRows / MixColumns** | Zeilen verschieben / Spalten mischen (Diffusion) |
-| **AddRoundKey** | XOR mit Rundenschlüssel |
-| **Key Whitening** | XOR mit Schlüssel am Anfang und Ende |
-| **ECB / CBC / OFB** | Betriebsmodi (deterministisch / verkettet / strom-artig) |
-| **IV** | Initialisierungsvektor (macht Modus probabilistisch) |
+| **AddRoundKey** | XOR des State mit dem Rundenschlüssel |
+| **Key Whitening** | zusätzliches AddRoundKey am Anfang und Ende |
+| **ECB / CBC / OFB** | Betriebsmodi: deterministisch / verkettet / strom-artig |
+| **IV** | Initialisierungsvektor — macht einen Modus probabilistisch |
 | **Einwegfunktion** | leicht vorwärts, praktisch unmöglich rückwärts |
+| **RSA-Schlüsselpaar** | öffentlich (N, e), privat (N, d); y = xᵉ mod N |
 | **Hybridprotokoll** | asymmetrischer Schlüsseltausch + symmetrische Daten (TLS) |
-| **Non-Repudiation** | Nichtabstreitbarkeit (nur asymmetrisch möglich) |
+| **Non-Repudiation** | Nichtabstreitbarkeit — nur asymmetrisch möglich |
 
 ## Typische Fallen
 
-- **AES ist eine Feistel-Chiffre? Nein** — AES nutzt Schichten und verschlüsselt jede Runde den ganzen Block; DES ist Feistel.
-- **ECB ist okay für kurze Daten? Nein** — die Determiniertheit ist *immer* ein Problem; ECB nie für echte Daten verwenden.
-- **AES hat 8 S-Boxen wie DES? Nein** — AES hat genau **eine** S-Box (mathematisch, GF(2^8)).
-- **Asymmetrisch ersetzt symmetrisch?** Nein — es ist langsamer; in der Praxis *hybrid* (TLS).
-- **Gleiche Bitlänge = gleiche Sicherheit?** Nein — 128-Bit-symmetrisch ≈ 3072-Bit-RSA. Schlüssellängen *nicht* zwischen den Welten vergleichen.
+- **AES ist eine Feistel-Chiffre? Nein** — AES nutzt Schichten und verschlüsselt jede Runde den ganzen Block; nur DES ist Feistel.
+- **AES hat acht S-Boxen wie DES? Nein** — AES hat genau **eine** S-Box, mathematisch über GF(2⁸) definiert.
+- **ECB ist okay für kurze oder „unwichtige" Daten? Nein** — die Determiniertheit ist immer ein Problem; ECB nie für echte Daten.
+- **Die letzte AES-Runde ist wie alle anderen? Nein** — ihr fehlt MixColumns.
+- **Asymmetrisch ersetzt symmetrisch? Nein** — es ist viel langsamer; die Praxis nutzt beides hybrid.
+- **Gleiche Bitlänge = gleiche Sicherheit? Nein** — 128 Bit symmetrisch entsprechen grob 3072 Bit RSA. Schlüssellängen nicht zwischen den Welten vergleichen.
 
 ## Klausur-Fokus
 
-Das Übungsblatt zeigt: Hier wird vor allem **mit den Betriebsmodi gerechnet**. Du bekommst eine kleine Blockchiffre (z. B. eine 5-Bit-Permutation) und sollst eine mehrteilige Nachricht in **ECB, CBC und OFB** verschlüsseln — also musst du die Formeln sicher anwenden: ECB Block für Block, CBC mit y_i = e_k(x_i ⊕ y_{i−1}) und dem IV für den ersten Block, OFB mit dem aus dem IV erzeugten Schlüsselstrom. Erkläre dazu, warum **ECB unsicher** ist (Muster bleiben sichtbar) und wozu der **IV** dient. Zweiter großer Rechenblock ist die **Anzahl der Schlüssel** in einem Unternehmen: rein symmetrisch braucht man für n Personen n·(n−1)/2 Schlüssel, asymmetrisch nur n Schlüsselpaare — das illustriert das Schlüsselaustauschproblem in Zahlen. Dazu kommt eine **Performance-Rechnung** (AES ist 100–1000× schneller als RSA → daher hybrid) und der **Vergleich symmetrisch vs. asymmetrisch** mit Vor- und Nachteilen. Auf der Wissensseite: die **vier AES-Schichten** in Reihenfolge (nur SubBytes nichtlinear, letzte Runde ohne MixColumns), **DES vs. AES** gegenüberstellen und die **Einwegfunktion** definieren (Faktorisierung, diskreter Logarithmus; Familien RSA/DH/ECC).
+Das Übungsblatt zeigt klar, wo gerechnet wird. Der erste große Block sind die **Betriebsmodi**: Du bekommst eine kleine Blockchiffre (etwa eine 5-Bit-Permutation) und sollst eine mehrteilige Nachricht in **ECB, CBC und OFB** verschlüsseln — die Formeln musst du sicher anwenden (ECB Block für Block, CBC mit yᵢ = eₖ(xᵢ ⊕ yᵢ₋₁) und dem IV für den ersten Block, OFB mit dem aus dem IV erzeugten Schlüsselstrom) und erklären können, warum ECB unsicher ist und wozu der IV dient. Der zweite Block ist **RSA per Hand**: ein Schlüsselpaar nach den fünf Schritten erzeugen (N = p·q, T = (p−1)(q−1), e·d ≡ 1 mod T), dann mit y = xᵉ mod N verschlüsseln und mit x = yᵈ mod N wieder entschlüsseln — etwa die Nachricht BCD mit (N=14, e=5, d=11). Dazu kommen zwei Vergleichs-Rechnungen: die **Anzahl der Schlüssel** in einem Unternehmen (rein symmetrisch n·(n−1)/2, asymmetrisch nur n Paare — bei 120 Mitarbeitern also 7140 gegenüber 120) und eine **Performance-Abschätzung** (1-GB-Datei bei gegebener AES- und RSA-Geschwindigkeit, woraus folgt, warum man hybrid arbeitet). Auf der Wissensseite: die **vier AES-Schichten** in Reihenfolge (nur SubBytes nichtlinear, letzte Runde ohne MixColumns), **DES gegen AES** abgrenzen, und die **Einwegfunktion** mit ihren zwei praktischen Beispielen (Faktorisierung, diskreter Logarithmus) sowie die drei Familien RSA/DH/ECC erklären.
 
 ## Mehr dazu
 
 - **Computerphile — AES Explained** (EN, Mike Pound): die AES-Idee und ihre Schichten anschaulich. https://www.youtube.com/watch?v=O4xNJsjtN6E
-- **Spanning Tree — AES: How to Design Secure Encryption** (EN): von Konfusion/Diffusion zur kompletten Runde, sehr klar animiert. https://www.youtube.com/watch?v=C4ATDMIz5wc
-- **Computerphile — Public Key Cryptography** (EN): warum ein „öffentlicher" Schlüssel funktioniert — die Intuition hinter Einwegfunktionen. https://www.youtube.com/watch?v=GSIDS_lvRv4`,
+- **Spanning Tree — AES: How to Design Secure Encryption** (~13 Min., EN): von Konfusion/Diffusion zur kompletten Runde, sehr klar animiert. https://www.youtube.com/watch?v=C4ATDMIz5wc
+- **Computerphile — Public Key Cryptography** (~6 Min., EN): warum ein „öffentlicher" Schlüssel funktionieren kann — die Intuition hinter Einwegfunktionen. https://www.youtube.com/watch?v=GSIDS_lvRv4`,
   },
 };
 
@@ -508,118 +741,121 @@ const lecture05: Explanation = {
   id: "cs-2025-l05",
   lesson: 5,
   title: {
-    de: "Das RSA-Kryptosystem: Schlüsselerzeugung, Verschlüsselung und Square-and-Multiply",
+    de: "Das RSA-Kryptosystem: Schlüsselerzeugung, Square-and-Multiply und digitale Signaturen",
   },
   content: {
-    de: `RSA ist das erste konkrete asymmetrische Verfahren und das wahrscheinlich klausurrelevanteste Rechenthema des Kurses. Die Folien werfen viele Formeln auf einmal — der rote Faden ist einfach: Aus zwei Primzahlen baut man ein Schlüsselpaar, verschlüsselt mit einer Potenz modulo n und entschlüsselt mit der „Gegen-Potenz". Die Sicherheit lebt davon, dass man n nicht in seine Primfaktoren zerlegen kann. Dazu zwei Werkzeuge: der erweiterte Euklidische Algorithmus (für den privaten Schlüssel) und Square-and-Multiply (um große Potenzen überhaupt rechnen zu können).
+    de: `RSA ist das erste konkrete asymmetrische Verfahren — und mit Abstand das klausurrelevanteste Rechenthema des ganzen Kurses. Der rote Faden ist erstaunlich schlicht: Aus zwei Primzahlen baut man ein Schlüsselpaar, verschlüsselt eine Nachricht, indem man sie hoch einen Exponenten nimmt und modulo n reduziert, und entschlüsselt mit der passenden „Gegen-Potenz". Die ganze Sicherheit ruht auf einer einzigen Tatsache: Man kann zwei große Primzahlen mühelos multiplizieren, aber das Produkt praktisch nicht wieder in seine Faktoren zerlegen. Damit das in der Praxis überhaupt rechenbar wird, brauchst du zwei Werkzeuge, die wir hier auch von Hand durchspielen — den erweiterten Euklidischen Algorithmus (er liefert den privaten Schlüssel) und Square-and-Multiply (es macht die riesigen Potenzen berechenbar). Und ganz am Ende drehen wir RSA um und bekommen gratis die **digitale Signatur** — die mathematische Unterschrift, die beweist, wer eine Nachricht geschrieben hat.
 
 ## Die Grundidee: öffentlich verschlüsseln, privat entschlüsseln
 
-RSA dreht die symmetrische Logik um. Jeder kennt deinen öffentlichen Schlüssel (n, e) und kann dir damit verschlüsselte Nachrichten schicken:
+RSA dreht die symmetrische Logik um. Jeder kennt deinen öffentlichen Schlüssel, ein Zahlenpaar (n, e), und kann dir damit verschlüsselte Nachrichten schicken: Die Verschlüsselung eines Klartextwertes x ist **y = xᵉ mod n**, die Entschlüsselung des Chiffrats y ist **x = yᵈ mod n** mit deinem geheimen privaten Schlüssel d. Beide Operationen sind im Kern dasselbe — „eine Zahl hoch einen Exponenten, modulo n". Der ganze Zauber steckt darin, dass e und d so zusammengewählt sind, dass das Hoch-d das Hoch-e *exakt* rückgängig macht. Wer d kennt, entschlüsselt mühelos; wer nur das öffentliche (n, e) hat, müsste zum Berechnen von d die Zahl n faktorisieren — und genau das ist für große n unmöglich.
 
-- **Verschlüsselung:** y = e_{k_pub}(x) ≡ x^e mod n
-- **Entschlüsselung:** x = d_{k_pr}(y) ≡ y^d mod n
+![Asymmetrische Verschlüsselung: mit dem öffentlichen Schlüssel verschlüsseln, mit dem privaten entschlüsseln](https://upload.wikimedia.org/wikipedia/commons/f/f9/Public_key_encryption.svg "RSA-Verschlüsselung: Bob verschlüsselt mit Alices öffentlichem Schlüssel (n, e), nur Alice entschlüsselt mit ihrem privaten d.")
 
-Beide Operationen sind „Zahl hoch Exponent, modulo n". Der Clou: e und d sind so gewählt, dass das Hoch-d das Hoch-e genau rückgängig macht — aber nur, wer d kennt, kann entschlüsseln. Und d aus dem öffentlichen (n, e) zu berechnen, würde bedeuten, n zu faktorisieren.
+## RSA-Schlüsselerzeugung in fünf Schritten
 
-## RSA-Schlüsselerzeugung in 5 Schritten
+Die Schlüsselerzeugung ist eine feste Abfolge, die du im Schlaf können musst. **Erstens** wählst du zwei große Primzahlen p und q — der mit Abstand teuerste Schritt, weil man dafür mit einem Zufallsgenerator Kandidaten zieht und sie mit einem Primzahltest (etwa dem Fermatschen Test) prüft, bis zwei Primzahlen gefunden sind. **Zweitens** berechnest du ihr Produkt n = p·q; dieses n ist der öffentliche Modul, und seine Bitlänge ist grob die Summe der Bitlängen von p und q (zwei 1024-Bit-Primzahlen ergeben ein ~2048-Bit-n). **Drittens** berechnest du Eulers Phi-Funktion φ(n) = (p−1)·(q−1). **Viertens** wählst du den öffentlichen Exponenten e aus dem Bereich von 1 bis φ(n)−1 so, dass e teilerfremd zu φ(n) ist, also ggT(e, φ(n)) = 1. **Fünftens** berechnest du den privaten Schlüssel d so, dass d·e ≡ 1 mod φ(n) gilt — mit anderen Worten, d ist das **modulare Inverse** von e modulo φ(n). Veröffentlicht wird am Ende das Paar (n, e); geheim bleiben d sowie p, q und φ(n).
 
-### Schritt für Schritt
+> **Eselsbrücke (die 5 Schritte):** **p, q → n → φ → e → d.** Zwei Primzahlen, ihr Produkt n, daraus φ = (p−1)(q−1), dann ein e mit ggT(e, φ) = 1, und zuletzt d als Inverse von e modulo φ.
 
-1. **Wähle zwei große Primzahlen p und q.** (Der aufwändigste Schritt.)
-2. **Berechne n = p · q.** Dieses n ist Teil des öffentlichen Schlüssels (der „Modul").
-3. **Berechne φ(n) = (p − 1)(q − 1)** (Eulers Phi-Funktion, siehe unten).
-4. **Wähle den öffentlichen Exponenten e ∈ {1, …, φ(n) − 1} mit ggT(e, φ(n)) = 1** (e und φ(n) teilerfremd).
-5. **Berechne den privaten Schlüssel d mit d · e ≡ 1 mod φ(n)** — d ist also das **modulare Inverse** von e.
+### Schritt für Schritt: ein komplettes RSA-Beispiel
 
-Öffentlich wird (n, e), geheim bleiben d (und p, q, φ(n)).
+Rechnen wir alles mit kleinen Zahlen durch, genau wie in der Klausur. Wir nehmen **p = 3** und **q = 11**. Dann ist **n = 3·11 = 33** und **φ(n) = (3−1)·(11−1) = 2·10 = 20**. Als öffentlichen Exponenten wählen wir **e = 3**, denn ggT(3, 20) = 1. Jetzt suchen wir d mit 3·d ≡ 1 mod 20 — durch Probieren oder mit dem gleich folgenden Algorithmus findet man **d = 7**, denn 3·7 = 21 = 20 + 1 ≡ 1 mod 20. Der öffentliche Schlüssel ist also **(33, 3)**, der private **(33, 7)**.
 
-**Komplett durchgerechnet (kleine Zahlen, genau wie in der Klausur):**
+Verschlüsseln wir den Klartextwert **x = 4**: y = 4³ mod 33 = 64 mod 33 = **31**. Und entschlüsseln zur Probe: x = 31⁷ mod 33. Ein hübscher Rechentrick spart hier Arbeit — 31 ≡ −2 mod 33, also ist 31⁷ ≡ (−2)⁷ = −128, und −128 mod 33 = −128 + 4·33 = **4**. Wir landen wieder beim Klartext 4. Beachte die Bedingung x < n: Jeder Klartextwert muss kleiner als der Modul sein, sonst geht die eindeutige Umkehrung verloren.
 
-1. p = 3, q = 11
-2. n = 3 · 11 = **33**
-3. φ(n) = (3−1)(11−1) = 2 · 10 = **20**
-4. e = 3 wählen — ggT(3, 20) = 1 ✓
-5. d mit 3 · d ≡ 1 (mod 20) → d = **7** (denn 3 · 7 = 21 ≡ 1 mod 20)
+## Warum es funktioniert: Eulers Phi-Funktion
 
-Öffentlicher Schlüssel (33, 3), privater 7. **Verschlüsseln** von x = 4: y = 4³ mod 33 = 64 mod 33 = **31**. **Entschlüsseln**: 31⁷ mod 33 = 4 (Trick: 31 ≡ −2 mod 33, also (−2)⁷ = −128 ≡ 4). Es kommt wieder der Klartext heraus.
+Der Schlüssel zum *Verständnis* (nicht nur zum Rechnen) ist **Eulers Phi-Funktion φ(n)**: Sie zählt, wie viele Zahlen von 1 bis n teilerfremd zu n sind. Zwei Regeln tragen das ganze RSA. Erstens: Ist n selbst eine Primzahl, dann sind *alle* n−1 kleineren Zahlen teilerfremd zu n, also φ(n) = n−1 (zum Beispiel φ(7) = 6). Zweitens: Sind p und q beide prim, dann gilt φ(p·q) = φ(p)·φ(q) = (p−1)·(q−1). Und hier ist der entscheidende Punkt, der RSA sicher macht: φ(n) lässt sich *nur dann* leicht ausrechnen, wenn man p und q kennt. Ein Angreifer sieht nur n; um daraus φ(n) zu gewinnen, müsste er n in p und q zerlegen — und ohne φ(n) gibt es kein d. Die Sicherheit von RSA ist also exakt die Schwierigkeit der **Faktorisierung**.
 
-> **Eselsbrücke (5 Schritte):** **p, q → n → φ → e → d.** Erst zwei Primzahlen, ihr Produkt n, daraus φ = (p−1)(q−1), dann ein e mit ggT(e, φ) = 1, und zum Schluss d als Inverse von e mod φ. Genau diese Kette an kleinen Zahlen rechnest du in der Klausur. [Practical Networking](https://www.youtube.com/watch?v=Pq8gNbvfaoM) und [Eddie Woo](https://www.youtube.com/watch?v=4zahvcJ9glg) rechnen je ein Beispiel komplett vor.
+### Schritt für Schritt: d finden mit dem erweiterten Euklidischen Algorithmus
 
-Zu den Schritten: **Schritt 1** ist der teuerste — man sucht mit einem RNG zufällige (z. B. 1024-Bit-)Zahlen und testet sie mit einem **Primzahltest** (z. B. Fermat), bis eine Primzahl gefunden ist. **Schritt 2** verdoppelt grob die Bitlänge (1024 × 1024 Bit → ~2048 Bit), und genau diese Größe macht die Faktorisierung von n unmöglich.
+Den fünften Schritt — d als Inverse von e zu bestimmen — erledigt man systematisch mit dem **erweiterten Euklidischen Algorithmus (EEA)**. Er berechnet zu zwei Zahlen nicht nur ihren größten gemeinsamen Teiler, sondern auch zwei Koeffizienten s und t, sodass ggT(φ(n), e) = s·φ(n) + t·e. Ist dieser ggT gleich 1 (was bei gültigem e der Fall ist), dann ist genau **t das gesuchte d** — das Inverse von e modulo φ(n). Der Algorithmus läuft iterativ: In jedem Schritt bildet man den Rest rᵢ = rᵢ₋₂ mod rᵢ₋₁, den Quotienten qᵢ₋₁ = (rᵢ₋₂ − rᵢ)/rᵢ₋₁ und führt s und t über die Regeln sᵢ = sᵢ₋₂ − qᵢ₋₁·sᵢ₋₁ und tᵢ = tᵢ₋₂ − qᵢ₋₁·tᵢ₋₁ mit, bis der Rest 0 wird. Machen wir das für unser Beispiel mit φ(n) = 20 und e = 3:
 
-## Warum es funktioniert: Eulers Phi & der EEA
+| i | rᵢ | qᵢ₋₁ | sᵢ | tᵢ |
+|---|---|---|---|---|
+| 0 | 20 | — | 1 | 0 |
+| 1 | 3 | — | 0 | 1 |
+| 2 | 20 mod 3 = 2 | 6 | 1 − 6·0 = 1 | 0 − 6·1 = −6 |
+| 3 | 3 mod 2 = 1 | 1 | 0 − 1·1 = −1 | 1 − 1·(−6) = 7 |
+| 4 | 2 mod 1 = 0 | — | — | — |
 
-**Eulers Phi-Funktion φ(n)** zählt, wie viele Zahlen kleiner n teilerfremd zu n sind. Zwei Regeln, die alles tragen:
+Der letzte von null verschiedene Rest ist r₃ = 1 = ggT(20, 3), also ist e gültig, und t₃ = **7** ist unser d. Zur Probe: s·20 + t·3 = (−1)·20 + 7·3 = −20 + 21 = 1. Stimmt — und 7 ist tatsächlich das Inverse von 3 modulo 20.
 
-- Ist n prim, dann φ(n) = n − 1 (z. B. φ(7) = 6).
-- Sind p, q prim, dann φ(p·q) = φ(p)·φ(q) = (p − 1)(q − 1).
+## Square-and-Multiply: riesige Potenzen schnell rechnen
 
-Der Witz: φ(n) lässt sich *nur* leicht berechnen, wenn man p und q kennt. Ein Angreifer hat nur n — und ohne φ(n) kein d.
+Bei echten Schlüsseln steht im Exponenten eine 2048-Bit-Zahl. Die Potenz xᵉ naiv durch fortgesetztes Multiplizieren auszurechnen bräuchte astronomisch viele Schritte — für einen 1024-Bit-Exponenten in der Größenordnung von 10³⁰⁰ Multiplikationen, mehr als es Atome im beobachtbaren Universum gibt. **Square-and-Multiply** schafft dasselbe mit nur etwa anderthalb Operationen *pro Bit* des Exponenten, indem es die **Binärdarstellung des Exponenten** abarbeitet, vom höchstwertigen Bit (MSB) zum niedrigstwertigen (LSB). Die Regel ist denkbar einfach: Beim ersten Bit übernimmst du einfach die Basis. Bei jedem weiteren Bit quadrierst du das bisherige Zwischenergebnis — und *zusätzlich*, falls das Bit eine 1 ist, multiplizierst du noch einmal mit der Basis. Nach jedem Schritt reduzierst du modulo n, damit die Zahlen klein bleiben (genau die Reduktionstechnik aus dem zweiten Kapitel).
 
-Schritt 4 und 5 erledigt man zusammen mit dem **erweiterten Euklidischen Algorithmus (EEA)**. Er berechnet zu zwei Zahlen nicht nur den ggT, sondern auch Koeffizienten s, t mit:
+### Schritt für Schritt: Square-and-Multiply von Hand
 
-> ggT(φ(n), e) = s · φ(n) + t · e
+Berechnen wir die Entschlüsselung 31⁷ mod 33 mit Square-and-Multiply. Der Exponent 7 ist binär **111**, also drei Einsen. Wir arbeiten sie von links ab:
 
-Ist dieser ggT = 1, ist e gültig — und der private Schlüssel **d entspricht t** (dem Inversen von e modulo φ(n)). Der EEA läuft iterativ: in jedem Schritt r_i = r_{i−2} mod r_{i−1}, q_{i−1} = (r_{i−2} − r_i)/r_{i−1}, und s, t werden rekursiv mitgeführt, bis der Rest 0 ist.
+| Bit (von links) | Operation | Rechnung mod 33 | Zwischenergebnis |
+|---|---|---|---|
+| 1 (MSB) | Basis übernehmen | — | 31 |
+| 1 | quadrieren, dann × Basis | 31² = 961 ≡ 4; 4·31 = 124 ≡ 25 | 25 |
+| 1 (LSB) | quadrieren, dann × Basis | 25² = 625 ≡ 31; 31·31 = 961 ≡ 4 | 4 |
 
-## Square-and-Multiply: große Potenzen schnell rechnen
+Heraus kommt **4** — genau der Klartext, den wir oben schon mit dem (−2)-Trick gefunden hatten. Bei einem Bit 0 würde man in der entsprechenden Zeile *nur* quadrieren und das Multiplizieren weglassen.
 
-Problem: x^e mod n mit 1024-Bit-Exponenten naiv auszurechnen bräuchte astronomisch viele Multiplikationen (≈ 10^300). **Square-and-Multiply** schafft es mit nur ~1,5 · (Bitlänge) Operationen, indem es die **Binärdarstellung des Exponenten** abarbeitet — vom höchstwertigen Bit (MSB) zum niedrigstwertigen (LSB):
+> **Eselsbrücke (Square-and-Multiply):** Lies den Exponenten **binär von links**. **Bit 1 → quadrieren *und* multiplizieren (QM)**, **Bit 0 → nur quadrieren (Q)**, das MSB ist immer nur „Basis hinschreiben". Schreib für jedes Bit Q oder QM untereinander — das ist der Rechenweg.
 
-- Beim MSB: Basis einfach übernehmen.
-- Bei jedem weiteren Bit: **immer quadrieren**; ist das Bit **1**, zusätzlich **mit der Basis multiplizieren**.
-- Nach jedem Schritt **modulo n reduzieren** (klein rechnen, wie in Vorlesung 2 gelernt).
+## RSA umgedreht: die digitale Signatur
 
-So wird aus einer unmöglich großen Rechnung eine, die ein Computer in Millisekunden erledigt.
+Jetzt der elegante Bonus, der ein ganz neues Schutzziel löst. Bisher hat RSA die *Vertraulichkeit* gesichert. Dreht man die beiden Schlüssel aber in der Reihenfolge um, bekommt man die **Nichtabstreitbarkeit** — den Beweis, *wer* eine Nachricht erzeugt hat. Das Verfahren heißt digitale Signatur. Alice **signiert** eine Nachricht m, indem sie sie mit ihrem *privaten* Schlüssel d „verschlüsselt": s = mᵈ mod n. Diese Zahl s ist die Signatur, und sie schickt das Paar (m, s) los. Jeder, der Alices *öffentlichen* Schlüssel e kennt, kann **verifizieren**: Er rechnet sᵉ mod n und prüft, ob das wieder die Nachricht m ergibt. Tut es das, kann die Signatur nur von Alice stammen — denn nur sie besitzt d. Beachte die Umkehrung der Rollen: Beim Verschlüsseln nutzt man den *öffentlichen* Schlüssel des Empfängers, beim Signieren den *eigenen privaten*.
 
-> **Eselsbrücke (Square-and-Multiply):** Lies den Exponenten **binär von links**. **Bit 0 → nur Quadrieren (Q)**. **Bit 1 → Quadrieren *und* Multiplizieren (QM)**. Schreib einfach für jedes Bit Q oder QM untereinander — fertig ist der Rechenweg.
+![Digitale Signatur: mit dem privaten Schlüssel signieren, mit dem öffentlichen verifizieren](https://upload.wikimedia.org/wikipedia/commons/9/99/Digital_Signature_diagram_de.svg "Digitale Signatur: Alice signiert mit ihrem privaten Schlüssel, jeder verifiziert mit ihrem öffentlichen. Stimmt die Prüfung, stammt die Nachricht garantiert von Alice.")
 
-## Textbook-RSA ist gefährlich: Determinismus & der ×2-Angriff
+### Schritt für Schritt: signieren und verifizieren
 
-„Textbook-RSA" (genau die obige Formel ohne Zusätze) hat zwei Schwächen:
+Bleiben wir bei unserem Schlüsselpaar (n = 33, e = 3, d = 7) und signieren die Nachricht m = 4. Alice rechnet die Signatur s = mᵈ mod n = 4⁷ mod 33. Mit Square-and-Multiply oder direkt: 4⁷ = 16384, und 16384 mod 33 = 16 (denn 496·33 = 16368). Also ist s = **16**. Bob verifiziert mit Alices öffentlichem e: sᵉ mod n = 16³ mod 33. Schrittweise: 16² = 256 ≡ 25 mod 33, dann 25·16 = 400 ≡ 4 mod 33. Heraus kommt **4** = m — die Signatur ist gültig, die Nachricht stammt von Alice.
 
-- **Deterministisch:** gleicher Klartext → immer gleiches Chiffrat. Ein Angreifer erkennt Wiederholungen.
-- **Manipulierbar (malleable):** Oskar sieht das Chiffrat y, berechnet 2^e mod n und multipliziert: y · 2^e mod n. Beim Entschlüsseln kommt **2 · x** heraus — Oskar hat den Klartext gezielt verändert, ohne ihn zu kennen.
+In der Praxis signiert man aber keine ganzen Dokumente direkt, denn die wären viel größer als n. Stattdessen nutzt man **Hash-Signaturen**: Man jagt das Dokument zuerst durch eine kryptografische Hash-Funktion H, die einen kurzen Fingerabdruck x = H(m) erzeugt, und signiert *nur diesen Fingerabdruck*: s = H(m)ᵈ mod n. Der Empfänger berechnet den Hash der erhaltenen Nachricht selbst neu, entschlüsselt die Signatur mit dem öffentlichen Schlüssel und vergleicht beide Werte — stimmen sie überein, ist das Dokument unverändert *und* von Alice. (Im Übungsblatt dient als Spielzeug-Hash die Quersumme der Buchstabenwerte: Der Hash von „ABC" wäre 65+66+67 = 198; man signiert dann diese 198 statt der ganzen Nachricht.) Wie echte Hash-Funktionen aussehen und welche Eigenschaften sie haben müssen, ist das Thema des nächsten Kapitels.
 
-Die Lösung ist **Padding**: Vor dem Verschlüsseln werden **zufällige Daten** in den Klartext eingebaut. Das macht RSA probabilistisch und zerstört die Manipulierbarkeit. Weitere Angriffsflächen: schnellere Faktorisierungsalgorithmen (gibt es, aber für große n weiterhin chancenlos — historisch: die RSA-129-Challenge) und **Seitenkanalangriffe** (der Stromverbrauch bei Square-and-Multiply kann d verraten). Und: AES ist **100–1000-mal schneller** als RSA — daher RSA nur für den Schlüsseltausch, nicht für Massendaten.
+> **Eselsbrücke (Verschlüsseln vs. Signieren):** **Verschlüsseln** = mit dem **öffentlichen** Schlüssel des Empfängers (nur er liest). **Signieren** = mit dem **eigenen privaten** Schlüssel (alle prüfen, nur du konntest es). Die zwei Schlüssel tauschen einfach die Rollen.
+
+## Textbook-RSA ist gefährlich: Determinismus und der ×2-Angriff
+
+Die reine Formel, die wir bisher benutzt haben, heißt „Textbook-RSA", und so wie sie dasteht, ist sie unsicher. Erstens ist sie **deterministisch**: Derselbe Klartext ergibt mit demselben Schlüssel immer dasselbe Chiffrat, sodass ein Angreifer Wiederholungen erkennt. Zweitens ist sie **manipulierbar (malleable)**, und das auf eine besonders hübsche Weise: Oskar sieht das Chiffrat y, berechnet selbst 2ᵉ mod n und multipliziert beides, schickt also y·2ᵉ mod n weiter. Beim Entschlüsseln kommt dann nicht x, sondern **2·x** heraus — Oskar hat den Klartext gezielt verdoppelt, ohne ihn je zu kennen. Die Lösung beider Probleme ist **Padding**: Vor dem Verschlüsseln baut man zufällige Daten in den Klartext ein, was RSA probabilistisch macht und die Manipulierbarkeit zerstört. Weitere Angriffsflächen, die du kennen solltest, sind schnellere Faktorisierungsalgorithmen (es gibt Fortschritte, aber für große n bleibt es chancenlos — historisch berühmt ist die RSA-129-Challenge) und **Seitenkanalangriffe**, bei denen etwa der Stromverbrauch während Square-and-Multiply den privaten Schlüssel verrät. Und nicht zu vergessen: RSA ist 100- bis 1000-mal langsamer als AES — ein weiterer Grund, es nur für den Schlüsseltausch und für Signaturen zu verwenden, nie für Massendaten.
 
 ## Auf den Punkt
 
-Die Kurzfassung: RSA ist das erste konkrete asymmetrische Verfahren. Der öffentliche Schlüssel ist (n, e), der private d; verschlüsselt wird mit y = x^e mod n, entschlüsselt mit x = y^d mod n. Den Schlüssel erzeugst du in fünf Schritten: zwei große Primzahlen p, q wählen → n = p·q → φ(n) = (p−1)(q−1) → ein e mit ggT(e, φ(n)) = 1 → d als Inverse von e modulo φ(n). Die Sicherheit ruht allein darauf, dass man n nicht in p und q zerlegen kann (Faktorisierungsproblem); kennt man φ(n) nicht, gibt es kein d. Zwei Werkzeuge machen RSA praktikabel: der erweiterte Euklidische Algorithmus liefert d, und Square-and-Multiply macht die riesigen Potenzen überhaupt berechenbar. Und Vorsicht: „Textbook-RSA" ohne Padding ist deterministisch und manipulierbar — die Praxis braucht Padding.
+Die Kurzfassung: RSA ist das erste konkrete asymmetrische Verfahren. Der öffentliche Schlüssel ist **(n, e)**, der private **d**; verschlüsselt wird mit **y = xᵉ mod n**, entschlüsselt mit **x = yᵈ mod n**. Den Schlüssel erzeugst du in fünf Schritten: zwei Primzahlen p, q → n = p·q → φ(n) = (p−1)(q−1) → ein e mit ggT(e, φ(n)) = 1 → d als Inverse von e modulo φ(n), bestimmt mit dem **erweiterten Euklidischen Algorithmus**. Die Sicherheit ruht allein auf der Schwierigkeit, n zu **faktorisieren** — ohne p und q kein φ(n), ohne φ(n) kein d. Damit die riesigen Potenzen rechenbar werden, nutzt man **Square-and-Multiply** (Binärexponent von links, Bit 1 = quadrieren und multiplizieren, Bit 0 = nur quadrieren). Dreht man die Schlüssel um, signiert man: **s = mᵈ mod n**, verifiziert mit **sᵉ mod n** — in der Praxis über den **Hash** des Dokuments. Und „Textbook-RSA" ohne **Padding** ist deterministisch und durch den ×2-Trick manipulierbar.
 
 ## Begriffe & Notation
 
 | Begriff | Bedeutung |
 |---|---|
-| **(n, e)** | öffentlicher Schlüssel (Modul + Exponent) |
+| **(n, e)** | öffentlicher Schlüssel: Modul n und Exponent e |
 | **d** | privater Schlüssel; d ≡ e⁻¹ mod φ(n) |
 | **n = p·q** | Produkt zweier großer Primzahlen |
-| **φ(n)** | Eulers Phi; φ(p·q) = (p−1)(q−1) |
-| **ggT(e, φ(n)) = 1** | e und φ(n) teilerfremd (Bedingung für e) |
-| **EEA** | erweiterter Euklid: liefert ggT und das Inverse d |
+| **φ(n)** | Eulers Phi; für n = p·q ist φ(n) = (p−1)(q−1) |
+| **ggT(e, φ(n)) = 1** | e teilerfremd zu φ(n) — Bedingung für ein gültiges e |
+| **EEA** | erweiterter Euklid: liefert ggT *und* das Inverse d |
 | **Square-and-Multiply** | schnelle modulare Exponentiation über die Bits von e |
-| **Textbook-RSA** | RSA ohne Padding — deterministisch & manipulierbar |
-| **Padding** | zufällige Daten im Klartext → probabilistisch & sicher |
+| **Signatur** | s = mᵈ mod n (mit privatem d), Prüfung sᵉ mod n |
+| **Hash-Signatur** | nicht m, sondern H(m) wird signiert |
+| **Textbook-RSA** | RSA ohne Padding — deterministisch und manipulierbar |
 
 ## Typische Fallen
 
 - **φ(n) = n − 1? Nur wenn n prim ist.** Bei RSA ist n = p·q, also φ(n) = (p−1)(q−1).
-- **e frei wählbar? Fast** — aber es muss ggT(e, φ(n)) = 1 gelten, sonst existiert kein d.
-- **d aus n und e leicht berechenbar?** Nur wenn man φ(n) kennt — und das setzt die Faktorisierung von n voraus (genau das ist hart).
-- **Modulo erst am Ende anwenden?** Nein — bei Square-and-Multiply nach *jedem* Schritt reduzieren, sonst werden die Zahlen riesig.
-- **Textbook-RSA ist sicher genug?** Nein — ohne Padding deterministisch und durch den ×2-Trick manipulierbar.
+- **e frei wählbar? Fast** — aber es muss ggT(e, φ(n)) = 1 gelten, sonst existiert kein passendes d.
+- **d aus n und e leicht berechenbar? Nur mit φ(n)** — und das setzt die Faktorisierung von n voraus, die genau das harte Problem ist.
+- **Bei Square-and-Multiply erst am Ende modulo rechnen? Nein** — nach *jedem* Schritt reduzieren, sonst explodieren die Zwischenergebnisse.
+- **Signieren = Verschlüsseln mit dem öffentlichen Schlüssel? Nein, umgekehrt** — signiert wird mit dem *privaten* Schlüssel, verifiziert mit dem öffentlichen.
+- **Textbook-RSA ist sicher genug? Nein** — ohne Padding deterministisch und durch den ×2-Trick manipulierbar.
 
 ## Klausur-Fokus
 
-RSA ist *das* Rechenthema des Kurses, und das Übungsblatt macht genau das vor: ein komplettes **RSA-Beispiel mit kleinen Zahlen** durchrechnen. Übe das, bis es sitzt — die fünf Schritte der Schlüsselerzeugung (p, q → n → φ(n) → e mit ggT(e, φ(n)) = 1 → d mit e·d ≡ 1 mod φ(n)), dann eine Nachricht (oft Buchstaben über die A=0…Z=25-Tabelle) mit y = x^e mod n **verschlüsseln und mit x = y^d mod n wieder entschlüsseln**, zur Probe. Du musst sicher sagen können, welches Zahlenpaar der **öffentliche** und welches der **private** Schlüssel ist (öffentlich (n, e), privat (n, d)), **φ(n)** korrekt bilden, ein gültiges **e** prüfen (teilerfremd zu φ(n), e < φ(n)) und **d per EEA** bestimmen. Für große Exponenten gehört **Square-and-Multiply** dazu (Binärexponent von links, Bit 0 → quadrieren, Bit 1 → quadrieren und multiplizieren, nach jedem Schritt mod reduzieren). Auf der Verständnisseite: erklären, warum die **Faktorisierung** die Sicherheit trägt und warum **Textbook-RSA** (deterministisch, ×2-Manipulation) **Padding** braucht.
+RSA ist *das* Rechenthema, und das Übungsblatt macht es vor. Zuerst ein **komplettes RSA-Beispiel mit kleinen Zahlen**: die fünf Schritte der Schlüsselerzeugung (p, q → n → φ(n) → e mit ggT(e, φ(n)) = 1 → d mit e·d ≡ 1 mod φ(n)), dann eine Nachricht (oft Buchstaben über die A=0…Z=25-Tabelle) mit y = xᵉ mod n **verschlüsseln und mit x = yᵈ mod n wieder entschlüsseln**. Du musst ein gegebenes Schlüsselpaar **vervollständigen oder als ungültig erkennen** können (etwa prüfen, ob e teilerfremd zu φ(n) ist), sicher sagen, welches Paar der **öffentliche** und welches der **private** Schlüssel ist, und **d per EEA** bestimmen (die Tabelle mit rᵢ, qᵢ₋₁, sᵢ, tᵢ bis zum Rest 0). Für große Exponenten gehört **Square-and-Multiply** dazu (Binärexponent von links, Bit 1 = quadrieren und multiplizieren, Bit 0 = nur quadrieren, nach jedem Schritt mod n). Frisch zum Üben sind die **Signaturen**: eine **RSA-Signatur** erstellen (s = mᵈ mod n) und verifizieren (sᵉ mod n = m), sowie eine **Hash-Signatur** (erst H(m), dann signieren) — im Übungsblatt mit der Quersumme der Buchstabenwerte als Spielzeug-Hash. Auf der Verständnisseite: erklären, warum die **Faktorisierung** die Sicherheit trägt, was **Eulers φ** mit alldem zu tun hat, und warum **Textbook-RSA** (deterministisch, ×2-Manipulation) **Padding** braucht. Faktenwissen: RSA wurde 1977 von Rivest, Shamir und Adleman vorgeschlagen, beruht auf dem Faktorisierungsproblem, und für 128-Bit-symmetrische Sicherheit braucht es rund 3072 Bit RSA-Schlüssellänge.
 
 ## Mehr dazu
 
 - **Practical Networking — RSA Algorithm, mit Beispiel** (EN): komplette Schlüsselerzeugung und Ver-/Entschlüsselung an Zahlen vorgerechnet. https://www.youtube.com/watch?v=Pq8gNbvfaoM
 - **Eddie Woo — The RSA Encryption Algorithm (1 of 2: Computing an Example)** (EN): sehr ruhige, kleinschrittige Beispielrechnung. https://www.youtube.com/watch?v=4zahvcJ9glg
-- **Art of the Problem — RSA Encryption** (EN): die Intuition (Einwegfunktion/Trapdoor, Euler) hinter RSA. https://www.youtube.com/watch?v=wXB-V_Keiu8
-- **Square-and-Multiply — Rechenbeispiel** (aus den Folien verlinkt): https://www.youtube.com/watch?v=cbGB__V8MNk`,
+- **Art of the Problem — RSA Encryption** (EN): die Intuition (Trapdoor-Einwegfunktion, Euler) hinter RSA. https://www.youtube.com/watch?v=wXB-V_Keiu8
+- **Square-and-Multiply — Rechenbeispiel** (EN): der Algorithmus an einer konkreten Potenz Schritt für Schritt. https://www.youtube.com/watch?v=cbGB__V8MNk`,
   },
 };
 
@@ -630,111 +866,116 @@ const lecture06: Explanation = {
     de: "Digitale Signaturen, Hash-Funktionen und Message Authentication Codes (MAC)",
   },
   content: {
-    de: `Bis jetzt ging es ums Geheimhalten (Vertraulichkeit). Diese Vorlesung dreht sich um die andere Hälfte: *Wer hat das wirklich geschickt, und wurde es unterwegs verändert?* — also Authentizität und Integrität. Das Werkzeug dafür sind digitale Signaturen (asymmetrisch), praktisch gemacht durch Hash-Funktionen, plus deren symmetrischer, schneller Cousin: der MAC.
+    de: `Bisher drehte sich alles ums Geheimhalten — um Vertraulichkeit. In diesem Kapitel geht es um die andere große Hälfte der Sicherheit, die man im Alltag genauso braucht und doch oft vergisst: *Wer hat das wirklich geschickt, und ist es unterwegs unverändert geblieben?* Das sind die Schutzziele **Authentizität** und **Integrität**. Drei Werkzeuge bauen wir dafür auf, und sie hängen eng zusammen: die **digitale Signatur** (die asymmetrische, fälschungssichere Unterschrift), die **Hash-Funktion** (der digitale Fingerabdruck, der Signaturen erst praktisch macht — und nebenbei Passwörter schützt) und der **MAC** (der schnelle, symmetrische Cousin der Signatur). Am Ende verstehst du auch, warum jede seriöse Webseite ein Schloss-Symbol trägt und warum dein Passwort niemals im Klartext in einer Datenbank stehen sollte.
 
 ## Digitale Signaturen: mit dem privaten Schlüssel unterschreiben
 
-Erinnerung aus Vorlesung 4: Symmetrische Verfahren können **keine Nichtabstreitbarkeit** (Non-Repudiation) garantieren — weil beide denselben Schlüssel haben, kann man nicht beweisen, *wer* etwas erzeugt hat. Digitale Signaturen lösen das mit asymmetrischer Kryptografie und drehen die RSA-Logik um:
+Erinnere dich an eine Schwäche der symmetrischen Kryptografie: Sie kann keine **Nichtabstreitbarkeit** (Non-Repudiation) garantieren. Weil beide Seiten denselben geheimen Schlüssel besitzen, lässt sich im Streitfall nie beweisen, *welche* von ihnen eine Nachricht erzeugt hat — beide hätten es gekonnt. Die digitale Signatur löst genau das, und sie tut es, indem sie die RSA-Logik einfach spiegelt. Beim Verschlüsseln benutzt man den *öffentlichen* Schlüssel des Empfängers; beim Signieren benutzt Alice ihren *eigenen privaten* Schlüssel. Sie erzeugt also s = sig(x) mit ihrem privaten Schlüssel und schickt das Paar (x, s) los. Jeder, der ihren öffentlichen Schlüssel kennt, kann anschließend verifizieren, ob die Signatur passt — das Ergebnis ist schlicht wahr oder falsch. Weil nur Alice ihren privaten Schlüssel besitzt, kann auch nur sie eine gültige Signatur erzeugen; und weil jeder mit dem öffentlichen Schlüssel prüfen kann, ist die Unterschrift öffentlich überprüfbar. Das liefert gleich drei Dinge auf einmal: **Integrität** (eine nachträglich geänderte Nachricht fällt bei der Prüfung durch), **Authentizität** (die Nachricht stammt nachweislich von Alice) und damit die ersehnte **Nichtabstreitbarkeit**. Das funktioniert mit jedem asymmetrischen Verfahren — RSA, Diffie-Hellman, elliptische Kurven —, und die konkrete RSA-Variante hast du im vorigen Kapitel schon von Hand gerechnet.
 
-- **Signieren:** Alice erzeugt s = sig_{kpr}(x) mit ihrem **privaten** Schlüssel und schickt (x, s).
-- **Verifizieren:** Bob prüft Verify_{kpub}(s, x) = true/false mit Alices **öffentlichem** Schlüssel.
+![Digitale Signatur: mit dem privaten Schlüssel signieren, mit dem öffentlichen verifizieren](https://upload.wikimedia.org/wikipedia/commons/9/99/Digital_Signature_diagram_de.svg "Die digitale Signatur ist das Spiegelbild der Verschlüsselung: signiert wird mit dem privaten Schlüssel, geprüft mit dem öffentlichen.")
 
-Nur Alice besitzt kpr, also kann nur sie signieren; jeder kann mit dem öffentlichen Schlüssel prüfen. Das liefert gleichzeitig **Integrität** (geändertes x fällt durch) und **Authentizität/Nichtabstreitbarkeit** (es war nachweislich Alice). Funktioniert mit RSA, Diffie-Hellman und Elliptischen Kurven; hier am Beispiel RSA.
+> **Eselsbrücke (Spiegelbild):** **Verschlüsseln: öffentlich → privat.** **Signieren: privat → öffentlich.** Mit dem *privaten* Schlüssel unterschreibst du (das kann nur einer), mit dem *öffentlichen* prüft jeder.
 
-![Digitale Signatur: signieren mit privatem, verifizieren mit öffentlichem Schlüssel](https://commons.wikimedia.org/wiki/Special:FilePath/Digital_Signature_diagram.svg "Signieren mit dem privaten Schlüssel, verifizieren mit dem öffentlichen — das Spiegelbild der Verschlüsselung.")
+## Der aktive Angreifer: Man-in-the-Middle
 
-> **Eselsbrücke (Signatur vs. Verschlüsselung — Spiegelbild!):** **Verschlüsseln: öffentlich → privat.** **Signieren: privat → öffentlich.** Mit dem *privaten* Schlüssel unterschreibst du (kann nur einer), mit dem *öffentlichen* prüft jeder.
+Bislang war Oskar ein *passiver* Lauscher, der nur mithörte. Jetzt tritt ein gefährlicherer Gegner auf: der **aktive** Angreifer, der Nachrichten nicht nur liest, sondern abfängt und verändert. Sein klassischer Trick ist der **Man-in-the-Middle (MITM)**: Er setzt sich heimlich zwischen Alice und Bob und **tauscht die öffentlichen Schlüssel aus**. Schickt Bob seinen öffentlichen Schlüssel an Alice, fängt Oskar ihn ab und ersetzt ihn durch *seinen eigenen*. Alice glaubt nun, sie habe Bobs Schlüssel, verschlüsselt (oder prüft Signaturen) in Wahrheit aber für Oskar — der alles mitliest, neu verschlüsselt und an Bob weiterreicht, ohne dass die beiden etwas merken. Das zeigt eine unbequeme Wahrheit: Ein öffentlicher Schlüssel allein nützt nichts, solange man nicht sicher weiß, *wem* er gehört.
 
-Aber: Bisher war Oskar ein *passiver* Lauscher. Jetzt kommt der **aktive** Angreifer — der **Man-in-the-Middle (MITM)**. Er fängt Nachrichten ab und **tauscht öffentliche Schlüssel aus**: Schickt Bob seinen öffentlichen Schlüssel, ersetzt Oskar ihn durch seinen eigenen. Alice signiert/verschlüsselt dann für Oskar, ohne es zu merken.
+## Zertifikate und PKI: wem gehört dieser Schlüssel?
 
-## Zertifikate & PKI: wem gehört dieser Schlüssel?
-
-Das Grundproblem: Asymmetrische Kryptografie braucht keinen *geheimen*, aber einen **authentisierten** Kanal, um öffentliche Schlüssel zu verteilen — sonst greift der MITM. Lösung: **Zertifikate**. Ein Zertifikat bindet einen öffentlichen Schlüssel an eine Identität, signiert von einer vertrauenswürdigen **Certificate Authority (CA)**:
-
-> Cert_A = [ (kpub_A, ID_A), sig_{kpr_CA}(kpub_A, ID_A) ]
-
-Die öffentlichen Schlüssel der CAs sind bereits im Browser vorinstalliert — daher kann dein Browser jedes Webseiten-Zertifikat prüfen. Das ganze Drumherum (CA + Identitätsprüfung, Rückruf, sichere Verteilung des CA-Schlüssels) heißt **Public-Key-Infrastruktur (PKI)**; das Standardformat ist **X.509** (Seriennummer, Aussteller, Gültigkeit, Inhaber, öffentlicher Schlüssel, Signatur).
+Daraus folgt das Grundproblem der asymmetrischen Kryptografie: Sie braucht zwar keinen *geheimen* Kanal mehr, um öffentliche Schlüssel zu verteilen, aber sie braucht einen **authentisierten** — einen, auf dem man der Herkunft eines Schlüssels trauen kann. Die Lösung sind **Zertifikate**. Ein Zertifikat bindet einen öffentlichen Schlüssel fest an eine Identität, und diese Bindung wird von einer vertrauenswürdigen dritten Stelle, einer **Certificate Authority (CA)**, digital signiert. Ein Zertifikat für Alice sieht im Kern so aus: Es enthält ihren öffentlichen Schlüssel und ihre Identität, und darüber die Signatur der CA, also Cert_A = [ (kpub_A, ID_A), sig_CA(kpub_A, ID_A) ]. Wer der CA vertraut, kann diese Signatur prüfen und weiß dann sicher, dass der Schlüssel wirklich Alice gehört. Der Clou im Alltag: Die öffentlichen Schlüssel der großen CAs sind bereits in deinem Browser und Betriebssystem **vorinstalliert**, weshalb dein Browser jedes Webseiten-Zertifikat automatisch prüfen kann — daher das Schloss-Symbol. Das ganze organisatorische Drumherum (CAs, Identitätsprüfung, das Zurückrufen kompromittierter Zertifikate, die sichere Verteilung der CA-Schlüssel) heißt **Public-Key-Infrastruktur (PKI)**, und das Standardformat eines Zertifikats ist **X.509** mit Feldern wie Seriennummer, Aussteller, Gültigkeitsdauer, Inhaber, öffentlichem Schlüssel und der Signatur.
 
 ## Hash-Funktionen: der digitale Fingerabdruck
 
-Eine **Hash-Funktion h** hat **keinen Schlüssel** und macht aus einem beliebig langen Input einen **Fingerabdruck fester Länge** (typisch 128–512 Bit). Eigenschaften: hohe Effizienz auch bei langen Nachrichten, und der **Avalanche-Effekt** — kleinste Änderung am Input → komplett anderer Hash.
+Jetzt zum vielleicht vielseitigsten Werkzeug der ganzen Kryptografie. Eine **Hash-Funktion h** nimmt einen beliebig langen Input und macht daraus einen **Fingerabdruck fester Länge** (typisch 128 bis 512 Bit). Anders als eine Chiffre hat sie **keinen Schlüssel** — jeder kann denselben Hash berechnen. Zwei Eigenschaften machen sie nützlich: Sie ist auch für sehr lange Nachrichten extrem schnell, und sie zeigt den **Avalanche-Effekt** (Lawineneffekt) — die kleinste Änderung am Input, ein einziges gekipptes Bit, verändert den Hash vollständig und unvorhersehbar.
 
-Warum braucht man sie bei Signaturen? Eine Signatur ist auf die Nachrichtenlänge begrenzt (bei RSA-2048 auf ~2048 Bit). Große Nachrichten kann man nicht direkt signieren, und blockweises Signieren wäre viel zu teuer. Lösung: **erst hashen, dann den Hash signieren** — s = sig_{kpr}(h(x)). Bob berechnet h(x) selbst neu und prüft die Signatur dagegen.
+![Eine kryptografische Hash-Funktion bildet beliebige Eingaben auf einen Fingerabdruck fester Länge ab](https://upload.wikimedia.org/wikipedia/commons/2/2b/Cryptographic_Hash_Function.svg "Eine Hash-Funktion verdichtet jede Eingabe — egal wie lang — zu einem Fingerabdruck fester Länge. Schon eine winzige Änderung der Eingabe liefert einen völlig anderen Hash.")
 
-## Die drei Sicherheitseigenschaften
+Wozu braucht man das bei Signaturen? Eine Signatur kann immer nur eine Nachricht von begrenzter Länge unterschreiben (bei RSA-2048 etwa 2048 Bit). Große Dokumente lassen sich nicht direkt signieren, und sie blockweise wie bei einer Blockchiffre zu signieren wäre viel zu teuer. Die elegante Lösung: **erst hashen, dann den Hash signieren.** Alice berechnet z = h(x), signiert nur diesen kurzen Fingerabdruck und schickt (x, s). Bob hasht das empfangene x selbst neu zu z′ = h(x) und prüft die Signatur gegen z′ — stimmen sie überein, ist das Dokument unverändert und von Alice. So unterschreibt man mit einer kurzen Signatur ein beliebig großes Dokument.
 
-Damit das sicher ist, muss h drei Dinge erfüllen:
+## Die drei Sicherheitseigenschaften — und das Geburtstagsparadoxon
 
-| Eigenschaft | Ziel | Warum wichtig |
-|---|---|---|
-| **Urbildresistenz** | aus h(x) lässt sich x **nicht** zurückrechnen | sonst könnte Oskar aus dem signierten Hash den Klartext gewinnen |
-| **Schwache Kollisionsresistenz** | zu gegebenem x1 findet man **kein** x2 ≠ x1 mit gleichem Hash (2nd-preimage) | sonst tauscht ein aktiver Angreifer x1 gegen x2 — die alte Signatur bleibt gültig |
-| **Starke Kollisionsresistenz** | man findet **gar kein** Paar x1 ≠ x2 mit gleichem Hash | strengste Anforderung; betrifft das **Geburtstagsparadoxon** |
+Damit dieses Hash-dann-Signiere sicher ist, muss h drei Eigenschaften erfüllen, die du sauber auseinanderhalten musst. Die erste ist die **Urbildresistenz** (preimage resistance): Aus einem gegebenen Hashwert h(x) darf man den Eingabewert x nicht zurückrechnen können. Wäre das verletzt, könnte ein Angreifer aus einem signierten Hash den ursprünglichen Klartext gewinnen, ohne die Verschlüsselung zu brechen. Die zweite ist die **schwache Kollisionsresistenz** (auch second-preimage resistance): Zu einer *gegebenen* Nachricht x₁ darf man keine *andere* Nachricht x₂ ≠ x₁ finden, die denselben Hash hat. Wäre das verletzt, könnte ein aktiver Angreifer die signierte Nachricht x₁ heimlich gegen sein x₂ austauschen — die alte Signatur über h(x₁) = h(x₂) bliebe gültig. Die dritte und strengste ist die **starke Kollisionsresistenz**: Man darf *überhaupt kein* Paar x₁ ≠ x₂ mit gleichem Hash finden können (egal welches).
 
-Kollisionen **müssen** existieren (fester Output, unendlich viele Inputs — Schubfachprinzip). Die Frage ist nur, wie schwer man eine findet. Das **Geburtstagsparadoxon** liefert die ernüchternde Antwort: Schon bei 23 Personen ist die Wahrscheinlichkeit zweier gleicher Geburtstage über 50 %. Übertragen auf Hashes: Für einen n-Bit-Ausgang braucht man **nicht** 2^n, sondern nur etwa **2^(n/2)** Nachrichten für eine Kollision. Deshalb wählt man die Ausgabelänge großzügig (128–512 Bit). Wichtigste Familien: die **MD4-Familie** (MD5, SHA-1, SHA-2 — 32-Bit-Operationen, boolesche AND/OR/XOR) und Hashes auf Basis von Blockchiffren; **SHA-3** gehört nicht zur MD4-Familie (anderer interner Aufbau). SHA-1 z. B.: 512-Bit-Blöcke, Kompressionsfunktion, Padding, 160-Bit-Ausgabe. Die [drei Hash-Anforderungen und der Avalanche-Effekt bei Computerphile](https://www.youtube.com/watch?v=b4b8ktEV4Bg); den Avalanche live siehst du in der [SHA-256-Demo](https://andersbrownworth.com/blockchain/hash).
+Hier kommt eine Pointe, die fast jeden überrascht. Kollisionen *müssen* existieren — es gibt unendlich viele mögliche Eingaben, aber nur endlich viele Hashwerte (Schubfachprinzip). Die Frage ist nur, *wie schwer* es ist, eine zu finden. Die Antwort gibt das **Geburtstagsparadoxon**: In einer Gruppe von nur 23 Personen ist die Wahrscheinlichkeit, dass zwei am selben Tag Geburtstag haben, bereits über 50 % — viel mehr, als die Intuition erwartet, weil es auf die Zahl der *Paare* ankommt, nicht der Personen. Übertragen auf einen n-Bit-Hash heißt das: Für eine Kollision braucht man nicht etwa 2ⁿ Versuche, sondern nur rund **2^(n/2)**. Ein 256-Bit-Hash bietet also nur etwa 128 Bit Kollisionssicherheit — weshalb man Hashes großzügig lang wählt. Die wichtigsten Hash-Funktionen kommen aus zwei Lagern: die **MD4-Familie** (zu der MD5, SHA-1 und SHA-2 gehören; sie rechnen auf 32-Bit-Werten mit booleschen Operationen wie AND, OR, XOR) und Hashes auf Basis von Blockchiffren; **SHA-3** gehört bewusst *nicht* zur MD4-Familie, weil es intern anders aufgebaut ist. SHA-1 etwa verarbeitet die Nachricht in 512-Bit-Blöcken über eine Kompressionsfunktion mit Padding und liefert 160 Bit — die typische Merkle-Damgård-Konstruktion:
 
-> **Eselsbrücke (Geburtstagsparadoxon):** Kollision finden kostet **nur die halbe Bitzahl** im Exponenten — **2^(n/2)**, nicht 2^n. Merke: ein 256-Bit-Hash gibt nur ~128 Bit Kollisionssicherheit. Deshalb sind Hashes „doppelt so lang" wie die gewünschte Sicherheit.
+![Merkle-Damgård-Konstruktion: die Nachricht wird blockweise durch eine Kompressionsfunktion gehasht](https://upload.wikimedia.org/wikipedia/commons/e/ed/Merkle-Damgard_hash_big.svg "Die Merkle-Damgård-Konstruktion (MD5, SHA-1, SHA-2): die gepaddete Nachricht läuft blockweise durch eine Kompressionsfunktion, das Ergebnis fließt jeweils in den nächsten Block.")
 
-> **Eselsbrücke (3 Hash-Eigenschaften):** **Urbild** = von h(x) *nicht* auf x zurück. **Schwache Kollision** = zu *gegebenem* x kein zweites finden. **Starke Kollision** = *irgendein* Paar mit gleichem Hash finden (am leichtesten → Geburtstag).
+> **Eselsbrücke (Geburtstagsparadoxon):** Eine Kollision kostet nur die *halbe* Bitzahl im Exponenten — **2^(n/2)**, nicht 2ⁿ. Ein Hash ist also „doppelt so lang" wie die Sicherheit, die er liefert.
+
+> **Eselsbrücke (drei Eigenschaften):** **Urbild** = von h(x) nicht auf x zurück. **Schwache Kollision** = zu einem *gegebenen* x kein zweites finden. **Starke Kollision** = *irgendein* Paar mit gleichem Hash finden (am leichtesten — daher das Geburtstagsparadoxon).
 
 ### Schritt für Schritt: Kollisionswahrscheinlichkeit abschätzen
 
-Das Übungsblatt lässt das ausrechnen, und das Ergebnis überrascht jedes Mal. Für N mögliche Hashwerte und k zufällig eingefügte Werte nähert man die Kollisionswahrscheinlichkeit mit **P ≈ 1 − e^(−k(k−1)/2N)**. Beispiel: ein **48-Bit-Adressraum**, also N = 2⁴⁸ ≈ 2,8 · 10¹⁴, und **k = 2,3 · 10⁷** Dateien.
+Genau das lässt das Übungsblatt ausrechnen, und das Ergebnis verblüfft jedes Mal. Für N mögliche Hashwerte und k zufällig eingefügte Werte nähert man die Kollisionswahrscheinlichkeit mit **P ≈ 1 − e^(−k(k−1)/2N)**. Nehmen wir einen **48-Bit-Adressraum**, also N = 2⁴⁸ ≈ 2,8·10¹⁴, und **k = 2,3·10⁷** Dateien:
 
-1. Zähler: k(k−1)/2 ≈ k²/2 = (2,3 · 10⁷)² / 2 ≈ 2,6 · 10¹⁴.
-2. Exponent: −2,6 · 10¹⁴ / 2,8 · 10¹⁴ ≈ −0,94.
-3. P ≈ 1 − e^(−0,94) ≈ 1 − 0,39 ≈ **0,61**, also rund **60 %**.
+- Der Zähler im Exponenten ist k(k−1)/2 ≈ k²/2 = (2,3·10⁷)² / 2 ≈ 2,6·10¹⁴.
+- Der Exponent ist also −2,6·10¹⁴ / 2,8·10¹⁴ ≈ −0,94.
+- Damit P ≈ 1 − e^(−0,94) ≈ 1 − 0,39 ≈ **0,61**, also rund **60 %**.
 
-Über 60 % Kollisionswahrscheinlichkeit bei „nur" 23 Millionen Einträgen in einem 281-Billionen-großen Raum — genau das ist die Wucht des Geburtstagsparadoxons, und genau deshalb wählt man Hashes lieber 256 Bit lang als 128.
+Über 60 % Kollisionswahrscheinlichkeit bei „nur" 23 Millionen Einträgen in einem 281-Billionen-großen Raum — das ist die Wucht des Geburtstagsparadoxons, und genau deshalb wählt man Hashes lieber 256 als 128 Bit lang.
 
-## MAC & HMAC: Integrität mit geteiltem Schlüssel
+### Schritt für Schritt: eine Hash-Tabelle füllen
 
-Ein **MAC (Message Authentication Code)** ist eine kryptografische Prüfsumme. Wie Signaturen sichert er Integrität und Authentizität — aber:
+Hashes haben auch eine ganz unkryptografische Anwendung, die das Übungsblatt aufgreift: die **Hash-Tabelle**. Hier dient der Hash dazu, jeden Eintrag schnell einem von mehreren Behältern (buckets) zuzuordnen. Mit sechs Buckets ist die Hash-Funktion einfach H(k) = k mod 6, und bei einer Kollision hängt man den neuen Wert an eine Liste im selben Bucket (separate chaining). Fügen wir der Reihe nach 71, 36, 22, 38, 11, 10, 1, 6, 4, 112, 42 ein: 71 mod 6 = 5, 36 mod 6 = 0, 22 mod 6 = 4, 38 mod 6 = 2, 11 mod 6 = 5 (Kollision, hinter 71), 10 mod 6 = 4 (hinter 22), 1 mod 6 = 1, 6 mod 6 = 0 (hinter 36), 4 mod 6 = 4, 112 mod 6 = 4, 42 mod 6 = 0. Es ergeben sich die Buckets 0: {36, 6, 42}, 1: {1}, 2: {38}, 3: {}, 4: {22, 10, 4, 112}, 5: {71, 11}.
 
-- MACs basieren auf **symmetrischer** Kryptografie (ein geteilter Schlüssel k_AB), sind dadurch **deutlich schneller**,
-- **aber** sie bieten **keine Nichtabstreitbarkeit** (beide kennen denselben Schlüssel).
+![Eine Hash-Tabelle mit separater Verkettung zur Kollisionsauflösung](https://upload.wikimedia.org/wikipedia/commons/7/7d/Hash_table_3_1_1_0_1_0_0_SP.svg "Hash-Tabelle mit separate chaining: kollidierende Einträge landen im selben Bucket und werden zu einer Liste verkettet.")
 
-Naiv könnte man einen MAC aus einer Hash-Funktion bauen: **Secret-Prefix** m = h(k‖x) oder **Secret-Suffix** m = h(x‖k). Beide haben Schwächen. Beim Secret-Suffix etwa: Findet Oskar eine Kollision h(x) = h(x_O), kann er x gegen x_O tauschen — die Prüfsumme h(x‖k) = h(x_O‖k) bleibt gültig. Deshalb nutzt man **HMAC** (1996, Bellare/Canetti/Krawczyk): sicher, ohne diese Schwächen, robust selbst gegen neue Hash-Angriffe, im Einsatz bei **TLS und IPSec**. Konstruktion (mit gepolstertem Schlüssel k+ und festen Masken ipad = 0x36…, opad = 0x5C…):
+Fügt man dieselben Zahlen in *anderer Reihenfolge* ein, fällt die wichtige Beobachtung an: Welche Zahl in welchem Bucket landet, hängt allein vom Hashwert ab, *nicht* von der Reihenfolge — die Bucket-Zugehörigkeit ist also identisch. Was sich unterscheidet, ist nur die *Reihenfolge innerhalb* einer Kette. Genau das ist der Punkt der Aufgabe.
 
-> HMAC_k(x) = h( (k+ ⊕ opad) ‖ h( (k+ ⊕ ipad) ‖ x ) )
+## Passwörter richtig speichern: Hashing, Rainbow-Tables und Salting
+
+Die vielleicht alltäglichste Anwendung von Hashes betrifft Passwörter. Speichert eine Webseite Benutzernamen und Passwörter **im Klartext**, ist ein einziges Datenleck katastrophal: Der Angreifer hat sofort alle Zugangsdaten — und weil viele Menschen Passwörter wiederverwenden, auch gleich die zu anderen Diensten. Deshalb speichert man niemals das Passwort selbst, sondern nur seinen **Hash**. Beim Login hasht der Server die Eingabe und vergleicht sie mit dem gespeicherten Hash; dank Urbildresistenz kann selbst ein Angreifer mit der ganzen Datenbank die Passwörter nicht zurückrechnen.
+
+Ganz wasserdicht ist das aber noch nicht, denn Angreifer kommen mit einem **Rainbow-Table-Angriff**: riesigen, vorberechneten Tabellen, die zu Millionen gängiger Passwörter bereits den Hash enthalten. Ist ein Passwort-Hash in so einer Tabelle, ist das Passwort sofort entlarvt. Das Gegenmittel heißt **Salting**: Vor dem Hashen hängt man an jedes Passwort einen zufälligen, pro Nutzer verschiedenen Wert (den Salt) an und speichert ihn mit. Dadurch erzeugt selbst dasselbe Passwort bei zwei Nutzern völlig verschiedene Hashes, und eine vorberechnete Rainbow-Table wird nutzlos — der Angreifer müsste sie für jeden einzelnen Salt neu berechnen.
+
+## MAC und HMAC: Integrität mit geteiltem Schlüssel
+
+Manchmal will man Integrität und Authentizität sichern, braucht aber keine Nichtabstreitbarkeit und hätte gern mehr Tempo. Dafür gibt es den **MAC (Message Authentication Code)** — eine kryptografische Prüfsumme. Wie eine Signatur garantiert er, dass eine Nachricht echt und unverändert ist; anders als eine Signatur beruht er aber auf **symmetrischer** Kryptografie mit einem geteilten Schlüssel k_AB, ist dadurch deutlich **schneller** — und bietet eben **keine Nichtabstreitbarkeit**, weil beide Seiten denselben Schlüssel kennen und somit jeder von ihnen den MAC hätte erzeugen können.
+
+Naheliegend wäre, einen MAC aus einer Hash-Funktion zu bauen, indem man den Schlüssel zusammen mit der Nachricht hasht. Zwei einfache Ansätze haben aber Schwächen. Beim **Secret-Prefix-MAC** h(k‖x) und beim **Secret-Suffix-MAC** h(x‖k) lässt sich jeweils ein Angriff finden — beim Secret-Suffix etwa nutzt Oskar eine Hash-Kollision: Findet er ein x_O mit h(x) = h(x_O), kann er x gegen x_O austauschen, und die Prüfsumme h(x‖k) = h(x_O‖k) bleibt gültig. Die robuste Standardlösung ist **HMAC** (1996 von Bellare, Canetti und Krawczyk): Sie hasht den Schlüssel in zwei verschachtelten Runden mit zwei festen Masken (ipad und opad) und ist dadurch sicher, selbst wenn die zugrunde liegende Hash-Funktion später Schwächen zeigt. HMAC steckt heute in TLS und IPSec; die Konstruktion lautet HMAC(x) = h( (k⁺ ⊕ opad) ‖ h( (k⁺ ⊕ ipad) ‖ x ) ).
+
+![Die HMAC-Konstruktion: zwei verschachtelte Hash-Durchläufe mit gepolstertem Schlüssel](https://upload.wikimedia.org/wikipedia/commons/7/7f/SHAhmac.svg "HMAC: der gepolsterte Schlüssel wird mit ipad bzw. opad maskiert und in zwei verschachtelten Hash-Durchläufen mit der Nachricht verrechnet.")
+
+> **Eselsbrücke (MAC vs. Signatur):** Beide sichern Integrität und Authentizität. Aber **MAC = symmetrisch, schnell, keine Nichtabstreitbarkeit**; **Signatur = asymmetrisch, langsamer, mit Nichtabstreitbarkeit**. Wer streiten können muss, *wer* es war, braucht eine Signatur.
 
 ## Auf den Punkt
 
-Die Kurzfassung: Bei dieser Vorlesung geht es um Integrität und Authentizität statt um Geheimhaltung. Eine digitale Signatur ist das Spiegelbild der Verschlüsselung — man signiert mit dem privaten und verifiziert mit dem öffentlichen Schlüssel; das liefert Integrität, Authentizität und Nichtabstreitbarkeit. Damit niemand per Man-in-the-Middle falsche öffentliche Schlüssel unterschiebt, bindet ein Zertifikat (von einer CA signiert) den Schlüssel an eine Identität (PKI, X.509). Hash-Funktionen sind schlüssellose Fingerabdrücke fester Länge mit Avalanche-Effekt; man signiert immer den Hash, nicht die ganze Nachricht. Ihre drei Sicherheitsziele sind Urbild-, schwache und starke Kollisionsresistenz — und wegen des Geburtstagsparadoxons reichen für eine Kollision ~2^(n/2) statt 2^n Versuche. Der MAC ist das symmetrische, schnellere Gegenstück zur Signatur, bietet aber keine Nichtabstreitbarkeit; der sichere Standard ist HMAC.
+Die Kurzfassung: In diesem Kapitel geht es um Integrität und Authentizität statt um Geheimhaltung. Eine **digitale Signatur** ist das Spiegelbild der Verschlüsselung — man signiert mit dem privaten und verifiziert mit dem öffentlichen Schlüssel, was Integrität, Authentizität und Nichtabstreitbarkeit liefert. Damit kein **Man-in-the-Middle** falsche öffentliche Schlüssel unterschiebt, bindet ein von einer **CA** signiertes **Zertifikat** den Schlüssel an eine Identität (PKI, X.509). **Hash-Funktionen** sind schlüssellose Fingerabdrücke fester Länge mit Avalanche-Effekt; man signiert immer den Hash, nicht die ganze Nachricht. Ihre drei Ziele sind Urbild-, schwache und starke Kollisionsresistenz — und wegen des **Geburtstagsparadoxons** genügt für eine Kollision ~2^(n/2) statt 2ⁿ Versuche. Hashes schützen auch **Passwörter** (mit **Salting** gegen Rainbow-Tables). Der **MAC** ist das symmetrische, schnellere Gegenstück zur Signatur ohne Nichtabstreitbarkeit; der sichere Standard ist **HMAC**.
 
 ## Begriffe & Notation
 
 | Begriff | Bedeutung |
 |---|---|
-| **sig_{kpr}(x)** | Signatur über x mit privatem Schlüssel |
-| **Verify_{kpub}(s, x)** | Signaturprüfung mit öffentlichem Schlüssel → true/false |
-| **Non-Repudiation** | Nichtabstreitbarkeit (nur asymmetrisch) |
-| **MITM** | Man-in-the-Middle: aktiver Angreifer tauscht Schlüssel |
-| **Zertifikat / CA** | signierte Bindung Schlüssel↔Identität / Aussteller |
-| **PKI / X.509** | Infrastruktur / Zertifikatsformat |
+| **sig_kpr(x) / Verify_kpub(s, x)** | signieren mit privatem / prüfen mit öffentlichem Schlüssel |
+| **Non-Repudiation** | Nichtabstreitbarkeit — nur asymmetrisch (Signatur) |
+| **MITM** | Man-in-the-Middle: aktiver Angreifer tauscht Schlüssel aus |
+| **Zertifikat / CA** | signierte Bindung Schlüssel↔Identität / ausstellende Stelle |
+| **PKI / X.509** | Public-Key-Infrastruktur / Standard-Zertifikatsformat |
 | **Hash h(x)** | schlüsselloser Fingerabdruck fester Länge |
-| **Avalanche-Effekt** | kleine Inputänderung → ganz anderer Hash |
-| **Urbild- / Kollisionsresistenz** | die drei Sicherheitsziele von h |
+| **Avalanche-Effekt** | kleinste Inputänderung → völlig anderer Hash |
+| **Urbild- / Kollisionsresistenz** | die drei Sicherheitsziele einer Hash-Funktion |
 | **Geburtstagsparadoxon** | Kollision schon bei ~2^(n/2) Versuchen |
-| **MAC / HMAC** | symmetrische Prüfsumme / sicherer Hash-MAC |
+| **Salting** | zufälliger Wert pro Passwort gegen Rainbow-Tables |
+| **MAC / HMAC** | symmetrische Prüfsumme / sicherer Hash-basierter MAC |
 
 ## Typische Fallen
 
-- **Signieren = Verschlüsseln mit privatem Schlüssel?** Konzeptionell umgekehrt zur Verschlüsselung: **signieren mit privat, prüfen mit öffentlich**. Verschlüsselt wird mit öffentlich, entschlüsselt mit privat.
-- **Hash schützt Vertraulichkeit?** Nein — ein Hash ist schlüssellos und nicht umkehrbar; er sichert **Integrität**, nicht Geheimhaltung.
-- **n-Bit-Hash = 2^n Kollisionssicherheit?** Nein — wegen des Geburtstagsparadoxons nur **2^(n/2)**.
-- **MAC liefert Nichtabstreitbarkeit?** Nein — das kann nur eine **Signatur** (asymmetrisch). MAC = nur Integrität/Authentizität.
-- **Secret-Prefix/Suffix-MAC ist sicher?** Nein — beide haben bekannte Schwächen; nimm **HMAC**.
+- **Signieren = Verschlüsseln mit dem privaten Schlüssel?** Konzeptionell umgekehrt: **signieren mit privat, prüfen mit öffentlich** — verschlüsselt wird mit öffentlich, entschlüsselt mit privat.
+- **Ein Hash schützt Vertraulichkeit? Nein** — er ist schlüssellos und nicht umkehrbar und sichert **Integrität**, nicht Geheimhaltung.
+- **Ein n-Bit-Hash bietet 2ⁿ Kollisionssicherheit? Nein** — wegen des Geburtstagsparadoxons nur **2^(n/2)**.
+- **Ein MAC liefert Nichtabstreitbarkeit? Nein** — das kann nur eine Signatur. Ein MAC sichert nur Integrität und Authentizität.
+- **Secret-Prefix/Suffix-MAC ist sicher? Nein** — beide haben bekannte Schwächen; nimm HMAC.
+- **Gehashte Passwörter sind automatisch sicher? Nicht ohne Salt** — sonst knackt eine Rainbow-Table die gängigen.
 
 ## Klausur-Fokus
 
-Das Übungsblatt zeigt zwei praktische Schwerpunkte. Erstens **Hashing rund ums Geburtstagsparadoxon**: Du solltest die **Kollisionswahrscheinlichkeit** ausrechnen können — die Näherung 1 − e^(−k(k−1)/2N) für k eingefügte Werte bei N möglichen Hashwerten (z. B. „wie wahrscheinlich ist eine Kollision bei 2,3·10⁷ Dateien und 48-Bit-Adressraum?") — und allgemein begründen, warum eine Kollision schon bei ~2^(n/2) Versuchen droht. Zweitens **Passwort-Hashing**: erklären, warum man Passwörter niemals im Klartext, sondern als Hash speichert, was ein **Rainbow-Table-Angriff** ist und wie **Salting** ihn verhindert (jeder Hash bekommt einen zufälligen Salt, sodass vorerzeugte Tabellen nutzlos werden). Auf der Wissensseite: den **Signatur-Ablauf** (signieren mit kpr, prüfen mit kpub) erklären und gegen Verschlüsselung abgrenzen, den **MITM auf den Schlüsselaustausch** schildern und wie **Zertifikate/CA** ihn verhindern, warum man **erst hasht, dann signiert**, die **drei Hash-Eigenschaften** mit je einem Angriffsszenario, und **MAC vs. Signatur** (symmetrisch/asymmetrisch, Geschwindigkeit, Non-Repudiation) inklusive der Schwäche des Secret-Suffix-MAC und warum **HMAC** sie behebt.
+Das Übungsblatt setzt zwei praktische Schwerpunkte. Erstens **Hashing und das Geburtstagsparadoxon**: die **Kollisionswahrscheinlichkeit** mit der Näherung 1 − e^(−k(k−1)/2N) ausrechnen (etwa „wie wahrscheinlich ist eine Kollision bei 2,3·10⁷ Dateien und 48-Bit-Adressraum?"), allgemein begründen, warum schon ~2^(n/2) Versuche genügen, und eine **Hash-Tabelle** mit H(k) = k mod m per separate chaining füllen (samt der Beobachtung, dass die Einfügereihenfolge nur die Kettenreihenfolge, nicht die Bucket-Zugehörigkeit ändert). Zweitens **Passwort-Hashing**: erklären, warum man Passwörter nie im Klartext speichert, was ein **Rainbow-Table-Angriff** ist und wie **Salting** ihn verhindert. Auf der Wissensseite: den **Signatur-Ablauf** (signieren mit kpr, prüfen mit kpub) erklären und gegen Verschlüsselung abgrenzen, den **MITM auf den Schlüsselaustausch** schildern und wie **Zertifikate/CA/PKI** ihn verhindern, warum man **erst hasht und dann signiert**, die **drei Hash-Eigenschaften** mit je einem Angriffsszenario, und **MAC gegen Signatur** (symmetrisch/asymmetrisch, Tempo, Non-Repudiation) inklusive der Schwäche des Secret-Suffix-MAC und warum **HMAC** sie behebt.
 
 ## Mehr dazu
 
-- **Computerphile — Hashing Algorithms and Security** (EN): drei Anforderungen an Hashes, Avalanche-Effekt, warum Kollisionen gefährlich sind. https://www.youtube.com/watch?v=b4b8ktEV4Bg
+- **Computerphile — Hashing Algorithms and Security** (EN): die drei Anforderungen an Hashes, der Avalanche-Effekt und warum Kollisionen gefährlich sind. https://www.youtube.com/watch?v=b4b8ktEV4Bg
 - **Practical Networking — Hashing, Algorithms, and Collisions** (EN): Digest, Kollisionen und die SHA-Familie sauber erklärt. https://www.youtube.com/watch?v=HHQ2QP_upGM
-- **SHA-256-Live-Demo** (aus den Folien): tippe Text und beobachte, wie sich der Hash bei jeder Änderung komplett ändert. https://andersbrownworth.com/blockchain/hash`,
+- **SHA-256-Live-Demo** (interaktiv): tippe Text und beobachte, wie sich der Hash bei jeder Änderung komplett ändert. https://andersbrownworth.com/blockchain/hash`,
   },
 };
 
@@ -745,101 +986,99 @@ const lecture07: Explanation = {
     de: "Kryptowährungen: wie Bitcoin aus Hashes ein dezentrales Geldsystem baut",
   },
   content: {
-    de: `Bitcoin ist die große Anwendung der bisherigen Krypto-Bausteine: Hash-Funktionen und digitale Signaturen werden hier zu einem Geldsystem **ohne Bank** zusammengesetzt. Die zentrale Frage der Vorlesung: Wie verhindert man ohne zentrale Vertrauensinstanz, dass jemand dasselbe Geld zweimal ausgibt (Double-Spending) — und wer darf überhaupt neues Geld erzeugen? Die Antworten heißen Blockchain, Distributed Consensus und Proof-of-Work.
+    de: `Bitcoin ist die große Anwendung, in der alle bisherigen Krypto-Bausteine zusammenlaufen: Hash-Funktionen und digitale Signaturen werden hier zu einem Geldsystem **ohne Bank** verschaltet. Die eine Frage, um die sich alles dreht, lautet: Wie verhindert man ohne zentrale Vertrauensinstanz, dass jemand dasselbe Geld zweimal ausgibt — und wer darf überhaupt neues Geld erzeugen? Die Antworten heißen Blockchain, Distributed Consensus und Proof-of-Work, und sie bestehen vollständig aus Dingen, die du in den letzten Kapiteln schon kennengelernt hast. Wir bauen Bitcoin von unten auf, Baustein für Baustein, bis am Ende klar ist, warum man dieser fremden Maschine sein Geld anvertrauen kann.
 
 ## Das Grundproblem: digitales Geld ohne Bank
 
-Klassisches Buchgeld (Kreditkarte, PayPal) ist **zentralisiert**: Man vertraut einer dritten Partei, und nichts ist anonym. Bargeld ist **dezentral**, anonym und offline. Bitcoin will das Beste übertragen: ein **dezentrales Peer-to-Peer-Netz**, allerdings nur **pseudonym** (nicht perfekt anonym) und im Regelfall online. Die drei Forschungsprobleme: **Anonymität**, ein wirklich **dezentrales** System, und das **Double-Spending-Problem** — denn eine digitale Münze ist nur eine Datei, die man kopieren könnte. Vorarbeiten dazu gab es lange (Byzantinische Generäle 1980, Chaums Ecash 1989, Haber/Stornettas Zeitstempel-Log 1991, Merkles Hash-Baum 1979).
+Vergegenwärtige dir zuerst, was Geld heute ausmacht. Klassisches Buchgeld — Kreditkarte, PayPal — ist **zentralisiert**: Du vertraust einer dritten Partei, die Buch führt, und nichts daran ist anonym. Bargeld dagegen ist **dezentral**, anonym und funktioniert offline, hat aber keinen digitalen Zwilling. Bitcoin will das Beste übertragen: ein **dezentrales Peer-to-Peer-Netz**, allerdings nur **pseudonym** (nicht perfekt anonym, denn alle Transaktionen sind öffentlich) und im Regelfall online. Daraus erwachsen drei Forschungsprobleme: echte **Dezentralität**, eine sinnvolle **Anonymität** und vor allem das **Double-Spending-Problem** — denn eine digitale Münze ist im Grunde nur eine Datei, und Dateien kann man beliebig kopieren. Wie verhindert man, dass jemand dieselbe Münze zweimal ausgibt, wenn keine Bank dazwischensteht? An diesem Problem hatten sich kluge Köpfe lange versucht (das Byzantinische-Generäle-Problem 1980, Chaums Ecash 1989, Haber und Stornettas Zeitstempel-Log 1991, Merkles Hash-Baum 1979), bevor Bitcoin die Teile zusammensetzte.
 
-## Hash Pointer & Blockchain
+## Hash-Pointer und die Blockchain
 
-Ein **Pointer** zeigt auf einen Datenbereich. Ein **Hash Pointer** zeigt nicht nur dorthin, sondern enthält zusätzlich den **Hash** dieses Bereichs — man kann also prüfen, ob die Daten verändert wurden. Eine **Blockchain** ist wie eine verkettete Liste, bei der jeder „prev"-Zeiger ein Hash Pointer auf den Vorgängerblock ist (ein **manipulationssicheres Log**).
+Der erste Baustein ist ein winziger, aber mächtiger Trick. Ein gewöhnlicher **Pointer** ist ein Zeiger auf einen Datenbereich. Ein **Hash-Pointer** zeigt nicht nur dorthin, sondern enthält zusätzlich den **Hash** dieses Bereichs — man kann also jederzeit prüfen, ob die Daten seitdem verändert wurden. Verkettet man Datenblöcke so, dass jeder Block den Hash-Pointer auf seinen Vorgänger enthält, entsteht eine **Blockchain**: im Grunde eine verkettete Liste, bei der jeder „prev"-Zeiger ein Hash-Pointer ist. Das macht die Kette zu einem **manipulationssicheren Log**.
 
-Der Clou steckt darin, dass die Hash-Berechnung **alle** Daten eines Blocks umfasst — die Transaktionen *und* den prev-Hash. Will Eve eine alte Transaktion in Block 10 fälschen, ändert sich dessen Hash, also auch der prev-Eintrag in Block 11, dessen Hash, und so weiter: Sie müsste **alle folgenden Blöcke neu berechnen**. Solange der oberste (neueste) Hash sicher bekannt ist, fällt jede Änderung auf. So entsteht eine beliebig lange Kette zurück bis zum **Genesis Block**.
+![Eine Blockchain: jeder Block verweist über einen Hash-Pointer auf den vorherigen](https://upload.wikimedia.org/wikipedia/commons/9/98/Blockchain.svg "Blockchain: jeder Block enthält den Hash des vorherigen Blocks. Ändert man einen alten Block, brechen alle nachfolgenden Hashes.")
+
+Der Clou liegt darin, dass die Hash-Berechnung eines Blocks **alle** seine Daten umfasst — die Transaktionen *und* den prev-Hash des Vorgängers. Will die Angreiferin Eve eine alte Transaktion in Block 10 fälschen, ändert sich dadurch dessen Hash; damit stimmt der prev-Eintrag in Block 11 nicht mehr, also ändert sich auch dessen Hash, und so weiter bis zum Ende der Kette. Eve müsste also **alle nachfolgenden Blöcke neu berechnen**, um die Fälschung zu vertuschen. Solange irgendwo der oberste, neueste Hash sicher bekannt ist, fällt jede Manipulation sofort auf. So lässt sich eine Kette beliebiger Länge bilden, die bis zum allerersten Block, dem **Genesis Block**, zurückreicht.
 
 ## Merkle-Bäume
 
-Ralph Merkle (1979) ersann den **Hash-Baum**: ein Binärbaum aus Hash-Pointern, dessen Wurzel die **Merkle Root** ist. Vorteil gegenüber der reinen Kette: Man kann **effizient beweisen, dass ein Element enthalten ist** (Proof of Membership), ohne alle Daten zu prüfen — man braucht nur den Pfad von der Wurzel zum Blatt.
+Eine reine Kette hat aber einen Nachteil: Will man beweisen, dass eine bestimmte Transaktion enthalten ist, müsste man im Zweifel alles durchgehen. Hier kommt Ralph Merkles Erfindung von 1979 ins Spiel, der **Hash-Baum** (Merkle-Baum): ein Binärbaum aus Hash-Pointern. Man hasht je zwei benachbarte Datenblätter zusammen, dann je zwei dieser Ergebnisse, und so weiter, bis ganz oben eine einzige Wurzel übrig bleibt — die **Merkle Root**, die alle darunterliegenden Daten in einem einzigen Wert zusammenfasst.
 
-![Merkle-Baum: Datenblätter werden paarweise gehasht bis zur Merkle Root](https://commons.wikimedia.org/wiki/Special:FilePath/Hash_Tree.svg "Merkle-Baum: jedes Blatt wird gehasht, je zwei Hashes werden zusammen weitergehasht — ganz oben die Merkle Root, die alle Daten zusammenfasst.")
+![Merkle-Baum: Datenblätter werden paarweise hochgehasht bis zur Merkle Root](https://upload.wikimedia.org/wikipedia/commons/9/95/Hash_Tree.svg "Merkle-Baum: jedes Datenblatt wird gehasht, je zwei Hashes werden zusammen weitergehasht — ganz oben die Merkle Root, die alle Daten zusammenfasst.")
 
-> **Eselsbrücke (Merkle-Baum):** Blätter paarweise hochhashen bis zu **einer** Wurzel. Um zu beweisen, dass *ein* Datum drin ist, brauchst du nur **log(n)** Hashes entlang des Pfads — nicht alle Daten. Das ist der „Proof of Membership".
+Der große Vorteil gegenüber der reinen Kette: Man kann **effizient beweisen, dass ein Element enthalten ist** (ein Proof of Membership), ohne alle Daten zu prüfen. Es genügt der Pfad von der Wurzel zum betreffenden Blatt — bei n Blättern also nur etwa log(n) Hashes statt aller n.
 
-## Identitäten & Bitcoin-Adressen
+> **Eselsbrücke (Merkle-Baum):** Blätter paarweise hochhashen bis zu *einer* Wurzel. Um zu beweisen, dass ein Datum drinsteckt, brauchst du nur **log(n)** Hashes entlang des Pfads — nicht alle Daten.
 
-In Bitcoin sind **öffentliche Schlüssel die Identitäten**: Eine korrekt signierte Nachricht kann nur vom Besitzer des passenden privaten Schlüssels stammen. Daraus folgt **dezentrales Identity Management** — jeder kann sich beliebig viele Identitäten erzeugen (einfach neue Schlüsselpaare). Weil öffentliche Schlüssel lang sind, leitet man daraus eine kompakte **Bitcoin-Adresse** ab (wie eine IBAN):
+## Identitäten und Bitcoin-Adressen
 
-> Public Key → SHA-256 → RIPEMD-160 → Präfix 00 → Base58Check → Adresse
+Wer ist in einem System ohne Bank eigentlich „du"? In Bitcoin sind **öffentliche Schlüssel die Identitäten**. Das funktioniert, weil eine korrekt signierte Nachricht nur von demjenigen stammen kann, der den passenden privaten Schlüssel besitzt — die Signatur *ist* der Identitätsnachweis. Daraus folgt ein **dezentrales Identitätsmanagement**: Jeder kann sich beliebig viele Identitäten erzeugen, indem er einfach neue Schlüsselpaare generiert; niemand muss das genehmigen. Weil öffentliche Schlüssel allerdings lang und unhandlich sind, leitet man aus ihnen eine kompakte **Bitcoin-Adresse** ab (vergleichbar einer IBAN), und zwar über die Kette Public Key → SHA-256 → RIPEMD-160 → Präfix 00 → Base58Check → Adresse.
 
-## Distributed Consensus & der Double-Spend
+## Distributed Consensus und der Double-Spend
 
-Jeder Knoten hat die Blockchain (worüber bereits Konsens besteht) plus einen Pool **ausstehender Transaktionen**. Vereinfachter Konsens-Algorithmus:
+Jetzt zum Herzstück: Wie einigen sich tausende fremder Knoten ohne Chef auf *eine* gemeinsame Wahrheit? Jeder Knoten besitzt die Blockchain, über die bereits Konsens besteht, plus einen Pool noch ausstehender Transaktionen. Der vereinfachte Konsens-Algorithmus läuft so ab: Neue Transaktionen werden an alle Knoten gebroadcastet; jeder Knoten sammelt sie in einem Block; in jeder Runde teilt ein zunächst *zufällig* gewählter Knoten seinen Block mit (das ist die Vereinfachung, die wir gleich aufheben); die anderen akzeptieren ihn nur, wenn alle enthaltenen Transaktionen gültig sind (die Coins noch nicht ausgegeben, die Signaturen korrekt); und sie zeigen ihre Akzeptanz, indem sie den Hash dieses Blocks in ihren eigenen nächsten Block aufnehmen.
 
-1. Neue Transaktionen werden an alle Knoten **gebroadcastet**.
-2. Jeder Knoten sammelt sie in einem Block.
-3. In jeder Runde teilt ein **zufälliger** Knoten seinen Block mit (das ist die Vereinfachung).
-4. Die anderen akzeptieren nur, wenn **alle Transaktionen gültig** sind (Coins noch nicht ausgegeben, Signaturen gültig).
-5. Akzeptanz zeigt man, indem man den **Hash dieses Blocks** in den nächsten eigenen Block aufnimmt.
-
-Der **Double-Spend-Angriff**: Alice sendet 100 Coins an Bob *und* gleichzeitig dieselben 100 an sich selbst (Alice'). Beide Transaktionen sind gültig signiert — es entstehen **zwei Branches**. Welcher gewinnt? **Longest Chain Wins**: Knoten bauen auf dem Branch weiter, den sie zuerst gesehen haben; langfristig wird einer länger, der kürzere wird obsolet. Praktische Folge: Wartet Bob auf **keine** Bestätigung (Zero-Confirmation), ist der Angriff leicht; je mehr Bestätigungen, desto sicherer. **Faustregel: nach 6 Bestätigungen** ist die Double-Spend-Chance praktisch null.
+Wo ist der Angriff? Beim **Double-Spend** sendet Alice ihre 100 Coins gleichzeitig an Bob *und* an sich selbst (an eine zweite eigene Adresse Alice'). Beide Transaktionen sind gültig signiert, also entstehen **zwei konkurrierende Branches** der Kette. Welcher gewinnt? Die Regel heißt **Longest Chain Wins**: Knoten bauen auf dem Branch weiter, den sie zuerst gesehen haben, und langfristig wird einer der beiden länger — der kürzere wird obsolet, und mit ihm die darin enthaltene Transaktion. Praktisch heißt das: Wartet Bob auf gar keine Bestätigung (eine Zero-Confirmation-Transaktion), ist der Angriff leicht; je mehr Bestätigungen er abwartet, desto sicherer ist sein Geld. Die Faustregel lautet: **Nach 6 Bestätigungen** ist die Double-Spend-Chance praktisch null.
 
 > **Eselsbrücke (Double-Spend):** Zwei widersprüchliche Zahlungen → zwei Ketten-Äste → **der längste Ast gewinnt**. Warte auf **6 Bestätigungen**, dann ist die doppelte Ausgabe so gut wie unmöglich. Den ganzen Aufbau baut [3Blue1Brown von Grund auf nach](https://www.youtube.com/watch?v=bBC-nXj3Ng4).
 
-## Proof-of-Work & Incentives
+## Proof-of-Work und die Anreize
 
-Die „zufällige Knotenwahl" aus Schritt 3 ist unrealistisch — und angreifbar (man erzeugt einfach viele Identitäten). Bitcoin ersetzt sie durch **Proof-of-Work**: einen Wettbewerb um knappe **Rechenleistung** (Idee aus **Hashcash**, ursprünglich gegen Spam). Um einen Block zu erzeugen, muss ein Miner eine Zahl, die **Nonce**, finden, sodass:
+Die „zufällige Knotenwahl" aus dem vereinfachten Algorithmus ist nicht nur unrealistisch, sie ist auch angreifbar: Wer beliebig viele Identitäten erzeugen kann, erzeugt eben auch beliebig viele Knoten und reißt die Wahl an sich (eine Sybil-Attacke). Bitcoin ersetzt die Zufallswahl deshalb durch **Proof-of-Work** — einen Wettbewerb um eine knappe, nicht fälschbare Ressource: **Rechenleistung**. Die Idee stammt aus **Hashcash**, das ursprünglich Spam erschweren sollte. Um einen Block erzeugen zu dürfen, muss ein Miner eine Zahl finden, die **Nonce**, sodass der Hash des Blocks unter einer Schwelle liegt: **H(nonce ‖ prev ‖ transactions) < target**. Das Puzzle ist schwer zu lösen, aber für jeden leicht zu prüfen, und das **Target** stellt die Schwierigkeit ein (je kleiner, desto mehr führende Nullen muss der Hash haben).
 
-> H(nonce ‖ prev ‖ transactions) < target
+![Aufbau eines Bitcoin-Blocks mit Nonce und Proof-of-Work](https://upload.wikimedia.org/wikipedia/commons/5/55/Bitcoin_Block_Data.svg "Ein Bitcoin-Block: Vorgänger-Hash, Merkle Root der Transaktionen und die Nonce, die der Miner so lange variiert, bis der Block-Hash unter dem Target liegt.")
 
-Das Puzzle ist **schwer zu lösen, aber leicht zu prüfen**; das **Target** stellt die Schwierigkeit ein. Weil das Arbeit kostet, müssen ehrliche Knoten belohnt werden (Bitcoin nimmt an, dass **>50 %** der Rechenleistung ehrlich ist):
+Weil das Mining echte Energie kostet, müssen ehrliche Knoten belohnt werden — Bitcoin nimmt dabei an, dass mehr als die Hälfte der Rechenleistung in ehrlichen Händen ist. Die Belohnung hat zwei Quellen. Die erste ist der **Block Reward**: Jeder Block enthält eine spezielle **Coinbase-Transaktion**, die frische Coins an den Miner ausschüttet. Dieser Reward halbiert sich alle 210 000 Blöcke (er begann bei 50 BTC und sank über 25 im Jahr 2012, 12,5 (2016), 6,25 (2020) auf 3,125 (2024)); um etwa 2140 erreicht er null. Die zweite Quelle sind die **Transaktionsgebühren**: Wählt man den Output einer Transaktion kleiner als den Input, geht die Differenz an den Miner — dieser Mechanismus hält Miner auch dann noch motiviert, wenn es keinen Block Reward mehr gibt. Wie ein Knoten überhaupt erkennt, ob Coins schon ausgegeben wurden, regelt das **UTXO-Modell** (Unspent Transaction Output): Eine Transaktion besteht aus Inputs (je eine Adresse plus eine unverbrauchte frühere Transaktion, signiert) und Outputs (Adresse plus Betrag), und die Differenz ist die Gebühr.
 
 > **Eselsbrücke (Proof-of-Work):** Probiere Nonces durch, bis der Block-Hash **klein genug** ist (unter dem Target = beginnt mit genug Nullen). **Suchen ist teuer, Prüfen ist billig.** Genau dieses Würfeln um eine gültige Nonce kannst du in der [ETH.BUILD-Demo](https://ethereum.org/videos/blockchain-eth-build/) selbst ausprobieren.
 
-- **Block Reward:** Jeder Block enthält eine **Coinbase-Transaktion** an den Miner. Der Reward **halbiert sich alle 210 000 Blöcke** (50 → 25 (2012) → 12,5 (2016) → 6,25 (2020) → 3,125 (2024)). Ab ~2140 ist er null; es gibt maximal **21 Mio. Bitcoin**.
-- **Transaktionsgebühren:** Output < Input; die Differenz geht an den Miner. Das hält Miner auch nach 2140 motiviert.
+### Schritt für Schritt: einen Block minen
 
-Wie sieht ein Knoten, ob Coins schon ausgegeben sind? Über das **UTXO**-Modell (Unspent Transaction Output): Eine Transaktion hat Inputs (Adresse + unverbrauchte frühere Transaktion, je signiert) und Outputs (Adresse + Betrag); die Differenz ist die Gebühr.
+Im Übungsblatt taucht eine vereinfachte **Mining-Aufgabe** auf, und das Vorgehen ist immer dasselbe. Du bekommst eine Hash-Formel und die festen Felder eines Blocks (den prev-Hash, die Zeit, die Transaktions-Wurzel) und sollst die **Nonce finden, mit der die Gültigkeitsbedingung erfüllt ist** — etwa „Block-Hash ≥ 90" bei der Spielzeug-Währung CyberCoin oder allgemein „Hash < Target". Du setzt schlicht nonce = 0 in die Formel ein, rechnest den Hash aus und prüfst die Bedingung; ist sie nicht erfüllt, nimmst du nonce = 1, dann 2, und so weiter, bis es passt. Genau das tun echte Miner — nur milliardenfach pro Sekunde mit echten SHA-256-Hashes. Und der Witz dabei ist „schwer zu finden, leicht zu prüfen": Hat ein Miner die richtige Nonce gefunden, kann jeder andere den Hash *ein einziges Mal* nachrechnen und die Gültigkeit sofort bestätigen.
 
-### Schritt für Schritt: minen und die 21 Millionen herleiten
+### Schritt für Schritt: die maximale Münzmenge herleiten
 
-Im Übungsblatt taucht eine vereinfachte **Mining-Aufgabe** auf, und das Vorgehen ist immer dasselbe: Du bekommst eine Hash-Formel und feste Blockfelder (prev-Hash, Zeit, tx-Root) und sollst die **Nonce finden, mit der die Gültigkeitsbedingung erfüllt ist** (z. B. „Hash ≥ 90" oder „Hash < Target"). Du setzt einfach nonce = 0 ein, rechnest den Hash aus, prüfst die Bedingung; ist sie nicht erfüllt, nimmst du nonce = 1, dann 2, und so weiter, bis es passt. Das ist exakt das, was Miner tun — nur mit echten Hashes milliardenfach pro Sekunde. „Schwer zu finden, leicht zu prüfen": Hat ein Miner die Nonce, kann jeder den Hash *einmal* nachrechnen und die Gültigkeit bestätigen.
+Die zweite Lieblingsaufgabe ist die **maximale Münzmenge aus der Halbierung**, und sie ist eine schöne geometrische Reihe. Bei Bitcoin startet der Reward bei 50 BTC und halbiert sich alle 210 000 Blöcke, also 50, dann 25, dann 12,5, und so fort. Die Gesamtmenge ist damit 210 000 · (50 + 25 + 12,5 + …) = 210 000 · 50 · (1 + ½ + ¼ + …). Die Reihe in der Klammer summiert sich zu **2**, also kommt 210 000 · 50 · 2 = **21 000 000** heraus — die berühmten 21 Millionen Bitcoin. Dieselbe Rechnung funktioniert für jede Spielzeug-Währung: Hat CyberCoin etwa einen Reward von 10, der sich alle 730 Blöcke halbiert, dann sind es maximal 730 · 10 · 2 = **14 600** CyberCoins.
 
-Die zweite Lieblingsaufgabe ist die **maximale Münzmenge aus der Halbierung**. Der Reward startet bei 50 BTC und halbiert sich alle 210 000 Blöcke: 50, dann 25, dann 12,5, … Die Gesamtzahl ist also 210 000 · (50 + 25 + 12,5 + …) = 210 000 · 50 · (1 + ½ + ¼ + …). Die geometrische Reihe in der Klammer summiert sich zu **2**, also: 210 000 · 50 · 2 = **21 000 000**. So kommen die berühmten 21 Millionen Bitcoin zustande.
+### Schritt für Schritt: wann sich eine Rainbow-Table lohnt
+
+Dasselbe Übungsblatt knüpft noch einmal an das Passwort-Hashing aus dem vorigen Kapitel an und lässt dich ausrechnen, *warum* lange Passwörter Rainbow-Tables besiegen. Gibt es 77 verwendbare Zeichen und erlaubt man Passwortlängen bis 8, dann ist die Zahl möglicher Passwörter 77⁴ + 77⁵ + … + 77⁸ — und dieser Wert wird vom letzten Term beherrscht, also grob 77⁸ ≈ 1,2 · 10¹⁵. Speichert man pro Eintrag 26 Byte, bräuchte die Rainbow-Table rund 26 · 1,2 · 10¹⁵ ≈ 3 · 10¹⁶ Byte, also etwa **30 Petabyte**. Und ihre Erzeugung bei 200 000 Hashes pro Sekunde dauerte 1,2 · 10¹⁵ / 2 · 10⁵ ≈ 6 · 10⁹ Sekunden, also fast **200 Jahre**. Genau diese Zahlen zeigen, warum man Passwörter lang wählt (und mit Salt versieht, siehe voriges Kapitel): Die vorberechnete Tabelle wird schlicht unbezahlbar.
 
 ## Auf den Punkt
 
-Die Kurzfassung: Bitcoin ist dezentrales, pseudonymes Geld ohne Bank. Seine Kernprobleme sind Double-Spending, Konsens ohne Vertrauensinstanz und die Frage, wer neues Geld prägen darf. Gelöst wird das mit vier Bausteinen aus den vorherigen Wochen: Hash-Pointer verketten Blöcke zu einem manipulationssicheren Log (Blockchain) — ändert man einen alten Block, brechen alle folgenden Hashes; ein Merkle-Baum fasst alle Transaktionen eines Blocks in einer Wurzel zusammen (effizienter Proof of Membership); öffentliche Schlüssel dienen als Identitäten, woraus die Bitcoin-Adresse abgeleitet wird; und der Konsens entsteht durch Proof-of-Work, bei dem Miner eine Nonce suchen, sodass H(Block) < Target. Es gilt „Longest Chain Wins", nach ~6 Bestätigungen ist Double-Spending praktisch unmöglich, und die Anreize liefern der Block Reward (halbiert sich alle 210 000 Blöcke, max. 21 Mio. BTC) plus Transaktionsgebühren.
+Die Kurzfassung: Bitcoin ist dezentrales, pseudonymes Geld ohne Bank, dessen Kernprobleme das Double-Spending, der Konsens ohne Vertrauensinstanz und die Frage nach dem Geldschöpfen sind. Gelöst wird das aus vier Bausteinen der Vorwochen: **Hash-Pointer** verketten Blöcke zu einem manipulationssicheren Log (der **Blockchain**) — ändert man einen alten Block, brechen alle folgenden Hashes; ein **Merkle-Baum** fasst alle Transaktionen eines Blocks in einer Wurzel zusammen und erlaubt effiziente Mitgliedsbeweise; **öffentliche Schlüssel** dienen als Identitäten, aus denen die Bitcoin-Adresse abgeleitet wird; und der Konsens entsteht durch **Proof-of-Work**, bei dem Miner eine Nonce mit H(Block) < Target suchen. Es gilt „Longest Chain Wins", nach etwa 6 Bestätigungen ist Double-Spending praktisch unmöglich, und die Anreize liefern der **Block Reward** (halbiert sich alle 210 000 Blöcke, Obergrenze 21 Mio. BTC) plus die **Transaktionsgebühren**.
 
 ## Begriffe & Notation
 
 | Begriff | Bedeutung |
 |---|---|
 | **Double-Spending** | dieselbe Münze zweimal ausgeben |
-| **Hash Pointer** | Zeiger + Hash des Zielbereichs (manipulationssicher) |
+| **Hash-Pointer** | Zeiger plus Hash des Zielbereichs (manipulationssicher) |
 | **Blockchain** | über Hash-Pointer verkettete Blöcke; Start = Genesis Block |
-| **Merkle-Baum / Root** | Hash-Baum; Wurzel fasst alle Daten zusammen |
-| **Bitcoin-Adresse** | aus Public Key: SHA-256 → RIPEMD-160 → Base58Check |
-| **Proof-of-Work** | H(nonce‖prev‖tx) < target finden (Nonce suchen) |
+| **Merkle-Baum / Root** | Hash-Baum; die Wurzel fasst alle Daten zusammen |
+| **Bitcoin-Adresse** | aus dem Public Key: SHA-256 → RIPEMD-160 → Base58Check |
+| **Proof-of-Work** | eine Nonce mit H(nonce‖prev‖tx) < target finden |
+| **Nonce** | die gesuchte Zahl, die den Block gültig macht |
 | **Longest Chain Wins** | der längste Branch setzt sich durch |
-| **Block Reward** | Coinbase-Belohnung, halbiert alle 210 000 Blöcke |
-| **UTXO** | Unspent Transaction Output (verfügbares Guthaben) |
+| **Block Reward / Coinbase** | frische Coins an den Miner, halbiert alle 210 000 Blöcke |
+| **UTXO** | Unspent Transaction Output — verfügbares Guthaben |
 
 ## Typische Fallen
 
-- **Bitcoin ist anonym?** Nein — nur **pseudonym** (Adressen statt Namen; Transaktionen sind öffentlich nachvollziehbar).
-- **Eine Transaktion ist sofort sicher?** Nein — erst nach mehreren **Bestätigungen** (Faustregel 6); bei Zero-Confirmation droht Double-Spend.
-- **Der Hash deckt nur die Transaktionen ab?** Nein — er umfasst auch den **prev-Hash**, deshalb verkettet sich Manipulation nach vorn.
-- **Proof-of-Work „macht etwas Nützliches"?** Nein — der Sinn ist allein, dass Arbeit **knapp und teuer** ist; nur die Nonce-Suche zählt.
-- **Block Reward bleibt konstant?** Nein — er **halbiert** sich; Obergrenze 21 Mio. BTC.
+- **Bitcoin ist anonym? Nein** — nur **pseudonym**; Adressen statt Namen, aber alle Transaktionen sind öffentlich nachvollziehbar.
+- **Eine Transaktion ist sofort sicher? Nein** — erst nach mehreren **Bestätigungen** (Faustregel 6); bei Zero-Confirmation droht der Double-Spend.
+- **Der Block-Hash deckt nur die Transaktionen ab? Nein** — er umfasst auch den **prev-Hash**, deshalb pflanzt sich jede Manipulation nach vorn fort.
+- **Proof-of-Work „berechnet etwas Nützliches"? Nein** — der Sinn ist allein, dass die Arbeit **knapp und teuer** ist; nur die Nonce-Suche zählt.
+- **Der Block Reward bleibt konstant? Nein** — er **halbiert** sich alle 210 000 Blöcke, mit der Obergrenze von 21 Mio. BTC.
 
 ## Klausur-Fokus
 
-Das Übungsblatt mischt Theorie mit einer hübschen Rechenaufgabe. Theorie zum frei Erklären: den **Aufbau und Zweck einer Blockchain**, das **Byzantinische-Generäle-Problem** im Bitcoin-Kontext (wie man sich ohne zentrale Instanz auf eine Wahrheit einigt), das **Proof-of-Work**-Konzept und die Rolle des **Merkle-Trees**. Die typische Rechenaufgabe ist eine vereinfachte **Mining-Simulation**: Mit einer gegebenen Hash-Formel sollst du für vorgegebene Blockfelder die **Nonce finden, mit der der Block-Hash die Gültigkeitsbedingung erfüllt** (z. B. Hash ≥ Schwelle), und so eine Blocktabelle vervollständigen — genau das illustriert „schwer zu lösen, leicht zu prüfen". Außerdem solltest du die **maximale Münzmenge aus einer Halbierungsregel** berechnen können (Reward halbiert sich alle k Blöcke → geometrische Reihe). Dazu, eher konzeptionell: das **Manipulations-Szenario** der Blockchain (warum alle folgenden Hashes neu müssten), **Double-Spend** mit „Longest Chain Wins" und der 6-Bestätigungen-Regel, sowie **Block Reward**, **Transaktionsgebühren** und **UTXO** in Grundzügen. (Verwandt aus demselben Blatt: **Rainbow-Tables** berechnen — Passwortkombinationen, Tabellengröße, CPU-Zeit.)
+Das Übungsblatt mischt Theorie mit hübschen Rechenaufgaben. Zum freien Erklären gehören der **Aufbau und Zweck einer Blockchain**, das **Byzantinische-Generäle-Problem** im Bitcoin-Kontext (sich ohne zentrale Instanz auf eine Wahrheit einigen), das **Proof-of-Work**-Konzept und die Rolle des **Merkle-Trees**. Die typische Rechenaufgabe ist eine vereinfachte **Mining-Simulation**: Mit einer gegebenen Hash-Formel sollst du für vorgegebene Blockfelder die **Nonce finden, mit der der Block-Hash die Gültigkeitsbedingung erfüllt** (etwa Hash ≥ Schwelle) und so eine Blocktabelle vervollständigen. Dazu solltest du die **maximale Münzmenge aus einer Halbierungsregel** über die geometrische Reihe berechnen können (Reward · Blöcke-pro-Halbierung · 2). Und passend zum Passwort-Hashing aus dem letzten Kapitel: die **Größe und Erzeugungszeit einer Rainbow-Table** abschätzen (Zahl der Passwörter über die Kombinatorik, mal Bytes pro Zeile, geteilt durch die Hash-Rate). Eher konzeptionell bleiben das **Manipulations-Szenario** der Blockchain, der **Double-Spend** mit „Longest Chain Wins" und der 6-Bestätigungen-Regel sowie **Block Reward**, **Transaktionsgebühren** und **UTXO** in Grundzügen.
 
 ## Mehr dazu
 
-- **3Blue1Brown — But how does bitcoin actually work?** (EN): baut Bitcoin Schritt für Schritt aus Ledger, Signaturen, Hashes und Proof-of-Work auf — die beste Intuition zum Thema. https://www.youtube.com/watch?v=bBC-nXj3Ng4
-- **ETH.BUILD — Blockchain-Mining-Demo** (EN, ethereum.org): interaktiv sehen, wie Blöcke verkettet werden, wie Proof-of-Work sichert und was bei Manipulation passiert. https://ethereum.org/videos/blockchain-eth-build/
+- **3Blue1Brown — But how does bitcoin actually work?** (~26 Min., EN): baut Bitcoin Schritt für Schritt aus Ledger, Signaturen, Hashes und Proof-of-Work auf — die beste Intuition zum Thema. https://www.youtube.com/watch?v=bBC-nXj3Ng4
+- **ETH.BUILD — Blockchain-Mining-Demo** (interaktiv, EN): live sehen, wie Blöcke verkettet werden, wie Proof-of-Work sichert und was bei Manipulation passiert. https://ethereum.org/videos/blockchain-eth-build/
 - **Khan Academy — Bitcoin: Cryptographic hash functions** (EN): die Hash-Grundlage hinter Bitcoin. https://www.youtube.com/watch?v=0WiTaBI82Mc`,
   },
 };
@@ -851,83 +1090,86 @@ const lecture08: Explanation = {
     de: "Sicherheitsprotokolle & Schlüsselvereinbarung: Diffie-Hellman, Needham-Schroeder, Kerberos",
   },
   content: {
-    de: `Wir haben Chiffren (symmetrisch + asymmetrisch) und Signaturen — aber eine Lücke bleibt: *Wie einigen sich zwei Fremde über eine abgehörte Leitung auf einen gemeinsamen geheimen Schlüssel?* Genau das ist das Schlüsselaustauschproblem aus Vorlesung 4. Diese Vorlesung gibt zwei Antworten: Diffie-Hellman (rein asymmetrisch, ohne dass je ein Schlüssel über die Leitung geht) und Server-basierte Protokolle mit einem KDC (Needham-Schroeder, Kerberos).
+    de: `Wir haben jetzt Chiffren — symmetrische wie asymmetrische — und digitale Signaturen. Doch eine alte Lücke ist immer noch offen, dieselbe, die schon die symmetrische Kryptografie quälte: *Wie einigen sich zwei Fremde über eine abgehörte Leitung auf einen gemeinsamen geheimen Schlüssel, ohne ihn vorher ausgetauscht zu haben?* Dieses Kapitel gibt zwei grundverschiedene Antworten. Die erste ist ein kleines Wunder der Mathematik — der **Diffie-Hellman-Schlüsselaustausch**, bei dem Alice und Bob einen gemeinsamen Schlüssel erzeugen, der *nie* über die Leitung geht. Die zweite ist bodenständiger und server-gestützt — Protokolle wie **Needham-Schroeder** und **Kerberos**, die einen vertrauenswürdigen Schlüsselserver einsetzen. Beide haben ihre Tücken, und genau die machen das Kapitel klausurrelevant.
 
 ## Diffie-Hellman: ein Geheimnis öffentlich aushandeln
 
-1976 von Diffie und Hellman veröffentlicht, nutzt DHKE das **diskrete Logarithmusproblem** als Einwegfunktion (RSA nutzt dagegen die Faktorisierung). Es löst das Schlüsselverteilungsproblem praktisch und steckt heute in SSL/TLS und IPsec.
+1976 stellten Whitfield Diffie und Martin Hellman ein Verfahren vor, das auf den ersten Blick unmöglich wirkt: Zwei Parteien einigen sich auf einen gemeinsamen geheimen Schlüssel, indem sie ausschließlich *öffentliche* Nachrichten austauschen. Möglich macht das eine andere Einwegfunktion als bei RSA — nicht die Faktorisierung, sondern das **diskrete Logarithmusproblem**: Eine Potenz α^a mod p ist leicht zu berechnen, aber aus dem Ergebnis den Exponenten a zurückzugewinnen ist für große p praktisch aussichtslos. DHKE löst damit das Schlüsselverteilungsproblem und steckt heute in SSL/TLS und IPsec.
 
-**Setup (öffentlich):** Wähle eine große Primzahl p (idealerweise > 2048 Bit) und eine Zahl α ∈ {2, …, p−2}; veröffentliche α und p.
+Die schönste Intuition dafür ist das **Farbenmischen**: Man nehme an, zwei Farben zu mischen sei leicht, eine gemischte Farbe aber wieder in ihre Bestandteile zu zerlegen sei praktisch unmöglich. Alice und Bob einigen sich öffentlich auf eine gemeinsame Grundfarbe. Dann mischt jeder heimlich seine eigene Geheimfarbe hinein und schickt das Ergebnis offen herüber. Mischt nun jeder die *empfangene* Mischung mit seiner *eigenen* Geheimfarbe, landen beide bei exakt derselben Endfarbe — die ein Lauscher nicht nachmischen kann, weil ihm beide Geheimfarben fehlen.
 
-**Protokoll:**
+![Diffie-Hellman als Farbmisch-Analogie](https://upload.wikimedia.org/wikipedia/commons/4/46/Diffie-Hellman_Key_Exchange.svg "Diffie-Hellman als Farben: eine öffentliche Grundfarbe plus je eine geheime Farbe ergeben über Kreuz dieselbe Endfarbe — ohne die geheimen Farben zu verraten.")
 
-1. Alice wählt geheim a, berechnet A = α^a mod p, sendet A.
-2. Bob wählt geheim b, berechnet B = α^b mod p, sendet B.
-3. Alice rechnet B^a = (α^b)^a = α^(a·b) mod p.
-4. Bob rechnet A^b = (α^a)^b = α^(a·b) mod p.
+In Zahlen läuft das so ab. Zuerst das öffentliche **Setup**: Man wählt eine große Primzahl p (idealerweise über 2048 Bit) und eine Basis α aus dem Bereich von 2 bis p−2 und veröffentlicht beide. Dann das **Protokoll**: Alice wählt insgeheim eine Zahl a, berechnet A = α^a mod p und schickt A an Bob; Bob wählt insgeheim b, berechnet B = α^b mod p und schickt B an Alice. Nun rechnet Alice B^a = (α^b)^a = α^(a·b) mod p, und Bob rechnet A^b = (α^a)^b = α^(a·b) mod p — beide erhalten denselben **Sitzungsschlüssel k_AB = α^(a·b) mod p**, obwohl nur A und B je übertragen wurden. Ein Lauscher Oskar kennt α, p, A und B, müsste aber aus A = α^a den geheimen Exponenten a ziehen — eben den diskreten Logarithmus —, und das gelingt für große p nicht.
 
-Beide haben denselben **Sitzungsschlüssel k_AB = α^(a·b) mod p** — obwohl nur A und B über die Leitung gingen. Oskar kennt α, p, A, B, müsste aber aus A = α^a den geheimen Exponenten a ziehen (den diskreten Logarithmus) — und das ist für große p praktisch unmöglich. **Aber:** Ohne Zertifikate ist auch DHKE durch einen aktiven **MITM** angreifbar (Oskar handelt je einen Schlüssel mit Alice und mit Bob aus).
+![Beide Seiten berechnen dasselbe gemeinsame Geheimnis](https://upload.wikimedia.org/wikipedia/commons/4/4c/Public_key_shared_secret.svg "Aus den öffentlich ausgetauschten Werten berechnen beide Parteien dasselbe gemeinsame Geheimnis, das nie über die Leitung gesendet wurde.")
 
-![Diffie-Hellman als Farbmisch-Analogie](https://commons.wikimedia.org/wiki/Special:FilePath/Diffie-Hellman_Key_Exchange.svg "Diffie-Hellman als Farben: öffentliche Grundfarbe + je eine geheime Farbe; gemischt ergeben beide dieselbe Endfarbe, ohne die geheimen Farben zu verraten. (Diagramm der Uni Duisburg-Essen.)")
+### Schritt für Schritt: Diffie-Hellman von Hand
 
-**Durchgerechnet (kleine Zahlen):** p = 23, α = 5. Alice wählt a = 4 → A = 5⁴ mod 23 = **4**. Bob wählt b = 3 → B = 5³ mod 23 = **10**. Alice: B⁴ = 10⁴ mod 23 = **18**. Bob: A³ = 4³ mod 23 = **18**. Gemeinsamer Schlüssel **18** — nie übertragen.
+Rechnen wir es mit kleinen Zahlen durch, genau wie auf dem Übungsblatt. Öffentlich seien p = 13 und g = 2 (das g ist hier die Basis α). Alice wählt geheim a = 4, Bob wählt geheim b = 5.
 
-> **Eselsbrücke (Diffie-Hellman = Farben mischen):** öffentliche Grundfarbe (α, p) + je eine **geheime** Farbe (a, b). Jeder schickt seine Mischung; mischt man die fremde Mischung mit der eigenen geheimen Farbe, kommt **dieselbe** Endfarbe heraus. Entmischen (= diskreter Log) geht nicht. [Computerphile zeigt genau diese Analogie](https://www.youtube.com/watch?v=NmM9HA2MQGI).
+- Alice berechnet A = g^a mod p = 2⁴ mod 13 = 16 mod 13 = **3** und schickt 3.
+- Bob berechnet B = g^b mod p = 2⁵ mod 13 = 32 mod 13 = **6** und schickt 6.
+- Alice berechnet das Geheimnis s = B^a mod p = 6⁴ mod 13 = 1296 mod 13 = **9**.
+- Bob berechnet s = A^b mod p = 3⁵ mod 13 = 243 mod 13 = **9**.
 
-## Schlüsselserver (KDC): symmetrischer Schlüsseltausch
+Beide haben **s = 9** — und über die Leitung gingen nur die 3 und die 6, nie die 9. (Bei größeren Exponenten rechnest du die Potenzen wieder mit Square-and-Multiply und reduzierst nach jedem Schritt modulo p.) Wichtig ist die eine Einschränkung, die du nie vergessen darfst: Ohne Authentisierung ist auch DHKE durch einen aktiven **Man-in-the-Middle** angreifbar — Oskar handelt einfach mit Alice *und* mit Bob je einen eigenen Schlüssel aus und sitzt unbemerkt in der Mitte. Deshalb braucht DHKE in der Praxis Zertifikate.
 
-Man kann Sitzungsschlüssel auch rein **symmetrisch** verteilen — über einen vertrauenswürdigen Server, das **KDC (Key Distribution Center)**. Annahme: Jeder Nutzer besitzt bereits einen geheimen symmetrischen Schlüssel mit dem KDC (vorab installiert, z. B. bei der Laptop-Übergabe). Das KDC erzeugt dann **Sitzungsschlüssel (Session-/Ephemeral-Keys)** und verteilt sie verschlüsselt. Warum kurzlebige Sitzungsschlüssel? Dem Angreifer stehen weniger Chiffrate pro Schlüssel zur Verfügung, er müsste viele Schlüssel knacken, und symmetrisch ist es schnell.
+> **Eselsbrücke (Diffie-Hellman = Farben mischen):** öffentliche Grundfarbe (α, p) plus je eine *geheime* Farbe (a, b). Jeder schickt seine Mischung; mischt man die fremde Mischung mit der eigenen geheimen Farbe, kommt **dieselbe** Endfarbe heraus. Entmischen (= diskreter Log) geht nicht. [Computerphile zeigt genau diese Analogie](https://www.youtube.com/watch?v=NmM9HA2MQGI).
 
-## Zwei Angriffe: Replay & fehlende Bestätigung
+## Schlüsselserver (KDC): der symmetrische Weg
 
-- **Replay-Angriff:** Ist der empfangene Sitzungsschlüssel überhaupt **aktuell**? Wenn nicht, spielt der Angreifer alte (mitgeschnittene) Nachrichten erneut ein und gibt sich als KDC aus. Gegenmittel: **Freshness** — Nonces (Zufallswerte), Timestamps, Counter.
-- **Schlüsselbestätigungsangriff:** Hat die Gegenseite den Schlüssel wirklich **bestätigt**? Wenn nicht, kann Oskar eine Identität austauschen und so einen Schlüssel etablieren, den er selbst kennt. Gegenmittel: **Challenge-Response** und das **Einbinden der Identitäten** in die Nachrichten.
+Es gibt auch einen ganz anderen Weg, Sitzungsschlüssel zu verteilen — rein **symmetrisch**, über einen vertrauenswürdigen Server, das **Key Distribution Center (KDC)**. Die Annahme dabei: Jeder Nutzer besitzt schon einen geheimen symmetrischen Schlüssel mit dem KDC, der vorab installiert wurde (etwa vom Systemadministrator bei der Laptop-Übergabe). Wollen nun zwei Nutzer kommunizieren, erzeugt das KDC einen frischen **Sitzungsschlüssel** (auch Session- oder Ephemeral-Key genannt) und verteilt ihn verschlüsselt an beide. Warum kurzlebige Sitzungsschlüssel überhaupt sinnvoll sind: Dem Angreifer stehen pro Schlüssel nur wenige Chiffrate zur Verfügung, er müsste viele verschiedene Schlüssel knacken, um längere Kommunikation mitzulesen (man denke an Satellitenfernsehen oder Sprachverschlüsselung), und das symmetrische Etablieren ist rechnerisch schnell.
 
-> **Eselsbrücke (Replay vs. Bestätigung):** **Replay** = „ist die Nachricht *frisch*?" → Gegenmittel **Freshness** (Nonce/Timestamp). **Bestätigung** = „redet wirklich die *richtige* Gegenseite?" → Gegenmittel **Challenge-Response**. Und merke: **Needham-Schroeder = Nonces** (mit Lücke), **Kerberos = Timestamps** (dafür synchrone Uhren nötig).
+## Zwei Angriffe, die jedes Schlüsselprotokoll abwehren muss
 
-## Needham-Schroeder & Kerberos
+Solche server-gestützten Protokolle müssen gegen zwei klassische Angriffe gewappnet sein. Der erste ist der **Replay-Angriff**: Ist der empfangene Sitzungsschlüssel überhaupt *aktuell*? Wenn ein Protokoll das nicht prüft, kann ein Angreifer alte, mitgeschnittene Nachrichten erneut einspielen und sich dabei als KDC ausgeben. Das Gegenmittel heißt **Freshness** und wird durch Nonces (frische Zufallswerte), Timestamps oder Zähler garantiert. Der zweite ist der **Schlüsselbestätigungsangriff**: Hat die Gegenseite den Schlüssel wirklich *bestätigt*? Tut sie das nicht nachweislich, kann Oskar eine der Identitäten austauschen und so einen Schlüssel etablieren, den er selbst kennt. Das Gegenmittel ist ein **Challenge-Response-Verfahren** und das feste **Einbinden der Identitäten** in die ausgetauschten Nachrichten.
 
-Das **Needham-Schroeder-Protokoll (1978)** ist ein KDC-Protokoll und wehrt Schlüsselbestätigungsangriffe ab (Identitäten sind in Nachricht 2 verschlüsselt; Nachrichten 4 und 5 bestätigen per Challenge-Response, dass Alice den Schlüssel hat). Seine **Schwäche**: Bricht das Protokoll nach Nachricht 2 ab, kann ein Angreifer, der einen *alten* Sitzungsschlüssel (und Alices Schlüssel) kennt, Nachricht 3 senden — Bob merkt nicht, dass der Schlüssel veraltet ist. Nonces allein reichen hier nicht; besser wären **Timestamps**.
+> **Eselsbrücke (Replay vs. Bestätigung):** **Replay** fragt „ist die Nachricht *frisch*?" → Gegenmittel **Freshness** (Nonce/Timestamp). **Bestätigung** fragt „redet wirklich die *richtige* Gegenseite?" → Gegenmittel **Challenge-Response**. Merke außerdem: **Needham-Schroeder = Nonces** (mit Lücke), **Kerberos = Timestamps** (dafür synchrone Uhren nötig).
 
-**Kerberos** baut auf Needham-Schroeder auf, ist aber mehr als ein Schlüsseltransport: Es **authentisiert Nutzer im Netzwerk**, wurde 1993 (RFC 1510) standardisiert und steckt in **Active Directory** (Windows/Linux). Der entscheidende Unterschied: Kerberos nutzt **Timestamps** statt nur Nonces → der obige Angriff scheidet aus. Preis dafür: Es braucht **synchronisierte Uhren**. Beide Protokolle setzen eine **vertrauenswürdige dritte Partei (das KDC)** voraus — ein **Single Point of Failure**.
+## Needham-Schroeder und Kerberos
+
+Das **Needham-Schroeder-Protokoll** von 1978 ist so ein KDC-Protokoll. Es wehrt Schlüsselbestätigungsangriffe ab, weil die Identitäten verschlüsselt übertragen werden und die letzten Nachrichten per Challenge-Response bestätigen, dass Alice den Sitzungsschlüssel tatsächlich besitzt. Doch es hat eine berühmte **Schwäche**: Bricht das Protokoll nach der zweiten Nachricht ab, kann ein Angreifer, der einen *alten* Sitzungsschlüssel (und Alices Schlüssel) erbeutet hat, einfach die dritte Nachricht senden — und Bob merkt nicht, dass der Schlüssel längst veraltet ist. Nonces allein decken diesen Fall nicht ab; hier bräuchte man Timestamps.
+
+Genau das tut der Nachfolger. **Kerberos** baut auf Needham-Schroeder auf, ist aber mehr als bloßer Schlüsseltransport: Es **authentisiert Nutzer im gesamten Netzwerk**, wurde 1993 als RFC 1510 standardisiert und steckt heute in jeder Active-Directory-Umgebung von Windows und Linux. Der entscheidende Unterschied ist der Einsatz von **Timestamps** statt bloßer Nonces, womit der eben beschriebene Replay-Angriff ausscheidet — der Preis dafür sind **synchronisierte Uhren** zwischen allen Beteiligten. Beide Protokolle teilen aber eine grundsätzliche Annahme: eine **vertrauenswürdige dritte Partei**, das KDC. Und das ist zugleich ihr Schwachpunkt — ein **Single Point of Failure**, dessen Kompromittierung das ganze System aushebelt.
 
 ## Auf den Punkt
 
-Die Kurzfassung: Diese Vorlesung schließt die Lücke „wie einigen sich zwei Fremde über eine abgehörte Leitung auf einen Schlüssel?". Antwort eins ist **Diffie-Hellman**: Alice und Bob erzeugen *gemeinsam* den Schlüssel k_AB = α^(a·b) mod p, ohne ihn je zu senden — sicher dank des diskreten Logarithmusproblems, aber ohne Authentisierung MITM-anfällig (deshalb Zertifikate). Antwort zwei sind **server-basierte Protokolle** mit einem KDC, das Sitzungsschlüssel verteilt (jeder teilt vorab einen Schlüssel mit dem KDC). Solche Protokolle müssen zwei Angriffe abwehren: **Replay** (Gegenmittel: Freshness via Nonce/Timestamp) und **fehlende Schlüsselbestätigung** (Gegenmittel: Challenge-Response). **Needham-Schroeder** (1978) hat noch eine Replay-Lücke; **Kerberos** schließt sie mit Timestamps (braucht dafür synchrone Uhren) und authentisiert Nutzer im Netz (Active Directory). Beide setzen ein KDC voraus — ein Single Point of Failure.
+Die Kurzfassung: Dieses Kapitel schließt die Lücke „wie einigen sich zwei Fremde über eine abgehörte Leitung auf einen Schlüssel?". Die erste Antwort ist **Diffie-Hellman**: Alice und Bob erzeugen *gemeinsam* den Schlüssel k_AB = α^(a·b) mod p, ohne ihn je zu senden — sicher dank des diskreten Logarithmusproblems, aber ohne Authentisierung MITM-anfällig (deshalb Zertifikate). Die zweite Antwort sind **server-gestützte Protokolle** mit einem KDC, das symmetrische Sitzungsschlüssel verteilt (jeder teilt vorab einen Schlüssel mit dem KDC). Solche Protokolle müssen zwei Angriffe abwehren: **Replay** (Gegenmittel Freshness via Nonce/Timestamp) und **fehlende Schlüsselbestätigung** (Gegenmittel Challenge-Response). **Needham-Schroeder** (1978) hat noch eine Replay-Lücke; **Kerberos** schließt sie mit Timestamps (braucht dafür synchrone Uhren) und authentisiert Nutzer im Netz. Beide setzen ein KDC voraus — einen Single Point of Failure.
 
 ## Begriffe & Notation
 
 | Begriff | Bedeutung |
 |---|---|
 | **DHKE** | Diffie-Hellman Key Exchange |
-| **diskretes Log-Problem** | Einwegfunktion hinter DHKE (und ECC) |
-| **α, p** | öffentliche Parameter (Generator, große Primzahl) |
-| **a, b** | private Exponenten von Alice/Bob |
-| **k_AB = α^(a·b) mod p** | gemeinsamer Sitzungsschlüssel |
-| **KDC** | Key Distribution Center (Schlüsselserver) |
+| **diskretes Logarithmusproblem** | Einwegfunktion hinter DHKE (und ECC) |
+| **α, p (bzw. g, p)** | öffentliche Parameter: Basis/Generator und große Primzahl |
+| **a, b** | die privaten Exponenten von Alice und Bob |
+| **k_AB = α^(a·b) mod p** | der gemeinsame Sitzungsschlüssel |
+| **KDC** | Key Distribution Center — der Schlüsselserver |
 | **Session-/Ephemeral-Key** | kurzlebiger Sitzungsschlüssel |
 | **Replay-Angriff** | alte Nachrichten erneut einspielen |
-| **Freshness** | Aktualität via Nonce / Timestamp / Counter |
+| **Freshness** | Aktualität via Nonce / Timestamp / Zähler |
 | **Challenge-Response** | Nachweis, dass die Gegenseite den Schlüssel hat |
 | **Needham-Schroeder / Kerberos** | KDC-Protokolle (Nonces / Timestamps) |
 
 ## Typische Fallen
 
-- **Bei DHKE wird der Schlüssel übertragen?** Nein — übertragen werden nur A und B; der Schlüssel α^(a·b) wird **bei beiden berechnet**, nie gesendet.
-- **DHKE ist gegen MITM sicher?** Nein — ohne Authentisierung/Zertifikate ist es angreifbar (wie alle asymmetrischen Verfahren).
-- **DHKE und RSA nutzen dasselbe Problem?** Nein — DHKE: **diskreter Logarithmus**; RSA: **Faktorisierung**.
-- **Nonces lösen alle Replays?** Nicht ganz — die Needham-Schroeder-Lücke zeigt, dass hier **Timestamps** nötig sind.
-- **KDC = mehr Sicherheit, keine Nachteile?** Es ist eine **vertrauenswürdige dritte Partei** und damit ein **Single Point of Failure**.
+- **Bei DHKE wird der Schlüssel übertragen? Nein** — übertragen werden nur A und B; der Schlüssel α^(a·b) wird bei beiden *berechnet*, nie gesendet.
+- **DHKE ist gegen MITM sicher? Nein** — ohne Authentisierung/Zertifikate ist es angreifbar, wie alle asymmetrischen Verfahren.
+- **DHKE und RSA nutzen dasselbe Problem? Nein** — DHKE beruht auf dem **diskreten Logarithmus**, RSA auf der **Faktorisierung**.
+- **Nonces lösen jeden Replay? Nicht ganz** — die Needham-Schroeder-Lücke zeigt, dass hier **Timestamps** nötig sind.
+- **Ein KDC bringt nur Vorteile? Nein** — es ist eine vertrauenswürdige dritte Partei und damit ein **Single Point of Failure**.
 
 ## Klausur-Fokus
 
-Die mit Abstand wichtigste Übung dieser Vorlesung ist die **Diffie-Hellman-Rechnung** — übe sie, bis sie blind sitzt: Aus p, g (= α), a, b berechnest du A = g^a mod p, B = g^b mod p und das gemeinsame Geheimnis s = B^a mod p = A^b mod p. Das Übungsblatt lässt das gleich an mehreren Parametersätzen durchrechnen, und genau so kommt es in der Klausur. Erkläre dazu, **warum DHKE sicher ist** (diskreter Logarithmus) und **warum ein MITM** ohne Authentisierung trotzdem klappt. Der zweite Schwerpunkt sind **Zertifikate**: das Aufgabenspektrum einer **CA**, die Ansätze zum **Widerruf** eines Zertifikats (CRL und das Echtzeit-**OCSP**) und der Unterschied zwischen der **CA-basierten Vertrauensstruktur und dem Web of Trust** (GPG). Auf der Protokollseite: **Replay** vs. **Schlüsselbestätigungsangriff** mit je dem Gegenmittel (Freshness/Nonce vs. Challenge-Response), die **Needham-Schroeder-Schwäche** (Abbruch nach Nachricht 2) und **Kerberos** (Timestamps statt Nonces, synchrone Uhren nötig, KDC als Single Point of Failure).
+Die mit Abstand wichtigste Übung dieses Kapitels ist die **Diffie-Hellman-Rechnung** — übe sie, bis sie blind sitzt: Aus p, g, a, b berechnest du A = g^a mod p, B = g^b mod p und das gemeinsame Geheimnis s = B^a mod p = A^b mod p. Das Übungsblatt lässt das an mehreren Parametersätzen durchrechnen (etwa p = 13, g = 2, a = 4, b = 5 → s = 9), und genau so kommt es in der Klausur. Erkläre dazu, **warum DHKE sicher ist** (diskreter Logarithmus) und **warum ein MITM** ohne Authentisierung trotzdem gelingt. Der zweite Schwerpunkt sind **Zertifikate und TLS**: das Aufgabenspektrum einer **CA**, die Ansätze zum **Widerruf** eines Zertifikats (die Sperrliste CRL und das Echtzeit-**OCSP**), der Unterschied zwischen der **CA-basierten Vertrauensstruktur und dem Web of Trust** (GPG) sowie die Idee von **Let's Encrypt** und **Certificate Transparency**. Auf der Protokollseite: **Replay** gegen **Schlüsselbestätigungsangriff** mit je dem Gegenmittel (Freshness/Nonce bzw. Challenge-Response), die **Needham-Schroeder-Schwäche** (Abbruch nach Nachricht 2) und **Kerberos** (Timestamps statt Nonces, synchrone Uhren nötig, KDC als Single Point of Failure).
 
 ## Mehr dazu
 
-- **Computerphile — Secret Key Exchange (Diffie-Hellman)** (EN): die berühmte Farbmisch-Analogie — warum man ein Geheimnis öffentlich aushandeln kann. https://www.youtube.com/watch?v=NmM9HA2MQGI
-- **Computerphile — Public Key Cryptography** (EN): Einordnung asymmetrischer Verfahren und Einwegfunktionen. https://www.youtube.com/watch?v=GSIDS_lvRv4
-- **Wikipedia — Diffie-Hellman-Schlüsselaustausch** (DE, aus den Folien): Protokoll, Rechenbeispiel und MITM-Problem. https://de.wikipedia.org/wiki/Diffie-Hellman-Schl%C3%BCsselaustausch`,
+- **Computerphile — Secret Key Exchange (Diffie-Hellman)** (~9 Min., EN): die berühmte Farbmisch-Analogie — warum man ein Geheimnis öffentlich aushandeln kann. https://www.youtube.com/watch?v=NmM9HA2MQGI
+- **Computerphile — Public Key Cryptography** (~6 Min., EN): Einordnung asymmetrischer Verfahren und Einwegfunktionen. https://www.youtube.com/watch?v=GSIDS_lvRv4
+- **Wikipedia — Diffie-Hellman-Schlüsselaustausch** (DE): Protokoll, Rechenbeispiel und das MITM-Problem im Detail. https://de.wikipedia.org/wiki/Diffie-Hellman-Schl%C3%BCsselaustausch`,
   },
 };
 
@@ -938,84 +1180,81 @@ const lecture09: Explanation = {
     de: "Denial-of-Service und Input Validation: Angriffe auf Verfügbarkeit und Webanwendungen",
   },
   content: {
-    de: `Hier verlässt der Kurs die reine Kryptografie und betritt die Netzwerk- und Web-Sicherheit. Zwei sehr unterschiedliche Angreifertypen: der eine will dein System **lahmlegen** (Denial-of-Service — Angriff auf die Verfügbarkeit), der andere schmuggelt **bösartige Eingaben** in deine Webanwendung (XSS, SQL-Injection). Davor steht noch kurz TLS als das Protokoll, das die Krypto der letzten Wochen im Web zusammenführt.
+    de: `Hier verlässt der Kurs die reine Mathematik und betritt die Welt der Netzwerk- und Web-Sicherheit. Zwei sehr unterschiedliche Angreifer treten auf. Der erste will dein System gar nicht ausspähen, sondern schlicht **lahmlegen** — er greift die Verfügbarkeit an (Denial-of-Service). Der zweite schmuggelt **bösartige Eingaben** in deine Webanwendung und bringt sie dazu, seinen Code auszuführen (Cross-Site-Scripting und SQL-Injection). Davor steht noch in einem Satz das Protokoll, das die ganze Krypto der letzten Wochen im Web zusammenführt: TLS. Am Ende verstehst du, warum ein einziger gekaperter Kühlschrank Teil eines Angriffs sein kann, der halbe Kontinente vom Netz nimmt — und warum ein einzelnes Anführungszeichen in einem Eingabefeld eine Datenbank ausplaudern lässt.
 
 ## TLS in einem Satz
 
-**SSL/TLS** verschlüsselt den Webverkehr und kombiniert dafür asymmetrische Kryptografie (für den Schlüsseltausch und Zertifikate) mit symmetrischer (für die eigentlichen Daten) — ein **Hybridprotokoll**. Die Versionsgeschichte ist vor allem eine Liste von Abkündigungen: SSL 1.0–3.0 und TLS 1.0/1.1 gelten als **veraltet**; relevant sind **TLS 1.2 (2008)** und **TLS 1.3 (2018)**.
+**SSL/TLS** ist das Hybridprotokoll, das jeden „https"-Verkehr absichert: Es nutzt asymmetrische Kryptografie für den Schlüsseltausch und die Zertifikatsprüfung und schaltet danach auf schnelle symmetrische Verschlüsselung für die eigentlichen Daten um — genau die Kombination, die wir in den letzten Kapiteln aufgebaut haben. Seine Versionsgeschichte ist vor allem eine lange Liste von Abkündigungen: SSL 1.0 bis 3.0 und TLS 1.0/1.1 gelten heute als veraltet; relevant und sicher sind nur noch **TLS 1.2 (2008)** und **TLS 1.3 (2018)**.
 
 ## Denial-of-Service: die Verfügbarkeit angreifen
 
-**DoS-Angriffe** zielen direkt auf das CIA-Schutzziel **Verfügbarkeit**: Sie **überlasten Ressourcen**, bis legitime Anfragen nicht mehr bedient werden. Angreifbar sind Netzwerk-Bandbreite, System- und Anwendungsressourcen. Die Bausteine:
+Ein **Denial-of-Service-Angriff (DoS)** zielt direkt auf das dritte CIA-Schutzziel, die **Verfügbarkeit**. Sein einziges Ziel ist es, eine Ressource so zu überlasten, dass legitime Anfragen nicht mehr bedient werden — angreifbar sind dabei die Netzwerkbandbreite, die Systemressourcen oder die Anwendungsressourcen. Es gibt eine ganze Familie von Techniken dafür, und du solltest sie auseinanderhalten können. Am einfachsten ist das **ICMP-Flooding**: Der Angreifer überschüttet den Server mit „ping"-Anfragen (ICMP echo requests), bis dieser an der Antwortlast erstickt. Damit er dabei unerkannt bleibt, nutzt er **Source-Address-Spoofing** — er fälscht die Absenderadresse seiner Pakete, was ihn nicht nur verschleiert, sondern es auch erlaubt, die Antworten gezielt auf fremde Rechner umzulenken. Eine raffiniertere Variante ist das **SYN-Spoofing**, das den TCP-Verbindungsaufbau (den Drei-Wege-Handshake) missbraucht: Der Angreifer öffnet massenhaft halbe Verbindungen, die der Server offen hält, bis dessen Verbindungstabelle voll ist.
 
-- **ICMP-Flooding:** den Server mit vielen „ping"-Anfragen (ICMP echo requests) zumüllen, bis er an der Antwortlast erstickt.
-- **Source-Address-Spoofing:** die **Quelladresse fälschen**. Damit verschleiert der Angreifer sich — und lenkt Antworten auf fremde Rechner.
-- **SYN-Spoofing:** den TCP-Handshake missbrauchen (halb offene Verbindungen) und so die Verbindungstabelle des Servers füllen.
-- **Reflection:** Anfragen mit gefälschter Quelladresse (= Opfer) an viele Server schicken; deren Antworten treffen alle das **Opfer**.
-- **Amplification:** eine Verstärkungs-Variante — eine **kleine** Anfrage erzeugt eine **viel größere** Antwort. Beispiel **DNS-Amplification**: eine 60-Byte-Anfrage (mit „ANY") löst eine 512- bis 4000-Byte-Antwort aus.
-- **DDoS (Distributed DoS):** statt von einem Rechner aus von **vielen** — einem **Botnet** aus gekaperten Maschinen (Handler- und Agent-Zombies).
+Richtig gefährlich werden zwei Verstärkungstricks. Beim **Reflection-Angriff** schickt der Angreifer Anfragen mit der gefälschten Absenderadresse des Opfers an viele gutgläubige Server — deren Antworten treffen dann alle das Opfer, das mit fremdem Antwortverkehr geflutet wird. Beim **Amplification-Angriff** kommt eine zweite Hebelwirkung hinzu: Eine *kleine* Anfrage löst eine *viel größere* Antwort aus. Das Paradebeispiel ist die **DNS-Amplification**, bei der eine 60-Byte-Anfrage (die mit „ANY" möglichst viele Informationen verlangt) eine 512- bis 4000-Byte-Antwort erzeugt — der Angreifer multipliziert seine eigene Bandbreite um ein Vielfaches. Und schließlich der **Distributed DoS (DDoS)**: Statt von einem einzigen Rechner kommt der Angriff von tausenden gleichzeitig, einem **Botnet** aus gekaperten Maschinen, die ein Angreifer über einen Command-and-Control-Server fernsteuert.
 
-**Mirai** (2016) ist das Lehrbuchbeispiel: ein **IoT-Botnet**, das schlecht gesicherte Geräte (Kameras, DVRs, Router) über **schwache Standardpasswörter** und offene Dienste (Telnet) kapert, sich selbst weiterverbreitet und damit die bis dahin größten DDoS-Angriffe fuhr. **Gegenmaßnahmen** sind schwer, weil man legitime von bösartiger Last unterscheiden muss: mehr Bandbreite/Redundanz, Erkennung + Filtern (Firewalls), Angreifer identifizieren.
+![Wie ein Botnet funktioniert: vom Schadprogramm über den C&C-Server zum koordinierten Angriff](https://upload.wikimedia.org/wikipedia/commons/c/c6/Botnet.svg "Ein Botnet: infizierte Rechner melden sich bei einem Command-and-Control-Server, der ihnen dann koordinierte Angriffsbefehle erteilt.")
 
-> **Eselsbrücke (DoS-Varianten):** **Reflection** = Antwort *umlenken* aufs Opfer (gefälschte Absenderadresse). **Amplification** = Antwort *aufblasen* (kleine Frage, riesige Antwort, z. B. DNS „ANY"). **DDoS** = *viele* Rechner (Botnet) statt einem. Und: DoS trifft immer das **A** der CIA-Triade (Verfügbarkeit).
+Genau so ein Botnet war **Mirai** (2016), das Lehrbuchbeispiel schlechthin: ein **IoT-Botnet**, das schlecht gesicherte Alltagsgeräte — Überwachungskameras, Videorekorder, Heimrouter — über deren **schwache Standardpasswörter** und offene Dienste (oft Telnet) kaperte, sich selbstständig auf weitere verwundbare Geräte ausbreitete und damit die bis dahin größten DDoS-Angriffe der Geschichte fuhr. Die folgende Architektur zeigt, wie sich solche Angriffe über Handler- und Agent-Zombies auffächern:
 
-## Input Validation: XSS & SQL-Injection
+![Stachledraht: ein verteilter DoS-Angriff über Handler und Agenten](https://upload.wikimedia.org/wikipedia/commons/3/3f/Stachledraht_DDos_Attack.svg "Ein DDoS-Angriff: Der Angreifer steuert über Handler eine Armee von Agent-Zombies, die gemeinsam das Opfer überfluten.")
 
-Die zweite Hälfte: Was passiert, wenn eine Webanwendung **Benutzereingaben ungeprüft** verwendet? (Die Folien nutzen PHP nur als Beispiel — in der Klausur musst du keinen PHP-Code schreiben, ggf. aber lesen.)
+Die Abwehr ist genau deshalb schwer, weil man **legitime von bösartiger Last unterscheiden** muss — der Angriffsverkehr sieht oft aus wie ganz normale Anfragen. Die Werkzeuge dagegen sind mehr Bandbreite und Redundanz, Angriffserkennung und Filterung (etwa durch Firewalls) sowie der Versuch, den Angreifer zu identifizieren.
 
-- **Cross-Site-Scripting (XSS):** Die Seite gibt Eingaben direkt im HTML aus, z. B. Welcome + name. Setzt der Angreifer als „name" ein Skript wie alert(document.cookie), wird es **im Browser des Opfers ausgeführt** — er kann z. B. Session-Cookies stehlen.
-- **SQL-Injection:** Die Eingabe landet ungeprüft in einer SQL-Abfrage, z. B. SELECT birthday FROM users WHERE name = '$name'. Schickt der Angreifer name = foo' UNION SELECT password FROM users, ändert er die **Bedeutung** der Abfrage und liest fremde Daten (oder löscht/ändert sie). Der Klassiker ist der **Login-Bypass**: Lautet die Prüfung SELECT uid FROM users WHERE username = '$user' AND password = '$pass', dann gibt der Angreifer als Benutzernamen admin'-- ein. Die zwei Bindestriche leiten einen SQL-Kommentar ein, der die Passwortprüfung *auskommentiert* — übrig bleibt „… WHERE username = 'admin'", und der Login gelingt ohne Passwort. (Alternativ ' OR '1'='1.)
+> **Eselsbrücke (DoS-Varianten):** **Reflection** = Antwort *umlenken* aufs Opfer (gefälschte Absenderadresse). **Amplification** = Antwort *aufblasen* (kleine Frage, riesige Antwort, z. B. DNS „ANY"). **DDoS** = *viele* Rechner (Botnet) statt einem. Und merke: DoS trifft immer das **A** der CIA-Triade.
 
-Gemeinsame Ursache: Daten (Eingabe) und Code (HTML/SQL) vermischen sich, und der Angreifer schmuggelt Code in die Daten. [Computerphile demonstriert SQL-Injection live](https://www.youtube.com/watch?v=_jKylhJtPmI); [PwnFunction erklärt XSS in ~12 Minuten](https://www.youtube.com/watch?v=EoaDgUgS6QA).
+## Input Validation: XSS und SQL-Injection
 
-> **Eselsbrücke (XSS vs. SQLi):** Beide entstehen, weil **Daten als Code gelesen** werden. **XSS** schmuggelt **JavaScript** → läuft im *Browser des Opfers* (Cookies klauen). **SQLi** schmuggelt **DB-Befehle** → läuft in der *Datenbank* (Daten lesen/ändern). Merksatz: das einzeln stehende **'** (Anführungszeichen) in der Eingabe ist das klassische SQLi-Warnsignal.
+Die zweite Hälfte des Kapitels handelt von einem ganz anderen Fehler: Was passiert, wenn eine Webanwendung **Benutzereingaben ungeprüft** weiterverwendet? Die gemeinsame Ursache aller folgenden Angriffe ist immer dieselbe — Daten (die Eingabe) und Code (das umgebende HTML oder SQL) vermischen sich, und der Angreifer schmuggelt Code dort hinein, wo das Programm nur Daten erwartet. (Die Beispiele sind in PHP gehalten; du musst keinen PHP-Code schreiben können, solltest ihn aber lesen und die Lücke erkennen.)
 
-## Abwehr: Sanitization, Validation, Whitelisting, CSP
+Beim **Cross-Site-Scripting (XSS)** gibt die Seite eine Eingabe direkt im HTML wieder, etwa eine Begrüßung „Welcome " gefolgt vom Parameter name. Setzt der Angreifer als name nicht seinen Namen, sondern ein Stück JavaScript ein — etwa ein **alert(document.cookie)** in einem Skript-Tag —, dann landet dieses Skript im ausgelieferten HTML und wird **im Browser des Opfers ausgeführt**. Damit kann der Angreifer zum Beispiel die Session-Cookies des Opfers auslesen und dessen Sitzung übernehmen. Man unterscheidet drei Spielarten: das **Reflected XSS** (das Skript steckt im Link oder Request und wird sofort zurückgespiegelt), das gefährlichere **Stored XSS** (das Skript wird auf dem Server gespeichert, etwa in einem Forenbeitrag, und trifft jeden, der die Seite danach besucht) und das **DOM-Based XSS** (das ganz im clientseitigen JavaScript entsteht).
 
-Gegen beides hilft **Input Validation** in zwei Spielarten:
+Bei der **SQL-Injection** landet die Eingabe ungeprüft in einer Datenbankabfrage. Stell dir die typische Login-Prüfung vor: **SELECT uid FROM users WHERE username = '$user' AND password = '$pass'**. Gibt der Angreifer als Benutzernamen **admin'--** ein, dann wird daraus **… WHERE username = 'admin'--' AND password = '…'** — die beiden Bindestriche leiten in SQL einen Kommentar ein, der den gesamten Rest der Zeile (und damit die Passwortprüfung) **auskommentiert**. Übrig bleibt eine Abfrage, die den Account admin ganz ohne Passwort zurückgibt: ein klassischer **Login-Bypass**. Dieselbe Wirkung hat die Eingabe **' OR '1'='1**, die eine immer wahre Bedingung anhängt. Und mit einer **UNION**-Injektion (etwa name = foo' UNION SELECT password FROM users) lässt sich die Bedeutung der Abfrage so umbiegen, dass sie fremde Daten wie Passwörter zurückliefert.
 
-- **Sanitization & Transformation** — die Eingabe *umformen*: **Typecasting** (z. B. zu int erzwingen), **Encoding** (Sonderzeichen unschädlich machen, z. B. base64/urlencode), **kontextsensitive Sanitization** (z. B. htmlentities wandelt < und > in &lt; / &gt;, oder RegEx, die nur erlaubte Zeichen durchlässt).
-- **Condition-Based Validation** — die Eingabe *prüfen*: **Type-Validation** (ist es eine Zahl?), **Format-Validation** (gültiges Datum?) und vor allem **Whitelisting**.
+> **Eselsbrücke (XSS vs. SQLi):** Beide entstehen, weil **Daten als Code gelesen** werden. **XSS** schmuggelt **JavaScript** → es läuft im *Browser des Opfers* (Cookies klauen). **SQLi** schmuggelt **Datenbankbefehle** → sie laufen in der *Datenbank* (Daten lesen, ändern, Login umgehen). Das einzeln stehende Anführungszeichen in einer Eingabe ist das klassische SQLi-Warnsignal.
 
-Merksatz: **Whitelisting schlägt Blacklisting.** Eine Blacklist „verbotener" Eingaben ist fehleranfällig — man vergisst leicht einen gefährlichen Fall. Eine Whitelist erlaubt nur explizit Bekanntes und ist daher sicherer. Ergänzend gibt es die **Content Security Policy (CSP)** (W3C-Standard): eine Whitelist erlaubter Inhaltsquellen; Inline-Skripte und eval sind standardmäßig blockiert. Aber: **CSP ersetzt keine Input-Validierung**, sie ergänzt sie nur.
+## Abwehr: Sanitization, Validierung, Whitelisting, CSP
+
+Gegen beide Angriffe hilft dasselbe Prinzip, die **Input Validation**, in zwei Spielarten. Die erste ist die **Sanitization und Transformation** — man *formt die Eingabe um*, bevor man sie benutzt. Dazu gehört das **Typecasting** (eine Eingabe gewaltsam in einen Typ wie Integer zwingen, sodass eingeschmuggelter Text gar keine Wirkung mehr hat), das **Encoding** (Sonderzeichen unschädlich machen) und die **kontextsensitive Sanitization** (etwa eine Funktion, die die gefährlichen Zeichen < und > in ihre harmlosen HTML-Entitäten &lt; und &gt; umwandelt, oder ein regulärer Ausdruck, der nur erlaubte Zeichen durchlässt). Die zweite Spielart ist die **bedingungsbasierte Validierung** — man *prüft die Eingabe*, statt sie umzuformen: ob sie wirklich eine Zahl ist (Type-Validation), ob sie ein gültiges Format hat (Format-Validation) und vor allem, ob sie auf einer Liste erlaubter Werte steht.
+
+Der wichtigste Merksatz dabei: **Whitelisting schlägt Blacklisting.** Eine schwarze Liste verbotener Eingaben ist immer fehleranfällig, weil man unweigerlich einen gefährlichen Fall übersieht; eine weiße Liste erlaubt nur explizit Bekanntes und ist daher prinzipiell sicherer. Ergänzend dazu gibt es die **Content Security Policy (CSP)**, einen W3C-Standard, der über eine Whitelist festlegt, aus welchen Quellen eine Seite Inhalte laden darf, und der Inline-Skripte sowie gefährliche Funktionen wie eval standardmäßig blockiert. Aber Vorsicht vor dem klassischen Irrtum: **CSP ersetzt die Input-Validierung nicht**, sie ist nur eine zusätzliche Schutzschicht — Defense in Depth, kein Allheilmittel.
 
 ## Auf den Punkt
 
-Die Kurzfassung: Hier verlässt der Kurs die Mathematik. TLS führt die Krypto im Web hybrid zusammen (asymmetrischer Schlüsseltausch, dann symmetrische Daten). Zwei Angreifertypen stehen im Zentrum. Der eine will lahmlegen: Denial-of-Service greift die Verfügbarkeit (das A der CIA) an, indem er Ressourcen überlastet — per ICMP-Flooding, Source-Address-Spoofing, SYN-Spoofing, Reflection und Amplification (kleine Anfrage, riesige Antwort), und verteilt als DDoS über ein Botnet (z. B. Mirai). Der andere schmuggelt bösartige Eingaben in Webanwendungen: XSS (eingeschleustes JavaScript läuft im Opfer-Browser) und SQL-Injection (eingeschleuste DB-Befehle, bis hin zum Login-Bypass). Abgewehrt wird das durch Input Validation — Sanitization/Encoding, Type-/Format-Prüfung, Whitelisting (besser als Blacklisting) — und ergänzend CSP, das die Input-Prüfung aber nicht ersetzt.
+Die Kurzfassung: Hier verlässt der Kurs die Mathematik. **TLS** führt die Krypto im Web hybrid zusammen (asymmetrischer Schlüsseltausch, dann symmetrische Daten). Zwei Angreifertypen stehen im Zentrum. Der eine will lahmlegen: **Denial-of-Service** greift die **Verfügbarkeit** (das A der CIA) an, indem er Ressourcen überlastet — per ICMP-Flooding, Source-Address-Spoofing, SYN-Spoofing, **Reflection** (Antworten aufs Opfer umlenken) und **Amplification** (kleine Anfrage, riesige Antwort), und verteilt als **DDoS** über ein Botnet wie **Mirai**. Der andere schmuggelt bösartige Eingaben in Webanwendungen: **XSS** (eingeschleustes JavaScript läuft im Browser des Opfers) und **SQL-Injection** (eingeschleuste Datenbankbefehle, bis hin zum Login-Bypass mit admin'-- oder ' OR '1'='1). Abgewehrt wird beides durch **Input Validation** — Sanitization und Encoding, Type- und Format-Prüfung, **Whitelisting** (besser als Blacklisting) — und ergänzend durch **CSP**, das die Eingabeprüfung aber nicht ersetzt.
 
 ## Begriffe & Notation
 
 | Begriff | Bedeutung |
 |---|---|
-| **TLS** | Hybridprotokoll fürs Web (asym. Tausch + sym. Daten) |
+| **TLS** | Hybridprotokoll fürs Web (asym. Schlüsseltausch + sym. Daten) |
 | **DoS / DDoS** | Verfügbarkeit angreifen / verteilt über ein Botnet |
-| **ICMP-Flooding** | mit Ping-Anfragen überlasten |
-| **Source-Address-Spoofing** | Quelladresse fälschen |
+| **ICMP-Flooding** | den Server mit Ping-Anfragen überlasten |
+| **Source-Address-Spoofing** | die Quelladresse fälschen |
 | **Reflection / Amplification** | Antworten aufs Opfer lenken / kleine Anfrage → große Antwort |
-| **Botnet / Mirai** | gekaperte Rechner / IoT-Botnet 2016 |
+| **Botnet / Mirai** | ferngesteuerte gekaperte Rechner / IoT-Botnet 2016 |
 | **XSS** | eingeschleustes JavaScript im Browser des Opfers |
-| **SQL-Injection** | eingeschleuste DB-Befehle |
-| **Sanitization / Validation** | Eingabe umformen / prüfen |
-| **Whitelisting** | nur explizit Erlaubtes zulassen (> Blacklisting) |
-| **CSP** | Content Security Policy (ergänzt Input-Validierung) |
+| **SQL-Injection** | eingeschleuste Datenbankbefehle (Login-Bypass, Datenklau) |
+| **Sanitization / Validierung** | Eingabe umformen / Eingabe prüfen |
+| **Whitelisting** | nur explizit Erlaubtes zulassen (besser als Blacklisting) |
+| **CSP** | Content Security Policy (ergänzt die Input-Validierung) |
 
 ## Typische Fallen
 
-- **DoS verletzt Vertraulichkeit?** Nein — DoS greift die **Verfügbarkeit** an (das A der CIA-Triade).
-- **Reflection = Amplification?** Nicht ganz: Reflection lenkt Antworten aufs Opfer; **Amplification** ist die Verstärkung (kleine Anfrage → große Antwort).
-- **DDoS = ein besonders starker Rechner?** Nein — **viele** Rechner (Botnet); das ist gerade der Punkt.
-- **Blacklisting reicht zur Abwehr?** Nein — fehleranfällig; **Whitelisting** bevorzugen.
-- **CSP ersetzt Input-Validierung?** Nein — sie ist nur eine zusätzliche Schicht (Defense in Depth).
+- **DoS verletzt die Vertraulichkeit? Nein** — DoS greift die **Verfügbarkeit** an (das A der CIA-Triade).
+- **Reflection ist dasselbe wie Amplification? Nicht ganz** — Reflection lenkt Antworten aufs Opfer; **Amplification** verstärkt zusätzlich (kleine Anfrage → große Antwort).
+- **DDoS ist nur ein besonders starker Rechner? Nein** — es sind **viele** Rechner (ein Botnet); genau das macht es so schwer abzuwehren.
+- **Blacklisting reicht zur Abwehr? Nein** — es ist fehleranfällig; **Whitelisting** ist sicherer.
+- **CSP ersetzt die Input-Validierung? Nein** — sie ist nur eine zusätzliche Schicht (Defense in Depth).
 
 ## Klausur-Fokus
 
-Das Übungsblatt ist sehr web-lastig und konkret. Bei **XSS** solltest du die **drei Typen** unterscheiden können — **Reflected** (Skript steckt im Link/Request und wird sofort zurückgespiegelt), **Stored** (Skript wird auf dem Server gespeichert, z. B. in einem Forenpost, und trifft jeden Besucher) und **DOM-Based** (rein im clientseitigen JavaScript) — und **CSP** mit Vor- und Nachteilen erklären. Bei **SQL-Injection** musst du einen **Login-Bypass konkret formulieren** (z. B. Benutzername admin'-- oder ' OR '1'='1, der die Passwortprüfung auskommentiert/aushebelt) und sagen, wie man ihn **verhindert** (parametrisierte Queries / Prepared Statements, Sanitization). Beim **DoS**-Teil: das technische Ziel nennen, es der **CIA-Verfügbarkeit** zuordnen (mit Begründung), **DDoS-Techniken** und **Amplification** mit Beispielen beschreiben, und **DoS vs. DDoS** abgrenzen (warum verteilt schwerer abzuwehren ist). Bei **Botnetzen**: bekannte nennen, Infektionswege, was ein **Command&Control-Server** ist, und ein Botnetz (Angreifer → C&C → Bots → Opfer) mit den DDoS-Kommunikationsflüssen **skizzieren**. Und zur **Abwehr**: Schicht-7-Erkennungsprobleme, das Kapazitäts-Dilemma, On-Site vs. Off-Site und wie ein **CDN** (mit DNS-basiertem Routing) DDoS abfedert. (PHP-Code musst du nur lesen/analysieren, nicht schreiben.)
+Das Übungsblatt ist sehr web-lastig und konkret. Bei **XSS** solltest du die **drei Typen** unterscheiden können — **Reflected** (Skript steckt im Request und wird sofort zurückgespiegelt), **Stored** (Skript wird auf dem Server gespeichert und trifft jeden Besucher) und **DOM-Based** (rein im clientseitigen JavaScript) — und **CSP** mit Vor- und Nachteilen erklären. Bei der **SQL-Injection** musst du einen **Login-Bypass konkret formulieren** (etwa den Benutzernamen admin'-- oder ' OR '1'='1, der die Passwortprüfung auskommentiert oder aushebelt) und sagen, wie man ihn **verhindert** (parametrisierte Abfragen bzw. Prepared Statements und Sanitization). Beim **DoS**-Teil: das technische Ziel benennen, es der **CIA-Verfügbarkeit** zuordnen (mit Begründung), die **DDoS-Techniken** und das **Amplification**-Konzept mit Beispielen beschreiben und **DoS gegen DDoS** abgrenzen (warum verteilt schwerer abzuwehren ist). Bei den **Botnetzen**: bekannte nennen, Infektionswege beschreiben, erklären, was ein **Command-and-Control-Server** ist, und ein Botnetz (Angreifer → C&C → Bots → Opfer) mit den DDoS-Kommunikationsflüssen **skizzieren**. Und zur **Abwehr**: die Erkennungsprobleme auf Schicht 7 des OSI-Modells, das Kapazitäts-Dilemma, der Unterschied zwischen On-Site- und Off-Site-Maßnahmen und wie ein **CDN** mit DNS-basiertem Routing einen DDoS abfedert.
 
 ## Mehr dazu
 
 - **Computerphile — Hacking Websites with SQL Injection** (EN): Tom Scott zeigt anschaulich, wie ungeprüfte Eingaben SQL-Befehle verändern. https://www.youtube.com/watch?v=_jKylhJtPmI
-- **PwnFunction — Cross-Site Scripting (XSS) Explained** (EN, ~12 Min.): wie eingeschleustes JavaScript im Opfer-Browser landet. https://www.youtube.com/watch?v=EoaDgUgS6QA
-- **Aikido — Injection Attacks 101 (SQLi, Code Injection, XSS)** (EN): kompakter Überblick inkl. Abwehr durch Input Validation. https://www.youtube.com/watch?v=wu6FAsiFhv0`,
+- **PwnFunction — Cross-Site Scripting (XSS) Explained** (~12 Min., EN): wie eingeschleustes JavaScript im Browser des Opfers landet. https://www.youtube.com/watch?v=EoaDgUgS6QA
+- **Aikido — Injection Attacks 101 (SQLi, Code Injection, XSS)** (EN): kompakter Überblick inklusive Abwehr durch Input Validation. https://www.youtube.com/watch?v=wu6FAsiFhv0`,
   },
 };
 
@@ -1041,7 +1280,9 @@ Um den Angriff zu verstehen, braucht man etwas x86-Wissen:
 - **Stack Frame:** Jeder Funktionsaufruf legt einen Rahmen an, von oben nach unten: **Funktionsargumente**, **Rücksprungadresse**, **gesicherter Base Pointer**, **lokale Variablen** (inkl. unserer Puffer!).
 - **Calling Convention:** call legt automatisch die **Rücksprungadresse** auf den Stack; ret holt sie zurück und lädt sie in **EIP**. Genau diese gespeicherte Rücksprungadresse ist das Ziel.
 
-![Aufbau eines Stack-Frames mit Funktionsargumenten, Rücksprungadresse und lokalen Variablen](https://commons.wikimedia.org/wiki/Special:FilePath/Call_stack_layout.svg "Ein Stack-Frame: Argumente, Rücksprungadresse, gesicherter Base Pointer, lokale Variablen. Der Puffer liegt bei den lokalen Variablen — läuft er über, wird die Rücksprungadresse überschrieben.")
+![Der Call-Stack mit mehreren Stack-Frames](https://upload.wikimedia.org/wikipedia/commons/8/8a/ProgramCallStack2_en.png "Der Call-Stack: jeder Funktionsaufruf legt einen neuen Frame an — mit Argumenten, Rücksprungadresse, gesichertem Base Pointer und lokalen Variablen.")
+
+![Aufbau eines einzelnen Stack-Frames](https://upload.wikimedia.org/wikipedia/commons/1/1f/Call-stack-layout.svg "Ein einzelner Stack-Frame im Detail: Argumente, Rücksprungadresse, gesicherter Base Pointer und lokale Variablen. Der Puffer liegt bei den lokalen Variablen und läuft beim Overflow auf die Rücksprungadresse zu.")
 
 > **Eselsbrücke (Stack-Frame, von oben nach unten):** **Argumente → Rücksprungadresse → alter EBP → lokale Variablen** (inkl. Puffer). Der Stack wächst **nach unten**, der Puffer läuft aber **nach oben** über — genau auf die **Rücksprungadresse** zu. Das ist das ganze Geheimnis des Angriffs.
 
@@ -1134,7 +1375,7 @@ const lecture11: Explanation = {
     de: "Betriebssystemsicherheit am Beispiel Multics: Reference Monitor, Schutzringe und Multilevel Security",
   },
   content: {
-    de: `Multics (Ende der 1960er) war das erste moderne Betriebssystem und der Geburtsort fast aller Sicherheitskonzepte, die wir bis heute nutzen: der Reference Monitor, die Schutzringe und die mehrstufige Sicherheit. Die Vorlesung benutzt dieses historische System als saubere Fallstudie, an der man versteht, *wie* ein Betriebssystem entscheidet, ob ein Prozess auf etwas zugreifen darf. Die Folien sind ein Begriffs- und Regel-Dschungel — der rote Faden ist die eine Frage: *Wer darf was, und wie setzt das System das zwingend durch?*
+    de: `Multics (Ende der 1960er) war das erste moderne Betriebssystem und der Geburtsort fast aller Sicherheitskonzepte, die wir bis heute nutzen: der Reference Monitor, die Schutzringe und die mehrstufige Sicherheit. Wir benutzen dieses historische System als saubere Fallstudie, an der man versteht, *wie* ein Betriebssystem entscheidet, ob ein Prozess auf etwas zugreifen darf. Auf den ersten Blick ist es ein Begriffs- und Regel-Dschungel — der rote Faden aber ist eine einzige Frage: *Wer darf was, und wie setzt das System das zwingend durch?*
 
 ## Multics & der Reference Monitor
 
@@ -1159,7 +1400,7 @@ Die Grundbausteine sind **Prozesse** (haben Code, eigenen virtuellen Adressraum)
 
 **Schutzringe** sind eine hierarchische Schichtung: **Ring 0** = höchste Privilegien (Kernel), nach außen immer weniger. Multics bietet 64 Ringe (8 in Hardware, 56 in Software); moderne CPUs (Intel) haben 4, genutzt werden meist nur **Ring 0 (Kernel)** und **Ring 3 (User)**. Höher privilegierte Ringe dürfen auf den Speicher niedrigerer Ringe zugreifen. Ein **Code-Segment** ist ausführbar; ein **Gate-Segment** ist ein spezielles Code-Segment, das über das Gate-Feld definierte **Eintrittspunkte** in einen privilegierteren Ring bietet — dort werden die Argumente aus dem niedriger privilegierten Aufrufer **validiert** (Schutz vor bösartiger Eingabe). Typischer Anwendungsfall: ein **Systemaufruf**.
 
-![Schutzringe der x86-Architektur: Ring 0 (Kernel) innen, Ring 3 (Anwendungen) außen](https://commons.wikimedia.org/wiki/Special:FilePath/Priv_rings.svg "Schutzringe: Ring 0 (Kernel) ganz innen = am privilegiertesten, Ring 3 (Anwendungen) außen = am wenigsten. Moderne OS nutzen nur 0 und 3.")
+![Schutzringe der x86-Architektur: Ring 0 (Kernel) innen, Ring 3 (Anwendungen) außen](https://upload.wikimedia.org/wikipedia/commons/2/25/CPU_ring_scheme.svg "Schutzringe: Ring 0 (Kernel) ganz innen = am privilegiertesten, nach außen sinkt die Macht bis Ring 3 (Anwendungen). Moderne Betriebssysteme nutzen nur Ring 0 und Ring 3.")
 
 > **Eselsbrücke (Schutzringe):** **kleiner = mächtiger.** Ring **0 = Kern (innen, alles erlaubt)**, nach außen sinkt die Macht; Ring 3 = normale Programme. In einen *mächtigeren* (kleineren) Ring kommst du nur durch ein **Gate** (= der Systemaufruf), das deine Argumente prüft.
 
@@ -1250,8 +1491,8 @@ Die mit Abstand wichtigste Aufgabe ist die **Zugriffsentscheidung per Hand** —
 ## Mehr dazu
 
 - **Wikipedia — Bell-LaPadula-Modell** (EN): die Lese-/Schreibregeln (no read up, no write down) und der MAC-Hintergrund. https://en.wikipedia.org/wiki/Bell-LaPadula_model
-- **Saltzer & Schroeder — A Hardware Architecture for Implementing Protection Rings** (aus den Folien): die Originalquelle zu Schutzringen. https://www.multicians.org/protection.html
-- **multicians.org** (aus den Folien): Geschichte und Konzepte von Multics aus erster Hand. https://www.multicians.org/`,
+- **Saltzer & Schroeder — A Hardware Architecture for Implementing Protection Rings** (EN): die Originalquelle zu den Schutzringen. https://www.multicians.org/protection.html
+- **multicians.org** (EN): Geschichte und Konzepte von Multics aus erster Hand. https://www.multicians.org/`,
   },
 };
 
@@ -1267,6 +1508,8 @@ const lecture12: Explanation = {
 ## Reverse Engineering: vom Binary zurück zum Verständnis
 
 Beim Bauen einer Anwendung durchläuft C/C++-Code eine Kette: **Präprozessor → Compiler → Assembler → Linker**. Heraus kommt Maschinencode, in dem **alle menschenlesbaren Informationen verloren** sind — Variablentypen und -namen, Funktionsnamen, Kommentare existieren nur noch (wenn überhaupt) als Debug-Info. Genau das macht Reverse Engineering schwer: Man muss aus rohem Assembler die Absicht rekonstruieren. Anwendungen: Funktionalität prüfen, Bugs/Schwachstellen finden, Programme **ohne Quellcode patchen** und vor allem **Schadsoftware erkennen**.
+
+![Vom Quellcode über den Compiler zum ausführbaren Programm](https://upload.wikimedia.org/wikipedia/commons/6/6b/Compiler.svg "Die Kompilierung übersetzt lesbaren Quellcode in Maschinencode — und wirft dabei Namen, Typen und Kommentare weg. Reverse Engineering versucht, diesen Weg rückwärts zu gehen.")
 
 > **Eselsbrücke (statisch vs. dynamisch):** **statisch = anschauen** (nicht ausführen → Strings, Disassembly, CFG). **dynamisch = laufen lassen** (Debugger, Sandbox/VM, Verhalten beobachten). Faustregel: erst Strings/statisch für den schnellen Überblick, dann dynamisch fürs echte Verhalten. [Low Level zeigt genau diese Stufen](https://www.youtube.com/watch?v=8vk5z9VAaBQ).
 
@@ -1357,7 +1600,9 @@ const lecture13: Explanation = {
   content: {
     de: `Die letzte Sitzung ist eine Wiederholung — und genau das richtige Werkzeug für die Klausurvorbereitung. Statt neuen Stoff bündelt dieses Kapitel den **roten Faden des ganzen Kurses**: die drei Säulen, wie die einzelnen Vorlesungen aufeinander aufbauen, und eine kompakte Checkliste, was du wirklich können musst. Nutze es als Landkarte und springe von hier in die einzelnen Kapitel-Erklärungen zurück.
 
-Der ganze Kurs ruht auf drei Säulen, eingerahmt von den Grundkonzepten aus Vorlesung 1. Die **Kryptografie** (V2–V8) sichert die Daten, die **Netzwerk- und Web-Sicherheit** (V9) die Kommunikation, und die **Software- und Systemsicherheit** (V10–V12) die Programme und Systeme. Innerhalb der Krypto verläuft ein klarer Faden — von symmetrisch (DES, AES) über asymmetrisch (RSA und das Schlüsselaustauschproblem) zur Integrität (Hashes, Signaturen, MAC) bis zu den Anwendungen (Bitcoin, Protokolle, TLS). Und durch alles ziehen sich dieselben Prinzipien aus V1: die CIA-Triade, das schwächste Glied, Defense in Depth, Kerckhoffs und das Adversarial Setting. Gehen wir die drei Säulen der Reihe nach durch.
+Der ganze Kurs ruht auf drei Säulen, eingerahmt von den Grundkonzepten aus Vorlesung 1. Die **Kryptografie** (V2–V8) sichert die Daten, die **Netzwerk- und Web-Sicherheit** (V9) die Kommunikation, und die **Software- und Systemsicherheit** (V10–V12) die Programme und Systeme. Innerhalb der Krypto verläuft ein klarer Faden — von symmetrisch (DES, AES) über asymmetrisch (RSA und das Schlüsselaustauschproblem) zur Integrität (Hashes, Signaturen, MAC) bis zu den Anwendungen (Bitcoin, Protokolle, TLS). Und durch alles ziehen sich dieselben Prinzipien aus dem ersten Kapitel: die CIA-Triade, das schwächste Glied, Defense in Depth, Kerckhoffs und das Adversarial Setting. Gehen wir die drei Säulen der Reihe nach durch.
+
+![Die CIA-Triade als roter Faden des gesamten Kurses](https://upload.wikimedia.org/wikipedia/commons/c/c5/CIAJMK1209-en.svg "Über allen drei Säulen schweben dieselben Schutzziele: Vertraulichkeit, Integrität, Verfügbarkeit. Fast jeder Angriff im Kurs lässt sich einem davon zuordnen.")
 
 ## Säule 1: Kryptografie (V2–V8)
 
@@ -1401,9 +1646,9 @@ Zuerst die **Software-Exploits** (V10): Ein Buffer Overflow überschreibt die R�
 
 ## Mehr dazu
 
-- **Computerphile (YouTube-Kanal)** (aus den Folien): kurze, hochwertige Videos zu fast allen Kursthemen — ideal zum Wiederholen. https://www.youtube.com/computerphile
-- **Patrick Winston (MIT) — „How To Speak"** (aus den Folien): wie man Inhalte klar präsentiert — nützlich für mündliche Prüfungen und Vorträge. https://www.youtube.com/watch?v=Unzc731iCUY
-- **David JP Phillips — „How to avoid death by PowerPoint"** (aus den Folien): bessere Folien und Präsentationen. https://www.youtube.com/watch?v=Iwpi1Lm6dFo`,
+- **Computerphile (YouTube-Kanal)** (EN): kurze, hochwertige Videos zu fast allen Kursthemen — ideal zum Wiederholen. https://www.youtube.com/computerphile
+- **Patrick Winston (MIT) — „How To Speak"** (EN): wie man Inhalte klar präsentiert — nützlich für mündliche Prüfungen und Vorträge. https://www.youtube.com/watch?v=Unzc731iCUY
+- **David JP Phillips — „How to avoid death by PowerPoint"** (EN): wie man Inhalte überzeugend präsentiert. https://www.youtube.com/watch?v=Iwpi1Lm6dFo`,
   },
 };
 
@@ -1423,8 +1668,4 @@ export function buildCybersicherheit2025Explanations(): Explanation[] {
     lecture12,
     lecture13,
   ];
-}
-
-export function buildCybersicherheit2025QuizSets(): QuizSet[] {
-  return [];
 }

@@ -7,6 +7,8 @@ const L = {
   uebung: { de: "Übung", en: "Exercise" },
   uebungCIntro: { de: "Übung (C-Einführung)", en: "Exercise (C primer)" },
   uebungExploits: { de: "Übung (Exploits)", en: "Exercise (Exploits)" },
+  uebungModi: { de: "Übung (Betriebsmodi & RSA)", en: "Exercise (block modes & RSA)" },
+  uebungWdh: { de: "Übung (Wiederholung)", en: "Exercise (recap)" },
   aufgaben: { de: "Aufgaben", en: "Exercises" },
   loesung: { de: "Lösung", en: "Solution" },
   zusatzhilfe: { de: "Zusatzhilfe", en: "Extra help" },
@@ -20,6 +22,16 @@ const L = {
  * Lesson↔Übung pairing was verified against the actual MD content of each
  * Übungsblatt (not by filename or number alone). Titles below reflect the
  * lecture content, not the cover-slide titles that pdf-to-md extracted.
+ *
+ * The Übungsblatt number is NOT the lesson number: lecture 1 (11.04.) is pure
+ * course-organisation + motivation and teaches no cipher, so it carries no
+ * Übung. The first sheet (Übungsblatt 1, klassische Kryptografie) tests the
+ * Caesar/Vigenère + modulare Arithmetik introduced in lecture 2 (25.04.).
+ * Hence Übungsblätter 1–3 sit on lectures 2–4. Lecture 4 (AES, schliesst die
+ * symmetrische Kryptografie ab) carries two sheets: Ü3 (Betriebsmodi/AES/RSA)
+ * and the symmetric-crypto recap Ü4 (Grundlagen + AES-Brute-Force + Stromchiffre,
+ * kein RSA). From lecture 5 on the numbers line up again (Ü5→L5 … Ü13→L12).
+ * Lecture 13 is a pure Klausur-recap and likewise carries no Übung.
  */
 export const cybersicherheit2025: Notebook = {
   subject: "cybersicherheit",
@@ -36,15 +48,18 @@ export const cybersicherheit2025: Notebook = {
       lecture: {
         pdf: { label: L.vorlesung, src: `${BASE}/lectures/01.pdf` },
         walkthroughId: "cs-2025-l01",
+        quizBankId: "cs-2025-l1",
       },
+      // Kein echtes Cyber-Übungsblatt (L1 ist Orga + Motivation), aber die
+      // Grundlagenübung „Modulo & Binärrechnung" (die in den Folien als
+      // freiwillige Wiederholung Modulo-Rechnung am 23.04. angekündigte
+      // Mathe-Auffrischung) gehört genau hierher — reine Rechen-Vorbereitung,
+      // noch keine Kryptografie. Die Datei liegt im Blatt-1-Bündel.
       exercises: [
         {
           label: L.uebung,
-          aufgaben: { label: L.aufgaben, src: `${BASE}/uebungen/01/aufgaben.pdf` },
-          solutions: [
-            { label: L.loesung, src: `${BASE}/uebungen/01/loesung.pdf` },
-            { label: L.zusatzhilfe, src: `${BASE}/uebungen/01/zusatzhilfe.pdf` },
-          ],
+          aufgaben: { label: L.aufgaben, src: `${BASE}/uebungen/01/zusatzhilfe.pdf` },
+          solutions: [],
         },
       ],
     },
@@ -54,14 +69,17 @@ export const cybersicherheit2025: Notebook = {
       lecture: {
         pdf: { label: L.vorlesung, src: `${BASE}/lectures/02.pdf` },
         walkthroughId: "cs-2025-l02",
+        quizBankId: "cs-2025-l2",
       },
+      // Übungsblatt 1 — klassische Kryptografie (Caesar, Transposition, Vigenère).
+      // Die Zusatzhilfe (Modulo & Binär) ist KEINE Lösung dieses Blatts, sondern
+      // eigenständige Rechen-Vorbereitung — sie hängt an Lecture 1.
       exercises: [
         {
           label: L.uebung,
-          aufgaben: { label: L.aufgaben, src: `${BASE}/uebungen/02/aufgaben.pdf` },
+          aufgaben: { label: L.aufgaben, src: `${BASE}/uebungen/01/aufgaben.pdf` },
           solutions: [
-            { label: L.loesung, src: `${BASE}/uebungen/02/loesung.pdf` },
-            { label: L.mitschrift, src: `${BASE}/uebungen/02/loesung-mitschrift.pdf` },
+            { label: L.loesung, src: `${BASE}/uebungen/01/loesung.pdf` },
           ],
         },
       ],
@@ -75,14 +93,16 @@ export const cybersicherheit2025: Notebook = {
       lecture: {
         pdf: { label: L.vorlesung, src: `${BASE}/lectures/03.pdf` },
         walkthroughId: "cs-2025-l03",
+        quizBankId: "cs-2025-l3",
       },
+      // Übungsblatt 2 — Vernam/Stromchiffre, DES, S-Boxen, Feistelnetzwerk.
       exercises: [
         {
           label: L.uebung,
-          aufgaben: { label: L.aufgaben, src: `${BASE}/uebungen/03/aufgaben.pdf` },
+          aufgaben: { label: L.aufgaben, src: `${BASE}/uebungen/02/aufgaben.pdf` },
           solutions: [
-            { label: L.loesung, src: `${BASE}/uebungen/03/loesung.pdf` },
-            { label: L.mitschrift, src: `${BASE}/uebungen/03/loesung-mitschrift.pdf` },
+            { label: L.loesung, src: `${BASE}/uebungen/02/loesung.pdf` },
+            { label: L.mitschrift, src: `${BASE}/uebungen/02/loesung-mitschrift.pdf` },
           ],
         },
       ],
@@ -96,10 +116,22 @@ export const cybersicherheit2025: Notebook = {
       lecture: {
         pdf: { label: L.vorlesung, src: `${BASE}/lectures/04.pdf` },
         walkthroughId: "cs-2025-l04",
+        quizBankId: "cs-2025-l4",
       },
+      // Lecture 4 schliesst die symmetrische Kryptografie ab und trägt zwei
+      // Blätter: Ü3 (Betriebsmodi/AES/RSA) und die Wiederholung Ü4
+      // (Grundlagen + AES-Brute-Force + Stromchiffre, noch ohne RSA-Tiefe).
       exercises: [
         {
-          label: L.uebung,
+          label: L.uebungModi,
+          aufgaben: { label: L.aufgaben, src: `${BASE}/uebungen/03/aufgaben.pdf` },
+          solutions: [
+            { label: L.loesung, src: `${BASE}/uebungen/03/loesung.pdf` },
+            { label: L.mitschrift, src: `${BASE}/uebungen/03/loesung-mitschrift.pdf` },
+          ],
+        },
+        {
+          label: L.uebungWdh,
           aufgaben: { label: L.aufgaben, src: `${BASE}/uebungen/04/aufgaben.pdf` },
           solutions: [{ label: L.loesung, src: `${BASE}/uebungen/04/loesung.pdf` }],
         },
@@ -114,6 +146,7 @@ export const cybersicherheit2025: Notebook = {
       lecture: {
         pdf: { label: L.vorlesung, src: `${BASE}/lectures/05.pdf` },
         walkthroughId: "cs-2025-l05",
+        quizBankId: "cs-2025-l5",
       },
       exercises: [
         {
@@ -132,6 +165,7 @@ export const cybersicherheit2025: Notebook = {
       lecture: {
         pdf: { label: L.vorlesung, src: `${BASE}/lectures/06.pdf` },
         walkthroughId: "cs-2025-l06",
+        quizBankId: "cs-2025-l6",
       },
       exercises: [
         {
@@ -147,6 +181,7 @@ export const cybersicherheit2025: Notebook = {
       lecture: {
         pdf: { label: L.vorlesung, src: `${BASE}/lectures/07.pdf` },
         walkthroughId: "cs-2025-l07",
+        quizBankId: "cs-2025-l7",
       },
       exercises: [
         {
@@ -165,6 +200,7 @@ export const cybersicherheit2025: Notebook = {
       lecture: {
         pdf: { label: L.vorlesung, src: `${BASE}/lectures/08.pdf` },
         walkthroughId: "cs-2025-l08",
+        quizBankId: "cs-2025-l8",
       },
       exercises: [
         {
@@ -183,6 +219,7 @@ export const cybersicherheit2025: Notebook = {
       lecture: {
         pdf: { label: L.vorlesung, src: `${BASE}/lectures/09.pdf` },
         walkthroughId: "cs-2025-l09",
+        quizBankId: "cs-2025-l9",
       },
       exercises: [
         {
@@ -201,6 +238,7 @@ export const cybersicherheit2025: Notebook = {
       lecture: {
         pdf: { label: L.vorlesung, src: `${BASE}/lectures/10.pdf` },
         walkthroughId: "cs-2025-l10",
+        quizBankId: "cs-2025-l10",
       },
       exercises: [
         {
@@ -224,6 +262,7 @@ export const cybersicherheit2025: Notebook = {
       lecture: {
         pdf: { label: L.vorlesung, src: `${BASE}/lectures/11.pdf` },
         walkthroughId: "cs-2025-l11",
+        quizBankId: "cs-2025-l11",
       },
       exercises: [
         {
@@ -242,6 +281,7 @@ export const cybersicherheit2025: Notebook = {
       lecture: {
         pdf: { label: L.vorlesung, src: `${BASE}/lectures/12.pdf` },
         walkthroughId: "cs-2025-l12",
+        quizBankId: "cs-2025-l12",
       },
       exercises: [
         {
@@ -261,8 +301,10 @@ export const cybersicherheit2025: Notebook = {
       lecture: {
         pdf: { label: L.vorlesung, src: `${BASE}/lectures/13.pdf` },
         walkthroughId: "cs-2025-l13",
+        quizBankId: "cs-2025-l13",
       },
-      exercises: [{ label: L.uebung, solutions: [] }],
+      // Reine Zusammenfassung / Klausurvorbereitung — kein Übungsblatt.
+      exercises: [],
     },
   ],
 };

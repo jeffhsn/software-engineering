@@ -13,9 +13,11 @@ import type {
   Notebook,
   PdfRef,
 } from "@/lib/notebooks/types";
-import { clampedIndex, setLessonInUrl, setOverlayInUrl } from "@/lib/notebooks/nav";
+import { clampedIndex, setLessonInUrl } from "@/lib/notebooks/nav";
 import { useI18n } from "@/lib/i18n/client";
 import { getExplanation } from "@/lib/notebooks/explanations/registry";
+import { getQuizSet } from "@/lib/notebooks/quizzes/registry";
+import { QuizPlayer } from "@/components/quiz-player";
 import { getSubject } from "@/lib/subjects/registry";
 import { ACCENT_INK } from "@/lib/subjects/accents";
 import {
@@ -23,7 +25,6 @@ import {
   ChevronRight,
   PenLine,
   PlayCircle,
-  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -138,7 +139,7 @@ function ChapterView({
   const leftChips: Chip[] = [
     {
       key: "lecture",
-      label: "Folien & Video",
+      label: "Vorlesung",
       active: leftKey === "lecture",
       onClick: () => {
         setLeftKey("lecture");
@@ -206,7 +207,7 @@ function ChapterView({
         },
         {
           key: "walkthrough",
-          label: "Walkthrough",
+          label: "Lösungsweg",
           active: rightUebung === "walkthrough",
           onClick: () => setRightUebung("walkthrough"),
         },
@@ -248,6 +249,7 @@ function ChapterView({
         scrollRef={rightScrollRef}
         chips={rightChips}
         progress={onLecture ? rightLecture !== "quiz" : rightUebung === "walkthrough"}
+        fill={onLecture && rightLecture === "quiz"}
       >
         {onLecture ? (
           rightLecture === "quiz" ? (
@@ -269,7 +271,7 @@ function ChapterView({
             <ErklaerungPanel
               walkthroughId={activeExercise.walkthroughId}
               mode="deep"
-              emptyHint="Noch kein Walkthrough. Sobald ich die Lösung gelesen habe, schreibe ich einen — Schritt für Schritt, im Stil des Profs."
+              emptyHint="Noch kein Lösungsweg. Sobald ich die Lösung gelesen habe, schreibe ich einen — Schritt für Schritt, im Stil des Profs."
             />
           )
         ) : null}
@@ -292,6 +294,7 @@ function ColumnPane({
   chips,
   progress,
   background,
+  fill,
   children,
 }: {
   ariaLabel: string;
@@ -299,6 +302,9 @@ function ColumnPane({
   chips: Chip[];
   progress?: boolean;
   background?: string;
+  /** Let the child own the full column height (no scroll padding) — used by
+      the inline quiz, which brings its own header/body/footer layout. */
+  fill?: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -308,15 +314,21 @@ function ColumnPane({
     >
       {progress && <ColumnTopProgress scrollRef={scrollRef} />}
 
-      {/* Content scrolls full-bleed from the very top; the chips float
-          directly over it. overscroll-contain keeps the fixed header
-          steady. */}
-      <div
-        ref={scrollRef}
-        className="h-full overflow-y-auto overscroll-contain pb-16"
-      >
-        {children}
-      </div>
+      {fill ? (
+        // Child fills the column beneath the floating chips and manages its
+        // own scrolling (e.g. the quiz player).
+        <div className="absolute inset-0 pt-14">{children}</div>
+      ) : (
+        /* Content scrolls full-bleed from the very top; the chips float
+           directly over it. overscroll-contain keeps the fixed header
+           steady. */
+        <div
+          ref={scrollRef}
+          className="h-full overflow-y-auto overscroll-contain pb-16"
+        >
+          {children}
+        </div>
+      )}
 
       {/* Chips float ON TOP of the material, vertically centered within
           the top spacing gap — separate pills, no subheader. */}
@@ -527,7 +539,7 @@ function SolutionPanel({
   if (solutions.length === 0) {
     return (
       <EmptyHint>
-        Keine Lösung veröffentlicht. Den Walkthrough nutzen, sobald er
+        Keine Lösung veröffentlicht. Den Lösungsweg nutzen, sobald er
         geschrieben ist.
       </EmptyHint>
     );
@@ -590,34 +602,13 @@ function QuizPanel({ quizBankId }: { quizBankId?: string }) {
       </EmptyHint>
     );
   }
-  return (
-    <div className="px-5 pt-4 sm:px-8">
-      <button
-        type="button"
-        onClick={() => setOverlayInUrl("quiz")}
-        className="group flex w-full cursor-pointer items-center gap-4 rounded-2xl bg-card px-6 py-6 text-start text-foreground ring-1 ring-[var(--rule)] transition-all hover:-translate-y-0.5 hover:ring-[var(--accent)]"
-      >
-        <span
-          aria-hidden
-          className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[var(--accent)]/10 text-[var(--accent)] transition-colors group-hover:bg-[var(--accent)] group-hover:text-background"
-        >
-          <Sparkles className="h-5 w-5" strokeWidth={1.75} />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block font-serif text-[21px] font-semibold leading-snug text-[var(--ink)]">
-            Quiz öffnen
-          </span>
-          <span className="mt-1 block text-[13.5px] leading-snug text-muted-foreground">
-            Viele Sets · beliebig wiederholbar · keine Antwort-Tells
-          </span>
-        </span>
-        <ChevronRight
-          className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-[var(--accent)]"
-          strokeWidth={2}
-        />
-      </button>
-    </div>
-  );
+  const quizSet = getQuizSet(quizBankId);
+  if (!quizSet) {
+    return <EmptyHint>{`Kein Quiz mit der ID „${quizBankId}".`}</EmptyHint>;
+  }
+  // The player owns the full column (picker → runner → summary) and brings its
+  // own scrolling; ColumnPane renders it in `fill` mode.
+  return <QuizPlayer quizSet={quizSet} />;
 }
 
 /* ─────────────────────── Chips & shared bits ─────────────────────── */

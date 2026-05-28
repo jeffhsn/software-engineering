@@ -263,6 +263,7 @@ function SingleQuizPlayer({
       <QuizSummary
         attempt={view.attempt}
         previousBest={prevBest}
+        attempts={attempts}
         onRetake={restart}
         onBack={onBack}
       />
@@ -461,11 +462,13 @@ function QuizRunner({
 function QuizSummary({
   attempt,
   previousBest,
+  attempts,
   onRetake,
   onBack,
 }: {
   attempt: QuizAttempt;
   previousBest: QuizAttempt | undefined;
+  attempts: QuizAttempt[];
   onRetake: () => void;
   onBack: () => void;
 }) {
@@ -473,10 +476,12 @@ function QuizSummary({
   const newRecord =
     !previousBest ||
     attempt.score / attempt.total > previousBest.score / previousBest.total;
+  // Most recent first; the just-finished attempt sits at index 0.
+  const history = attempts;
 
   return (
-    <div className="flex h-full flex-col items-center justify-center bg-background px-6 py-10">
-      <div className="flex w-full max-w-md flex-col items-center gap-6 rounded-3xl border border-border bg-card p-8 text-center shadow-sm">
+    <div className="flex h-full flex-col items-center overflow-y-auto bg-background px-6 py-10">
+      <div className="my-auto flex w-full max-w-md flex-col items-center gap-6 rounded-3xl border border-border bg-card p-8 text-center shadow-sm">
         <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
           Ergebnis
         </span>
@@ -507,6 +512,25 @@ function QuizSummary({
             </span>
           )}
         </div>
+
+        {history.length > 1 && (
+          <div className="w-full text-start">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              Verlauf · {history.length} Versuche
+            </p>
+            <ul className="flex flex-col">
+              {history.slice(0, 10).map((a, i) => (
+                <AttemptRow key={a.finishedAt + i} attempt={a} current={i === 0} />
+              ))}
+            </ul>
+            {history.length > 10 && (
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                und {history.length - 10} weitere
+              </p>
+            )}
+          </div>
+        )}
+
         <div className="flex flex-wrap items-center justify-center gap-2">
           <button
             type="button"
@@ -525,6 +549,63 @@ function QuizSummary({
         </div>
       </div>
     </div>
+  );
+}
+
+/** One row in the attempt-history list on the summary screen. */
+function AttemptRow({
+  attempt,
+  current,
+}: {
+  attempt: QuizAttempt;
+  current: boolean;
+}) {
+  const pct = Math.round((attempt.score / attempt.total) * 100);
+  const when = new Date(attempt.finishedAt);
+  const dateLabel = when.toLocaleDateString("de-DE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+  });
+  const timeLabel = when.toLocaleTimeString("de-DE", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return (
+    <li
+      className={cn(
+        "flex items-center justify-between gap-3 rounded-lg px-2.5 py-1.5 text-sm",
+        current && "bg-accent/50",
+      )}
+    >
+      <span className="flex items-center gap-2 text-muted-foreground">
+        <span className="tabular-nums">
+          {dateLabel} · {timeLabel}
+        </span>
+        {current && (
+          <span className="rounded-full bg-foreground/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-foreground">
+            jetzt
+          </span>
+        )}
+      </span>
+      <span className="flex items-center gap-2">
+        <span className="font-semibold tabular-nums text-foreground">
+          {attempt.score}/{attempt.total}
+        </span>
+        <span
+          className={cn(
+            "w-11 rounded-full px-2 py-0.5 text-center text-xs font-semibold tabular-nums",
+            pct >= 80
+              ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+              : pct >= 50
+                ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
+                : "bg-red-500/10 text-red-700 dark:text-red-400",
+          )}
+        >
+          {pct}%
+        </span>
+      </span>
+    </li>
   );
 }
 
