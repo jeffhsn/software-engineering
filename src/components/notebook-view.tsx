@@ -8,11 +8,11 @@ import remarkGfm from "remark-gfm";
 import { figureComponents } from "@/components/prose-figure";
 import { PageSkeleton } from "@/components/pdf-skeleton";
 import type {
-  Exercise,
   Lesson,
   Notebook,
   PdfRef,
 } from "@/lib/notebooks/types";
+import type { LocalizedText } from "@/lib/i18n/types";
 import { clampedIndex, setLessonInUrl } from "@/lib/notebooks/nav";
 import { useI18n } from "@/lib/i18n/client";
 import { getExplanation } from "@/lib/notebooks/explanations/registry";
@@ -63,6 +63,17 @@ type LeftKey = "lecture" | `uebung-${number}`;
 type RightLectureKey = "tief" | "einfach" | "quiz";
 type RightUebungKey = "loesung" | "walkthrough";
 
+/**
+ * One material can hold several sources that all belong to the SAME chip —
+ * e.g. a lecture with slides + a video recording, or an Übung with a German
+ * and an English Aufgaben sheet. A small secondary chip row switches between
+ * them and only the selected one renders, so loading stays identical to a
+ * single-source material regardless of notebook or year.
+ */
+type LeftVariant =
+  | { key: string; label: LocalizedText; kind: "pdf"; src: string }
+  | { key: string; label: LocalizedText; kind: "video"; url: string };
+
 function ChapterView({
   notebook,
   lessonIndex,
@@ -87,6 +98,9 @@ function ChapterView({
   const [rightUebung, setRightUebung] =
     useState<RightUebungKey>("loesung");
   const [solutionIdx, setSolutionIdx] = useState(0);
+  // Which source (slides/video, DE/EN, …) of the active left material shows.
+  // null = the first/default variant.
+  const [leftVariant, setLeftVariant] = useState<string | null>(null);
   const leftScrollRef = useRef<HTMLDivElement>(null);
   const rightScrollRef = useRef<HTMLDivElement>(null);
 
@@ -103,6 +117,13 @@ function ChapterView({
       rightScrollRef.current?.scrollTo({ top: 0 });
     }
   }, [lesson.number]);
+
+  // Switching the primary material (Vorlesung ↔ Übung, or between Übungen)
+  // always starts at that material's first variant.
+  useEffect(() => {
+    setLeftVariant(null);
+    leftScrollRef.current?.scrollTo({ top: 0 });
+  }, [leftKey]);
 
   // ← / → keyboard navigation between chapters. Skip when typing.
   useEffect(() => {
@@ -135,6 +156,46 @@ function ChapterView({
     : parseInt(leftKey.replace("uebung-", ""), 10);
   const activeExercise =
     activeExerciseIdx >= 0 ? exercises[activeExerciseIdx] : undefined;
+
+  // Variants of the active left material. A lecture is its slides plus, if
+  // present, a video recording; an Übung is each of its Aufgaben sheets (e.g.
+  // German + English). Only the selected variant renders below.
+  const leftVariants: LeftVariant[] = onLecture
+    ? [
+        {
+          key: "folien",
+          label: { de: "Folien", en: "Slides" },
+          kind: "pdf",
+          src: lesson.lecture.pdf.src,
+        },
+        ...(lesson.lecture.videoUrl
+          ? [
+              {
+                key: "video",
+                label: { de: "Video", en: "Video" },
+                kind: "video" as const,
+                url: lesson.lecture.videoUrl,
+              },
+            ]
+          : []),
+      ]
+    : (activeExercise?.aufgaben ?? []).map((a, i) => ({
+        key: `a-${i}`,
+        label: a.label,
+        kind: "pdf" as const,
+        src: a.src,
+      }));
+  const activeVariant =
+    leftVariants.find((v) => v.key === leftVariant) ?? leftVariants[0];
+  const leftSubChips: Chip[] =
+    leftVariants.length > 1
+      ? leftVariants.map((v) => ({
+          key: v.key,
+          label: tr(v.label),
+          active: v.key === activeVariant?.key,
+          onClick: () => setLeftVariant(v.key),
+        }))
+      : [];
 
   const leftChips: Chip[] = [
     {
@@ -235,12 +296,19 @@ function ChapterView({
         ariaLabel="Materialien"
         scrollRef={leftScrollRef}
         chips={leftChips}
+        subChips={leftSubChips}
         progress={onLecture}
       >
-        {onLecture ? (
-          <LecturePanel lesson={lesson} />
-        ) : activeExercise ? (
-          <UebungPanel exercise={activeExercise} fallbackLabel={leftKey} />
+        {activeVariant ? (
+          activeVariant.kind === "video" ? (
+            <VideoEmbed url={activeVariant.url} />
+          ) : (
+            <PdfBlock src={activeVariant.src} />
+          )
+        ) : !onLecture && activeExercise ? (
+          <EmptyHint>
+            {`Kein Aufgaben-PDF zu „${tr(activeExercise.label) || "dieser Übung"}“. Manchmal wird nur die Lösung veröffentlicht — schau in der rechten Spalte unter „Lösung“.`}
+          </EmptyHint>
         ) : null}
       </ColumnPane>
 
@@ -292,6 +360,7 @@ function ColumnPane({
   ariaLabel,
   scrollRef,
   chips,
+  subChips,
   progress,
   background,
   fill,
@@ -300,6 +369,8 @@ function ColumnPane({
   ariaLabel: string;
   scrollRef: React.RefObject<HTMLDivElement | null>;
   chips: Chip[];
+  /** Secondary row of smaller chips (e.g. slides/video, DE/EN). Optional. */
+  subChips?: Chip[];
   progress?: boolean;
   background?: string;
   /** Let the child own the full column height (no scroll padding) — used by
@@ -330,10 +401,12 @@ function ColumnPane({
         </div>
       )}
 
-      {/* Chips float ON TOP of the material, vertically centered within
-          the top spacing gap — separate pills, no subheader. */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex h-16 items-center px-3 sm:px-4">
+      {/* Chips float ON TOP of the material — separate pills, no subheader.
+          A secondary row (slides/video, DE/EN, …) sits just below the primary
+          chips when the active material has more than one source. */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex min-h-16 flex-col justify-center gap-1.5 px-3 py-2 sm:px-4">
         <ChipRow chips={chips} />
+        {subChips && subChips.length > 0 && <ChipRow chips={subChips} small />}
       </div>
     </section>
   );
@@ -396,9 +469,12 @@ function ColumnTopProgress({
  * legible over whatever slide scrolls underneath. New chips just join
  * the row at the same level.
  */
-function ChipRow({ chips }: { chips: Chip[] }) {
+function ChipRow({ chips, small }: { chips: Chip[]; small?: boolean }) {
   return (
-    <div role="tablist" className="pointer-events-auto flex flex-wrap items-center gap-2">
+    <div
+      role="tablist"
+      className="pointer-events-auto flex flex-wrap items-center gap-2"
+    >
       {chips.map((c) => (
         <button
           key={c.key}
@@ -407,7 +483,8 @@ function ChipRow({ chips }: { chips: Chip[] }) {
           aria-selected={c.active}
           onClick={c.onClick}
           className={cn(
-            "cursor-pointer rounded-full px-4 py-1.5 font-serif text-[15.5px] tracking-tight shadow-[0_5px_12px_-2px_rgba(0,0,0,0.32),0_22px_50px_-10px_rgba(0,0,0,0.8)] transition-all",
+            "cursor-pointer rounded-full font-serif tracking-tight shadow-[0_5px_12px_-2px_rgba(0,0,0,0.32),0_22px_50px_-10px_rgba(0,0,0,0.8)] transition-all",
+            small ? "px-3 py-1 text-[13px]" : "px-4 py-1.5 text-[15.5px]",
             c.active
               ? "bg-[var(--accent)] font-medium text-background"
               : "bg-card text-foreground hover:text-foreground",
@@ -488,64 +565,64 @@ function ArrowButton({
 
 /* ─────────────────────── Material panels ─────────────────────── */
 
-function LecturePanel({ lesson }: { lesson: Lesson }) {
-  return (
-    <div className="flex flex-col">
-      {lesson.lecture.videoUrl && (
-        <div className="px-4 pb-3 pt-3 sm:px-6">
-          <a
-            href={lesson.lecture.videoUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="group inline-flex cursor-pointer items-center gap-2 text-[13px] font-medium text-muted-foreground transition-colors hover:text-[var(--accent)]"
-          >
-            <PlayCircle className="h-4 w-4" strokeWidth={1.75} />
-            <span>Aufzeichnung ansehen</span>
-          </a>
-        </div>
-      )}
-      <PdfBlock src={lesson.lecture.pdf.src} />
-    </div>
-  );
-}
-
-function UebungPanel({
-  exercise,
-  fallbackLabel,
-}: {
-  exercise: Exercise;
-  fallbackLabel: string;
-}) {
-  const { tr } = useI18n();
-  const title = tr(exercise.label) || fallbackLabel;
-  const sheets = exercise.aufgaben ?? [];
-  if (sheets.length === 0) {
+/**
+ * A lecture recording (or any video variant). YouTube/Vimeo URLs become an
+ * embedded responsive player; anything else falls back to a plain link so the
+ * user is never stuck.
+ */
+function VideoEmbed({ url }: { url: string }) {
+  const embed = toEmbedUrl(url);
+  if (!embed) {
     return (
-      <EmptyHint>
-        {`Kein Aufgaben-PDF zu „${title}“. Manchmal wird nur die Lösung veröffentlicht — schau in der rechten Spalte unter „Lösung“.`}
-      </EmptyHint>
+      <div className="px-5 py-10 sm:px-8">
+        <a
+          href={url}
+          target="_blank"
+          rel="noreferrer"
+          className="group inline-flex cursor-pointer items-center gap-2 text-[14px] font-medium text-[var(--accent)]"
+        >
+          <PlayCircle className="h-5 w-5" strokeWidth={1.75} />
+          <span>Aufzeichnung ansehen</span>
+        </a>
+      </div>
     );
   }
-  // A sheet can exist in several languages (e.g. DE + EN). With more than one,
-  // label each so the reader can tell the versions apart; a single sheet stays
-  // caption-free, matching the Lösung column.
-  if (sheets.length === 1) {
-    return <PdfBlock src={sheets[0].src} />;
-  }
   return (
-    <div className="flex flex-col">
-      {sheets.map((sheet, i) => (
-        <div key={i} className="flex flex-col">
-          <div className="not-prose px-5 pt-4 pb-1 font-serif text-[13px] font-semibold uppercase tracking-wide text-[var(--ink-soft)] sm:px-8">
-            {tr(sheet.label)}
-          </div>
-          <PdfBlock src={sheet.src} />
-        </div>
-      ))}
+    <div className="px-3 py-4 sm:px-5">
+      <div className="relative w-full overflow-hidden rounded-lg bg-black shadow-sm" style={{ aspectRatio: "16 / 9" }}>
+        <iframe
+          src={embed}
+          title="Aufzeichnung"
+          className="absolute inset-0 h-full w-full"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      </div>
     </div>
   );
 }
 
+/** Turn a YouTube/Vimeo watch URL into its embeddable form, else null. */
+function toEmbedUrl(url: string): string | null {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./, "");
+    if (host === "youtu.be") {
+      return `https://www.youtube.com/embed/${u.pathname.slice(1)}`;
+    }
+    if (host === "youtube.com" || host === "m.youtube.com") {
+      const v = u.searchParams.get("v");
+      if (v) return `https://www.youtube.com/embed/${v}`;
+      if (u.pathname.startsWith("/embed/")) return url;
+    }
+    if (host === "vimeo.com") {
+      return `https://player.vimeo.com/video/${u.pathname.slice(1)}`;
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
 
 function SolutionPanel({
   solutions,
@@ -671,7 +748,11 @@ function PdfBlock({ src, label }: { src: string; label?: string }) {
       {mounted ? (
         <PdfViewer key={src} src={src} mode="stack" />
       ) : (
-        <div aria-hidden className="min-h-[420px] animate-pulse bg-muted/10" />
+        // Full-width landscape shimmer until the viewer mounts — never a
+        // thin/tall placeholder.
+        <div className="px-3 py-1 sm:px-0">
+          <PageSkeleton className="aspect-[16/9]" />
+        </div>
       )}
     </div>
   );

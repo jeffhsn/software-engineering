@@ -48,6 +48,11 @@ export function PdfViewer({ src, className, onReady, mode = "fit" }: Props) {
     numPages: null,
     loadError: false,
   });
+  // Real page aspect ratio (height / width). Slides are landscape (~0.56),
+  // exercise sheets are portrait (~1.41). We measure it from page 1 so the
+  // loading skeleton has the SAME shape as the slide — no ugly tall/thin
+  // placeholder that then snaps to a wide slide.
+  const [pageAspect, setPageAspect] = useState<number | null>(null);
   const currentDocument =
     documentState.src === src
       ? documentState
@@ -80,8 +85,21 @@ export function PdfViewer({ src, className, onReady, mode = "fit" }: Props) {
         : Math.max(220, Math.round(containerWidth * PDF_ZOOM_FACTOR[zoom]));
 
   const onLoad = useCallback(
-    (d: { numPages: number }) => {
-      setDocumentState({ src, numPages: d.numPages, loadError: false });
+    (pdf: {
+      numPages: number;
+      getPage: (n: number) => Promise<{
+        getViewport: (o: { scale: number }) => { width: number; height: number };
+      }>;
+    }) => {
+      setDocumentState({ src, numPages: pdf.numPages, loadError: false });
+      // Measure page 1 so every placeholder matches the real slide shape.
+      pdf
+        .getPage(1)
+        .then((page) => {
+          const vp = page.getViewport({ scale: 1 });
+          if (vp.width > 0) setPageAspect(vp.height / vp.width);
+        })
+        .catch(() => setPageAspect(1.414));
       onReady?.();
     },
     [onReady, src],
@@ -119,7 +137,7 @@ export function PdfViewer({ src, className, onReady, mode = "fit" }: Props) {
           loading={
             <div className={cn("w-full", isStack ? "py-1" : "px-4 py-4")}>
               <PageSkeleton
-                height={pageWidth ? Math.round(pageWidth * 1.414) : 560}
+                height={pageWidth ? Math.round(pageWidth * (pageAspect ?? 0.6)) : 320}
                 srLabel="PDF wird geladen"
               />
             </div>
@@ -139,17 +157,24 @@ export function PdfViewer({ src, className, onReady, mode = "fit" }: Props) {
             isStack ? "gap-3 py-1" : "gap-4 px-4 py-4",
           )}
         >
-          {currentDocument.numPages &&
-            pageWidth &&
-            Array.from({ length: currentDocument.numPages }, (_, i) => (
-              <LazyPage
-                key={`${src}-p-${i + 1}-w-${Math.round(pageWidth)}`}
-                root={isStack ? null : containerElement}
-                pageNumber={i + 1}
-                width={pageWidth}
-                eager={i === 0}
-              />
-            ))}
+          {currentDocument.numPages && pageWidth ? (
+            pageAspect ? (
+              Array.from({ length: currentDocument.numPages }, (_, i) => (
+                <LazyPage
+                  key={`${src}-p-${i + 1}-w-${Math.round(pageWidth)}`}
+                  root={isStack ? null : containerElement}
+                  pageNumber={i + 1}
+                  width={pageWidth}
+                  aspect={pageAspect}
+                  eager={i === 0}
+                />
+              ))
+            ) : (
+              // Aspect not measured yet (a tick after parse): one matching-width
+              // skeleton, sized landscape-ish so no thin/tall slide flashes.
+              <PageSkeleton height={Math.round(pageWidth * 0.6)} />
+            )
+          ) : null}
         </Document>
       )}
     </div>
@@ -164,11 +189,14 @@ export function PdfViewer({ src, className, onReady, mode = "fit" }: Props) {
 function LazyPage({
   pageNumber,
   width,
+  aspect,
   root,
   eager,
 }: {
   pageNumber: number;
   width: number;
+  /** Real page height/width, so the placeholder matches the rendered page. */
+  aspect: number;
   root: HTMLElement | null;
   /** When true, mount immediately — used for the first page so it renders ASAP. */
   eager?: boolean;
@@ -191,7 +219,7 @@ function LazyPage({
     return () => io.disconnect();
   }, [mounted, root]);
 
-  const placeholderHeight = Math.round(width * 1.414);
+  const placeholderHeight = Math.round(width * aspect);
 
   return (
     <div ref={ref} style={{ width }}>
