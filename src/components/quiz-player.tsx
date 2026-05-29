@@ -58,32 +58,13 @@ function QuizSetPicker({
   quizSet: QuizSet;
   onPick: (id: string) => void;
 }) {
-  const { tr } = useI18n();
-  const totalQuestions = quizSet.quizzes.reduce(
-    (acc, q) => acc + q.questions.length,
-    0,
-  );
-
+  // No header bar — the floating "Quiz" chip already labels this column and the
+  // chapter title lives on the lecture side. The quiz list scrolls full-bleed
+  // beneath the floating chips (like the slides do), so nothing reads as a
+  // subheader stuck under the chips. Top padding lets the first row clear them.
   return (
     <div className="flex h-full flex-col overflow-y-auto bg-background">
-      <div className="border-b border-border/60 px-6 py-8 sm:px-10 sm:py-10">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-          Quiz
-        </p>
-        <h2
-          className="mt-2 text-balance text-3xl font-semibold tracking-tight sm:text-4xl"
-          style={{ fontFamily: "var(--font-serif), Georgia, serif", color: "var(--ink)" }}
-        >
-          {tr(quizSet.title)}
-        </h2>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-          {quizSet.quizzes.length}{" "}
-          {quizSet.quizzes.length === 1 ? "Quiz" : "Quizzes"} ·{" "}
-          {totalQuestions} Fragen insgesamt. Tippe auf ein Quiz, um direkt zu starten.
-        </p>
-      </div>
-
-      <ul className="divide-y divide-border/60">
+      <ul className="divide-y divide-border/60 pt-6 sm:pt-8">
         {quizSet.quizzes.map((q, idx) => (
           <QuizRow
             key={q.id}
