@@ -397,7 +397,7 @@ function ColumnPane({
            steady. */
         <div
           ref={scrollRef}
-          className="h-full overflow-y-auto overscroll-contain pb-16"
+          className="h-full overflow-y-auto overscroll-contain"
         >
           {children}
         </div>
