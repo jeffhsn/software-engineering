@@ -101,6 +101,10 @@ function ChapterView({
   const [rightUebung, setRightUebung] =
     useState<RightUebungKey>("loesung");
   const [solutionIdx, setSolutionIdx] = useState(0);
+  // True only while a quiz is actually being played (runner/summary), which
+  // owns the column with its own header/body/footer. The quiz *picker* is just
+  // a list and floats under the chips like every other panel.
+  const [quizActive, setQuizActive] = useState(false);
   // Which source (slides/video, DE/EN, …) of the active left material shows.
   // null = the first/default variant.
   const [leftVariant, setLeftVariant] = useState<string | null>(null);
@@ -116,6 +120,7 @@ function ChapterView({
       setRightLecture("tief");
       setRightUebung("loesung");
       setSolutionIdx(0);
+      setQuizActive(false);
       leftScrollRef.current?.scrollTo({ top: 0 });
       rightScrollRef.current?.scrollTo({ top: 0 });
     }
@@ -320,11 +325,14 @@ function ChapterView({
         scrollRef={rightScrollRef}
         chips={rightChips}
         progress={onLecture ? rightLecture !== "quiz" : rightUebung === "walkthrough"}
-        fill={onLecture && rightLecture === "quiz"}
+        fill={onLecture && rightLecture === "quiz" && quizActive}
       >
         {onLecture ? (
           rightLecture === "quiz" ? (
-            <QuizPanel quizBankId={lesson.lecture.quizBankId} />
+            <QuizPanel
+              quizBankId={lesson.lecture.quizBankId}
+              onActiveChange={setQuizActive}
+            />
           ) : (
             <ErklaerungPanel
               walkthroughId={lesson.lecture.walkthroughId}
@@ -390,20 +398,8 @@ function ColumnPane({
 
       {fill ? (
         // Child fills the column beneath the floating chips and manages its
-        // own scrolling (e.g. the quiz player). A top fade dissolves rows into
-        // the page as they scroll up under the chips, so no bold line ever sits
-        // right beneath them and reads as a subheader.
-        <>
-          <div className="absolute inset-0 pt-14">{children}</div>
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 top-0 z-10 h-28"
-            style={{
-              background:
-                "linear-gradient(to bottom, var(--background) 68%, transparent)",
-            }}
-          />
-        </>
+        // own scrolling (e.g. a running quiz with its own header/body/footer).
+        <div className="absolute inset-0 pt-14">{children}</div>
       ) : (
         /* Content scrolls full-bleed from the very top; the chips float
            directly over it. overscroll-contain keeps the fixed header
@@ -702,7 +698,14 @@ function ErklaerungPanel({
   );
 }
 
-function QuizPanel({ quizBankId }: { quizBankId?: string }) {
+function QuizPanel({
+  quizBankId,
+  onActiveChange,
+}: {
+  quizBankId?: string;
+  /** Reports true while a quiz is being played (so the column switches to fill). */
+  onActiveChange?: (active: boolean) => void;
+}) {
   if (!quizBankId) {
     return (
       <EmptyHint>
@@ -716,9 +719,11 @@ function QuizPanel({ quizBankId }: { quizBankId?: string }) {
   if (!quizSet) {
     return <EmptyHint>{`Kein Quiz mit der ID „${quizBankId}".`}</EmptyHint>;
   }
-  // The player owns the full column (picker → runner → summary) and brings its
-  // own scrolling; ColumnPane renders it in `fill` mode.
-  return <QuizPlayer quizSet={quizSet} />;
+  // The picker scrolls under the floating chips like every other panel; only a
+  // running quiz takes over the column (ColumnPane switches to `fill` then).
+  return (
+    <QuizPlayer quizSet={quizSet} onActiveChange={onActiveChange} chipInset />
+  );
 }
 
 /* ─────────────────────── Chips & shared bits ─────────────────────── */

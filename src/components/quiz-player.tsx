@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type {
   MultipleChoiceQuestion,
   Quiz,
@@ -14,6 +14,12 @@ import { cn } from "@/lib/utils";
 
 interface Props {
   quizSet: QuizSet;
+  /** Reports true while a quiz is actually being played (runner/summary), so the
+      column can hand the quiz its full height; the picker reports false. */
+  onActiveChange?: (active: boolean) => void;
+  /** Inline reading column: pad the picker so its first row clears the floating
+      chips. Off in the fullscreen overlay, which has a real header bar instead. */
+  chipInset?: boolean;
 }
 
 type AnswerState = {
@@ -30,13 +36,21 @@ interface QuizAttempt {
 
 /* ────────── Outer: picker → quiz ────────── */
 
-export function QuizPlayer({ quizSet }: Props) {
+export function QuizPlayer({ quizSet, onActiveChange, chipInset }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = quizSet.quizzes.find((q) => q.id === selectedId) ?? null;
 
+  useEffect(() => {
+    onActiveChange?.(!!selected);
+  }, [selected, onActiveChange]);
+
   if (!selected) {
     return (
-      <QuizSetPicker quizSet={quizSet} onPick={(id) => setSelectedId(id)} />
+      <QuizSetPicker
+        quizSet={quizSet}
+        onPick={(id) => setSelectedId(id)}
+        chipInset={chipInset}
+      />
     );
   }
 
@@ -54,17 +68,18 @@ export function QuizPlayer({ quizSet }: Props) {
 function QuizSetPicker({
   quizSet,
   onPick,
+  chipInset,
 }: {
   quizSet: QuizSet;
   onPick: (id: string) => void;
+  chipInset?: boolean;
 }) {
   // No header bar — the floating "Quiz" chip already labels this column and the
-  // chapter title lives on the lecture side. The quiz list scrolls full-bleed
-  // beneath the floating chips (like the slides do), so nothing reads as a
-  // subheader stuck under the chips. Top padding lets the first row clear them.
+  // chapter title lives on the lecture side. The list scrolls under the floating
+  // chips exactly like the Erklärung panel; top padding clears the chips at rest.
   return (
     <div className="flex h-full flex-col overflow-y-auto bg-background">
-      <ul className="divide-y divide-border/60 pt-6 sm:pt-8">
+      <ul className={cn("divide-y divide-border/60", chipInset ? "pt-20" : "pt-6 sm:pt-8")}>
         {quizSet.quizzes.map((q, idx) => (
           <QuizRow
             key={q.id}
