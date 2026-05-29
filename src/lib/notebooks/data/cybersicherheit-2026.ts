@@ -42,6 +42,8 @@ export const cybersicherheit2026: Notebook = {
       },
       lecture: {
         pdf: { label: L.vorlesung, src: `${BASE}/lectures/01.pdf` },
+        walkthroughId: "cs-2026-l01",
+        quizBankId: "cs-2026-l1",
       },
       // Reine Orga + Motivation — kein Übungsblatt.
       exercises: [],
@@ -51,6 +53,8 @@ export const cybersicherheit2026: Notebook = {
       title: { de: "Einführung in die Kryptografie", en: "Introduction to cryptography" },
       lecture: {
         pdf: { label: L.vorlesung, src: `${BASE}/lectures/02.pdf` },
+        walkthroughId: "cs-2026-l02",
+        quizBankId: "cs-2026-l2",
       },
       // Übungsblatt 1 — klassische Kryptografie (Caesar, Transposition, Vigenère).
       exercises: [
@@ -61,6 +65,7 @@ export const cybersicherheit2026: Notebook = {
             { label: L.aufgabenEn, src: `${BASE}/uebungen/01/aufgaben.en.pdf` },
           ],
           solutions: [{ label: L.loesung, src: `${BASE}/uebungen/01/loesung.pdf` }],
+          walkthroughId: "cs-2026-u01",
         },
       ],
     },
@@ -72,6 +77,8 @@ export const cybersicherheit2026: Notebook = {
       },
       lecture: {
         pdf: { label: L.vorlesung, src: `${BASE}/lectures/03.pdf` },
+        walkthroughId: "cs-2026-l03",
+        quizBankId: "cs-2026-l3",
       },
       // Lecture 3 trägt zwei Blätter: Übung 2 (Vernam/OTP + DES-S-Boxen) und
       // Übung 2.2 (erste DES-Runde, Avalanche-Effekt, DES-Entschlüsselung).
@@ -83,6 +90,7 @@ export const cybersicherheit2026: Notebook = {
             { label: L.aufgabenEn, src: `${BASE}/uebungen/02/aufgaben.en.pdf` },
           ],
           solutions: [{ label: L.loesung, src: `${BASE}/uebungen/02/loesung.pdf` }],
+          walkthroughId: "cs-2026-u02",
         },
         {
           label: L.uebungDesRunde,
@@ -91,6 +99,7 @@ export const cybersicherheit2026: Notebook = {
             { label: L.aufgabenEn, src: `${BASE}/uebungen/02_2/aufgaben.en.pdf` },
           ],
           solutions: [{ label: L.loesung, src: `${BASE}/uebungen/02_2/loesung.pdf` }],
+          walkthroughId: "cs-2026-u02_2",
         },
       ],
     },
@@ -102,6 +111,8 @@ export const cybersicherheit2026: Notebook = {
       },
       lecture: {
         pdf: { label: L.vorlesung, src: `${BASE}/lectures/04.pdf` },
+        walkthroughId: "cs-2026-l04",
+        quizBankId: "cs-2026-l4",
       },
       // Übungsblatt 3 — Wiederholung + AES-Brute-Force + Betriebsmodi (ECB/CBC/OFB).
       exercises: [
@@ -112,6 +123,7 @@ export const cybersicherheit2026: Notebook = {
             { label: L.aufgabenEn, src: `${BASE}/uebungen/03/aufgaben.en.pdf` },
           ],
           solutions: [{ label: L.loesung, src: `${BASE}/uebungen/03/loesung.pdf` }],
+          walkthroughId: "cs-2026-u03",
         },
       ],
     },
@@ -123,6 +135,8 @@ export const cybersicherheit2026: Notebook = {
       },
       lecture: {
         pdf: { label: L.vorlesung, src: `${BASE}/lectures/05.pdf` },
+        walkthroughId: "cs-2026-l05",
+        quizBankId: "cs-2026-l5",
       },
       // Übungsblatt 4 — RSA (Schlüsselerzeugung, Ver-/Entschlüsselung) + AES↔RSA-Vergleich.
       // Noch keine offizielle Lösung veröffentlicht.
@@ -134,6 +148,7 @@ export const cybersicherheit2026: Notebook = {
             { label: L.aufgabenEn, src: `${BASE}/uebungen/04/aufgaben.en.pdf` },
           ],
           solutions: [],
+          walkthroughId: "cs-2026-u04",
         },
       ],
     },
@@ -145,6 +160,8 @@ export const cybersicherheit2026: Notebook = {
       },
       lecture: {
         pdf: { label: L.vorlesung, src: `${BASE}/lectures/06.pdf` },
+        walkthroughId: "cs-2026-l06",
+        quizBankId: "cs-2026-l6",
       },
       // Noch kein Übungsblatt zu diesem Kapitel.
       exercises: [],
