@@ -79,7 +79,7 @@ function ChapterView({
       : undefined;
 
   const exercises = lesson.exercises.filter(
-    (e) => e.aufgaben || e.solutions.length > 0,
+    (e) => (e.aufgaben?.length ?? 0) > 0 || e.solutions.length > 0,
   );
 
   const [leftKey, setLeftKey] = useState<LeftKey>("lecture");
@@ -518,14 +518,32 @@ function UebungPanel({
 }) {
   const { tr } = useI18n();
   const title = tr(exercise.label) || fallbackLabel;
-  if (!exercise.aufgaben) {
+  const sheets = exercise.aufgaben ?? [];
+  if (sheets.length === 0) {
     return (
       <EmptyHint>
         {`Kein Aufgaben-PDF zu „${title}“. Manchmal wird nur die Lösung veröffentlicht — schau in der rechten Spalte unter „Lösung“.`}
       </EmptyHint>
     );
   }
-  return <PdfBlock src={exercise.aufgaben.src} />;
+  // A sheet can exist in several languages (e.g. DE + EN). With more than one,
+  // label each so the reader can tell the versions apart; a single sheet stays
+  // caption-free, matching the Lösung column.
+  if (sheets.length === 1) {
+    return <PdfBlock src={sheets[0].src} />;
+  }
+  return (
+    <div className="flex flex-col">
+      {sheets.map((sheet, i) => (
+        <div key={i} className="flex flex-col">
+          <div className="not-prose px-5 pt-4 pb-1 font-serif text-[13px] font-semibold uppercase tracking-wide text-[var(--ink-soft)] sm:px-8">
+            {tr(sheet.label)}
+          </div>
+          <PdfBlock src={sheet.src} />
+        </div>
+      ))}
+    </div>
+  );
 }
 
 

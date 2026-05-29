@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { getAllSubjectSlugs, getSubject } from "@/lib/subjects/registry";
-import { getNotebook } from "@/lib/notebooks/registry";
+import { getNotebookForYear } from "@/lib/notebooks/registry";
 import { ACCENT } from "@/lib/subjects/accents";
 import { splitSections } from "@/lib/subjects/section-columns";
 import type { SectionKind } from "@/lib/subjects/types";
@@ -40,24 +40,25 @@ export default async function SubjectPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ l?: string }>;
+  searchParams: Promise<{ l?: string; y?: string }>;
 }) {
   const { slug } = await params;
-  const { l } = await searchParams;
+  const { l, y } = await searchParams;
   const subject = getSubject(slug);
   if (!subject) notFound();
 
   const { dict } = await getServerI18n();
   const a = ACCENT[subject.accent];
-  const notebook = getNotebook(subject.slug);
+  const notebook = getNotebookForYear(subject.slug, y ? Number(y) : undefined);
 
   // Subjects with a real notebook open straight into a chapter — there is
   // no notebook home. A bare URL redirects to the first chapter so the
-  // header (chapter picker) and body stay in sync.
+  // header (chapter picker) and body stay in sync. The selected year (?y=)
+  // is preserved so switching iterations doesn't bounce back to the default.
   if (notebook && notebook.lessons.length > 0) {
     const hasChapter = l != null && l !== "0";
     if (!hasChapter) {
-      redirect(`/subjects/${slug}?l=1`);
+      redirect(`/subjects/${slug}?${y ? `y=${y}&` : ""}l=1`);
     }
     return <NotebookView notebook={notebook} />;
   }

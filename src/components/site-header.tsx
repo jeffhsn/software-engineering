@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useI18n } from "@/lib/i18n/client";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { ReadingSettings } from "@/components/reading-settings";
@@ -9,7 +9,7 @@ import { ThemeSwitcher } from "@/components/theme-switcher";
 import { SUBJECTS } from "@/lib/subjects/registry";
 import {
   getAllNotebooks,
-  getNotebook,
+  getNotebookForYear,
   getNotebooksForSubject,
 } from "@/lib/notebooks/registry";
 import { YearPicker } from "@/components/year-picker";
@@ -34,12 +34,16 @@ const SUBJECT_RE = /^\/subjects\/([^/]+)(?:\/([^/]+))?\/?$/;
 export function SiteHeader() {
   const { dict } = useI18n();
   const pathname = usePathname();
+  const router = useRouter();
   const searchParams = useSearchParams();
 
   const match = pathname.match(SUBJECT_RE);
   const slug = match?.[1];
   const subject = slug ? SUBJECTS.find((s) => s.slug === slug) : undefined;
-  const notebook = subject ? getNotebook(subject.slug) : undefined;
+  const rawY = searchParams.get("y");
+  const notebook = subject
+    ? getNotebookForYear(subject.slug, rawY ? Number(rawY) : undefined)
+    : undefined;
 
   const rawL = searchParams.get("l");
   const inChapter = Boolean(notebook && rawL && rawL !== "0");
@@ -96,6 +100,9 @@ export function SiteHeader() {
                 <YearPicker
                   current={notebook}
                   available={getNotebooksForSubject(notebook.subject)}
+                  onSelect={(n) =>
+                    router.push(`/subjects/${notebook.subject}?y=${n.year}&l=1`)
+                  }
                 />
               )}
             </>

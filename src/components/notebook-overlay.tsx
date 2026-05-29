@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { SUBJECTS } from "@/lib/subjects/registry";
-import { getNotebook } from "@/lib/notebooks/registry";
+import { getNotebookForYear } from "@/lib/notebooks/registry";
 import { getExplanation } from "@/lib/notebooks/explanations/registry";
 import { getQuizSet } from "@/lib/notebooks/quizzes/registry";
 import { clampedIndex, setOverlayInUrl } from "@/lib/notebooks/nav";
@@ -26,7 +26,10 @@ export function NotebookOverlay() {
   const match = pathname.match(SUBJECT_RE);
   const slug = match?.[1];
   const subject = slug ? SUBJECTS.find((s) => s.slug === slug) : undefined;
-  const notebook = subject ? getNotebook(subject.slug) : undefined;
+  const rawY = searchParams.get("y");
+  const notebook = subject
+    ? getNotebookForYear(subject.slug, rawY ? Number(rawY) : undefined)
+    : undefined;
 
   const view = searchParams.get("v");
   const isOpen = view === "quiz" || view === "walkthrough";

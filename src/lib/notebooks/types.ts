@@ -45,8 +45,11 @@ export interface Lecture {
 export interface Exercise {
   /** Label in the nav tree and section header (e.g. "Übung", "Übung (Exploits)"). */
   label: LocalizedText;
-  /** The Aufgaben PDF. Optional. */
-  aufgaben?: PdfRef;
+  /**
+   * The Aufgaben PDF(s). Optional, repeatable: a sheet may exist in several
+   * languages (e.g. a German and an English version) — list all of them.
+   */
+  aufgaben?: PdfRef[];
   /**
    * Solution PDFs. The first entry is the primary "Lösung"; further entries
    * are variants like Mitschrift, Multics-version, Zusatzhilfe.

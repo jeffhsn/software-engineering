@@ -171,7 +171,7 @@ function ResultButton({
 function chapterMeta(lesson: Lesson): string {
   const parts: string[] = ["Vorlesung"];
   const exCount = lesson.exercises.filter(
-    (e) => e.aufgaben || e.solutions.length > 0,
+    (e) => (e.aufgaben?.length ?? 0) > 0 || e.solutions.length > 0,
   ).length;
   if (exCount > 0) {
     parts.push(`${exCount} ${exCount === 1 ? "Übung" : "Übungen"}`);
