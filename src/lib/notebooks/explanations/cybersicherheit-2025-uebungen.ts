@@ -937,11 +937,19 @@ Das ist die Schwachstelle: **$username und $password sind frei eingebbar und wer
 
     test"; SELECT * FROM users WHERE username = "administrator
 
-Dann lautet die zusammengebaute Query (gekürzt): `… password = "test"; SELECT * FROM users WHERE username = "administrator"`. Das angehängte zweite Statement holt direkt den administrator-Datensatz — das eingeschobene `;` beendet die erste Anweisung und schmuggelt eine eigene hinterher.
+Dann lautet die zusammengebaute Query (gekürzt) so:
 
-**Variante B — die klassische Tautologie.** Setze als Passwort `" OR "1"="1`. Die WHERE-Bedingung wird dann `… AND password = "" OR "1"="1"`, und weil „1"="1" *immer* wahr ist, liefert die Query alle Nutzer (bzw. den ersten = oft den Admin) zurück — Login umgangen, ganz ohne Passwort.
+    … password = "test"; SELECT * FROM users WHERE username = "administrator"
 
-**Wie verhindert man das?** *Abstrakt:* Nutzereingaben dürfen niemals als Code interpretiert werden — man muss sie als reine *Daten* behandeln. *Konkret:* gefährliche Sonderzeichen (vor allem `;` und Anführungszeichen) maskieren, z. B. in PHP mit mysql_real_escape_string($password). Die saubere moderne Lösung sind **Prepared Statements** (parametrisierte Queries): dort wird die Eingabe getrennt von der Query übergeben und kann die Struktur prinzipiell nicht mehr verändern.
+Das angehängte zweite Statement holt direkt den administrator-Datensatz — das eingeschobene Semikolon beendet die erste Anweisung und schmuggelt eine eigene hinterher.
+
+**Variante B — die klassische Tautologie.** Setze als Passwort die Eingabe " OR "1"="1 (Anführungszeichen, dann OR, dann 1=1). Die WHERE-Bedingung wird dann zu
+
+    … AND password = "" OR "1"="1"
+
+und weil "1"="1" *immer* wahr ist, liefert die Query alle Nutzer (bzw. den ersten = oft den Admin) zurück — Login umgangen, ganz ohne Passwort.
+
+**Wie verhindert man das?** *Abstrakt:* Nutzereingaben dürfen niemals als Code interpretiert werden — man muss sie als reine *Daten* behandeln. *Konkret:* gefährliche Sonderzeichen (vor allem das Semikolon und Anführungszeichen) maskieren, z. B. in PHP mit mysql_real_escape_string($password). Die saubere moderne Lösung sind **Prepared Statements** (parametrisierte Queries): dort wird die Eingabe getrennt von der Query übergeben und kann die Struktur prinzipiell nicht mehr verändern.
 
 > **Eselsbrücke:** SQL-Injection entsteht, wenn Eingabe zu *Code* wird. Whitelisting/Escaping/Prepared Statements machen aus Eingabe wieder reine *Daten*.
 
@@ -975,7 +983,7 @@ Dann lautet die zusammengebaute Query (gekürzt): `… password = "test"; SELECT
 
 ## Klausur-Fokus
 
-Das einzige „rechnerische" Muss ist die **SQL-Injection**: zeige, wie eine ungeprüfte Eingabe die Query-Struktur kapert (Batched Statement mit `;` *oder* die `" OR "1"="1`-Tautologie), und nenne die Abwehr (Escaping / Prepared Statements). Sonst ist es Begriffssicherheit: die drei **XSS-Typen** (Stored/Reflected/DOM) sauber unterscheiden, **CSP** als Whitelist-Header (mindert XSS, ersetzt keine Validierung), bei **DoS** „nur die Verfügbarkeit der CIA-Ziele" und das **Amplification**-Prinzip (kleine Anfrage → große Antwort, IP-Spoofing lenkt sie aufs Opfer), die **Botnetz**-Begriffe (Mirai/IoT, C&C), und die **Abwehr** (On-Site vs. Off-Site, CDN + DNS-Routing, warum Layer-7-Erkennung und reines Aufrüsten schwer sind).`,
+Das einzige „rechnerische" Muss ist die **SQL-Injection**: zeige, wie eine ungeprüfte Eingabe die Query-Struktur kapert (Batched Statement mit Semikolon *oder* die OR-1=1-Tautologie), und nenne die Abwehr (Escaping / Prepared Statements). Sonst ist es Begriffssicherheit: die drei **XSS-Typen** (Stored/Reflected/DOM) sauber unterscheiden, **CSP** als Whitelist-Header (mindert XSS, ersetzt keine Validierung), bei **DoS** „nur die Verfügbarkeit der CIA-Ziele" und das **Amplification**-Prinzip (kleine Anfrage → große Antwort, IP-Spoofing lenkt sie aufs Opfer), die **Botnetz**-Begriffe (Mirai/IoT, C&C), und die **Abwehr** (On-Site vs. Off-Site, CDN + DNS-Routing, warum Layer-7-Erkennung und reines Aufrüsten schwer sind).`,
   },
 };
 
