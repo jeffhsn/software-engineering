@@ -6,6 +6,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import type { Notebook } from "@/lib/notebooks/types";
 import { getSubject } from "@/lib/subjects/registry";
 import { ACCENT_INK } from "@/lib/subjects/accents";
@@ -18,6 +26,11 @@ interface Props {
   onSelect?: (notebook: Notebook) => void;
 }
 
+/**
+ * Iteration (term/year) switcher — a searchable Popover + Command dropdown,
+ * same pattern as the language and subject pickers. Type to filter when a
+ * subject has many years; ✓ marks the current one.
+ */
 export function YearPicker({ current, available, onSelect }: Props) {
   const [open, setOpen] = useState(false);
   const subject = getSubject(current.subject);
@@ -45,44 +58,47 @@ export function YearPicker({ current, available, onSelect }: Props) {
           strokeWidth={2}
         />
       </PopoverTrigger>
-      <PopoverContent align="start" sideOffset={6} className="w-56 p-1">
-        <div className="px-2 pb-1 pt-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-          Iteration
-        </div>
-        {available.map((n) => {
-          const active = n.year === current.year && n.term === current.term;
-          return (
-            <button
-              key={`${n.year}-${n.term}`}
-              type="button"
-              onClick={() => {
-                setOpen(false);
-                if (!active) onSelect?.(n);
-              }}
-              disabled={active}
-              className={cn(
-                "flex w-full items-center justify-between gap-2 rounded-sm px-2 py-1.5 text-sm",
-                "transition-colors hover:bg-accent",
-                active ? "font-semibold" : "cursor-pointer",
-              )}
-            >
-              <span>{n.term}</span>
-              {active && (
-                <span
-                  aria-hidden
-                  className="text-xs text-muted-foreground"
-                >
-                  ✓
-                </span>
-              )}
-            </button>
-          );
-        })}
-        {available.length === 1 && (
-          <p className="border-t border-border/60 px-2 pb-1.5 pt-2 text-[11px] leading-snug text-muted-foreground">
-            Only one iteration uploaded. New years will appear here when added.
-          </p>
-        )}
+      <PopoverContent align="start" sideOffset={6} className="w-60 p-0">
+        <Command>
+          <CommandInput placeholder="Semester…" />
+          <CommandList className="max-h-72">
+            <CommandEmpty>—</CommandEmpty>
+            <CommandGroup>
+              {available.map((n) => {
+                const active =
+                  n.year === current.year && n.term === current.term;
+                return (
+                  <CommandItem
+                    key={`${n.year}-${n.term}`}
+                    value={`${n.term} ${n.year}`}
+                    onSelect={() => {
+                      setOpen(false);
+                      if (!active) onSelect?.(n);
+                    }}
+                    className={cn(
+                      "flex cursor-pointer items-center justify-between gap-2",
+                      active && "font-semibold",
+                    )}
+                  >
+                    <span className="flex items-center gap-2">
+                      <span
+                        aria-hidden
+                        className="h-2 w-2 shrink-0 rounded-full"
+                        style={{ backgroundColor: accent }}
+                      />
+                      <span>{n.term}</span>
+                    </span>
+                    {active && (
+                      <span aria-hidden className="text-xs text-muted-foreground">
+                        ✓
+                      </span>
+                    )}
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          </CommandList>
+        </Command>
       </PopoverContent>
     </Popover>
   );
