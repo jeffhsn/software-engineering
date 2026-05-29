@@ -569,10 +569,267 @@ Das hier ist die Generalprobe für den symmetrischen Teil. Sicher können: (1) K
   },
 };
 
+const ueb05: Explanation = {
+  id: "cs-2025-u05",
+  lesson: 5,
+  title: {
+    de: "Lösungsweg — Übungsblatt 5: RSA vervollständigen, Signaturen & Hash-Signaturen",
+  },
+  content: {
+    de: `Dieses Blatt hat einen heimlichen Star, an dem fast alle hängen bleiben: das Berechnen des privaten Schlüssels d. In den ersten RSA-Aufgaben war d geschenkt — jetzt musst du es selbst finden, und dafür brauchst du den **erweiterten euklidischen Algorithmus**. Genau diesen Schritt rechnen wir hier ganz langsam vor, denn er ist der eine Trick, der RSA-Aufgaben von „unlösbar" zu „Routine" macht. Dazu lernst du, was eine Signatur ist (RSA rückwärts) und warum man in der Praxis nicht das Dokument, sondern seinen Hash signiert.
+
+## Aufgabe 1 — RSA-Grundwissen
+
+- **Wann entwickelt, wie lange patentiert?** Entwickelt **1977**, in den USA patentiert bis **2000**.
+- **Wofür steht RSA?** Nach den drei Erfindern **R**ivest, **S**hamir, **A**dleman.
+- **Worauf beruht die Sicherheit?** Auf dem **Faktorisierungsproblem**: zwei große Primzahlen zu *multiplizieren* ist leicht, aber das Produkt wieder in seine Primfaktoren zu *zerlegen* ist (für große Zahlen) praktisch unmöglich. Wer N = p·q faktorisieren könnte, hätte sofort den privaten Schlüssel.
+- **Welche Bitlänge für 128-Bit-Sicherheit?** Bei RSA ca. **3072 Bit** — asymmetrische Schlüssel müssen viel länger sein als symmetrische für dasselbe Sicherheitsniveau.
+
+## Aufgabe 2 — Schlüsselpaar vervollständigen
+
+Hier fehlt jeweils d, und du musst zuerst prüfen, ob überhaupt ein gültiges RSA-Paar möglich ist. Der Ablauf ist immer derselbe: N und φ(N) ausrechnen, prüfen ob e teilerfremd zu φ(N) ist, und falls ja, d als das **modulare Inverse** von e berechnen.
+
+**Teil a) — p = 23, q = 43, e = 71.**
+
+- N = p·q = 23·43 = **989**.
+- φ(N) = (p−1)(q−1) = 22·42 = **924**.
+- Ist e gültig? Prüfe ggT(924, 71). 71 ist prim und teilt 924 nicht, also ggT = 1 → e ist erlaubt.
+
+Jetzt der Kern: **d ist die Zahl mit (e·d) mod φ(N) = 1**, also das Inverse von e modulo φ(N). *Warum diese Bedingung?* Weil beim Entschlüsseln (x^e)^d = x^{e·d} herauskommen soll, und nur wenn e·d ≡ 1 (mod φ(N)) ist, liefert Eulers Satz x^{e·d} ≡ x (mod N) — der Klartext kommt unversehrt zurück. d findest du mit dem erweiterten euklidischen Algorithmus.
+
+### Schritt für Schritt — d = 71⁻¹ mod 924 mit dem erweiterten Euklid
+
+**Vorwärts (normaler Euklid, gcd suchen):** teile immer mit Rest, bis der Rest 0 wird.
+
+    924 = 13 · 71 + 1     (denn 13·71 = 923, Rest 1)
+     71 =  71 ·  1 + 0     (Rest 0 → fertig, ggT = 1)
+
+**Rückwärts (die eine Gleichung mit Rest 1 nach 1 auflösen):**
+
+    1 = 924 − 13 · 71
+
+Jetzt liest du diese Gleichung modulo 924: der Term 924 fällt weg (924 ≡ 0), übrig bleibt **−13 · 71 ≡ 1 (mod 924)**. Also ist 71⁻¹ ≡ −13. Negative Inverse schiebt man in den positiven Bereich: −13 + 924 = **911**. Damit ist **d = 911**.
+
+**Probe:** 71 · 911 = 64 681 = 70 · 924 + 1, also 71·911 mod 924 = 1. ✓ Das Schlüsselpaar ist Public (989, 71), Private (989, 911).
+
+**Verschlüsseln** des Klartexts x = 134: y = 134⁷¹ mod 989 = **632**. (So ein Riesen-Exponent rechnet man nie direkt aus, sondern mit **Square-and-Multiply** und reduziert nach jedem Schritt mod 989, sodass die Zahlen klein bleiben.)
+
+**Teil b) — p = 31, q = 59, e = 185.**
+
+- N = 31·59 = 1829, φ(N) = 30·58 = **1740**.
+- Prüfe ggT(1740, 185): 185 = 5·37, und 1740 = 5·348 — beide durch 5 teilbar, also ggT = **5 ≠ 1**.
+
+Damit ist e **nicht** teilerfremd zu φ(N), es existiert kein modulares Inverse → **kein gültiges RSA-Schlüsselpaar**. Genau dafür ist die ggT-Prüfung da: sie sagt dir *vor* der ganzen Rechnerei, ob ein d überhaupt existiert.
+
+> **Typische Falle:** Immer zuerst ggT(φ(N), e) prüfen. Ist er nicht 1, hörst du sofort auf — es gibt kein d. Viele rechnen blind weiter und produzieren Unsinn.
+
+## Aufgabe 3 — Signaturen: RSA rückwärts
+
+Eine **Signatur** ist RSA „andersherum": Alice signiert mit ihrem *privaten* Schlüssel, jeder kann mit ihrem *öffentlichen* Schlüssel prüfen. Signieren: s = m^d mod N. Verifizieren: m = s^e mod N. Weil nur Alice d kennt, kann nur sie eine Signatur erzeugen, die mit ihrem öffentlichen e zu einem sinnvollen m „aufgeht" — das ist der Beweis der Urheberschaft (Nonrepudiation).
+
+**Aufgabe 3a — Signatur für 'R' (= 17).** Mit den gegebenen Parametern (N = 21257891, d = 17230733): s = m^d mod N = 17^17230733 mod 21257891 = **12 246 481**. (Wieder Square-and-Multiply mit Tool; die Klausur fragt vor allem nach der *Formel* s = m^d mod N und der Richtung „privat zum Signieren".)
+
+### Schritt für Schritt — Aufgabe 3b: Hash-Signatur für „RSAISTCOOL"
+
+Große Dokumente signiert man nicht direkt — man signiert ihren **Hash** (einen kurzen Fingerabdruck). Hier ist die (Spielzeug-)Hashfunktion „Summe der ASCII-Werte". Erst den Hash bilden:
+
+| R | S | A | I | S | T | C | O | O | L |
+|---|---|---|---|---|---|---|---|---|---|
+| 82 | 83 | 65 | 73 | 83 | 84 | 67 | 79 | 79 | 76 |
+
+Summe: 82+83+65+73+83+84+67+79+79+76 = **771**. Das ist der Hashwert x = H(m).
+
+Dann signierst du *den Hash* (nicht den Text) mit dem privaten Schlüssel: s = x^d mod N = 771^17230733 mod 21257891 = **11 094 112**. Bob würde zum Prüfen denselben Hash 771 selbst bilden und mit s^e mod N vergleichen — stimmen beide überein, ist die Nachricht echt und unverändert.
+
+> **Eselsbrücke:** Verschlüsseln nutzt den *öffentlichen* Schlüssel (jeder darf dir Geheimes schicken), Signieren den *privaten* (nur du kannst unterschreiben). Und immer den **Hash** signieren, nicht das ganze Dokument — kurz, schnell, und jede Änderung am Dokument zerstört die Signatur.
+
+## Klausur-Fokus
+
+Das absolute Muss dieses Blatts ist der **erweiterte Euklid zum Finden von d**: forward teilen bis Rest 1, dann die Gleichung „1 = … − q·e" rückwärts lesen, das Vorzeichen-Inverse in den positiven Bereich schieben, mit e·d mod φ(N) = 1 gegenprüfen. Dazu: die ggT-Prüfung *vorher* (gcd ≠ 1 → kein Schlüssel), die RSA-Fakten (1977, Faktorisierung, 3072 Bit), und die Signatur-Richtungen sicher beherrschen — s = m^d mod N zum Signieren, s^e mod N zum Prüfen, und immer den Hash signieren. Square-and-Multiply solltest du benennen können als die Methode, mit der man x^e mod N effizient rechnet.`,
+  },
+};
+
+const ueb06: Explanation = {
+  id: "cs-2025-u06",
+  lesson: 6,
+  title: {
+    de: "Lösungsweg — Übungsblatt 6: Hash-Tabellen, Kollisionswahrscheinlichkeit & Passwort-Hashing",
+  },
+  content: {
+    de: `Hashing hat zwei Gesichter, und dieses Blatt zeigt beide. Das eine ist die *uncryptografische* Hash-Tabelle — eine Datenstruktur, die Suchen blitzschnell macht. Das andere ist die *kryptografische* Anwendung: das sichere Speichern von Passwörtern. Dazwischen liegt eine Wahrscheinlichkeitsrechnung, die direkt das Geburtstagsparadoxon aus der Vorlesung aufgreift und erklärt, warum Kollisionen viel früher kommen, als man denkt. Wir rechnen die Tabellen von Hand und führen die Formeln Schritt für Schritt her.
+
+## Aufgabe 1 — Hash-Tabellen mit separate chaining
+
+Eine **Hash-Tabelle** ordnet jeden Eintrag über seinen Schlüssel einem von m Behältern (Buckets) zu. Die Hashfunktion ist hier ganz simpel: **H(k) = k mod 6**, es gibt also 6 Buckets (0–5). Landen zwei Schlüssel im selben Bucket (eine **Kollision**), hängt man sie nach dem Prinzip **separate chaining** einfach hintereinander in eine Liste.
+
+### Schritt für Schritt — Tabelle 1 befüllen
+
+Einfügereihenfolge: 71, 36, 22, 38, 11, 10, 1, 6, 4, 112, 42. Für jeden Wert rechnest du k mod 6 und hängst ihn an:
+
+| k | k mod 6 | Bucket |
+|---|---|---|
+| 71 | 5 | 5 |
+| 36 | 0 | 0 |
+| 22 | 4 | 4 |
+| 38 | 2 | 2 |
+| 11 | 5 | 5 (hinter 71) |
+| 10 | 4 | 4 (hinter 22) |
+| 1 | 1 | 1 |
+| 6 | 0 | 0 (hinter 36) |
+| 4 | 4 | 4 (hinter 10) |
+| 112 | 4 | 4 (hinter 4) |
+| 42 | 0 | 0 (hinter 6) |
+
+Ergebnis:
+
+| Bucket | 0 | 1 | 2 | 3 | 4 | 5 |
+|---|---|---|---|---|---|---|
+| Inhalt | 36, 6, 42 | 1 | 38 | — | 22, 10, 4, 112 | 71, 11 |
+
+### Tabelle 2 — dieselben Zahlen, andere Reihenfolge
+
+Einfügereihenfolge: 42, 71, 6, 22, 38, 36, 11, 10, 1, 4, 112. Die Restklassen sind natürlich dieselben (42 mod 6 = 0, 6 mod 6 = 0, 36 mod 6 = 0 …), also landen exakt dieselben Zahlen in denselben Buckets:
+
+| Bucket | 0 | 1 | 2 | 3 | 4 | 5 |
+|---|---|---|---|---|---|---|
+| Inhalt | 42, 6, 36 | 1 | 38 | — | 22, 10, 4, 112 | 71, 11 |
+
+**Worin unterscheiden sich die Tabellen?** Nur in der **Reihenfolge innerhalb der Ketten** — schau Bucket 0 an: einmal 36, 6, 42 und einmal 42, 6, 36. Welche Zahlen in welchem Bucket liegen, ist identisch (das bestimmt allein H(k)); aber *wer zuerst kam, steht vorne in der Liste*. Die Einfügereihenfolge ändert die Verkettung, nicht die Verteilung.
+
+### Kollisionswahrscheinlichkeit herleiten
+
+**P(keine Kollision in Schritt i).** Beim i-ten Einfügen sind bereits (i−1) Buckets belegt. Von m Buckets sind also noch m − (i−1) frei, und bei Gleichverteilung trifft der neue Schlüssel mit Wahrscheinlichkeit
+
+> **P(i) = (m − (i − 1)) / m**
+
+einen *freien* Bucket. Anschaulich bei m = 6: Schritt 1 hat P = 6/6 = 1 (noch nichts da), Schritt 2 P = 5/6, dann 4/6, 3/6, 2/6, 1/6, und ab Schritt 7 ist P = 0 — bei 6 Buckets und 7 Schlüsseln *muss* es kollidieren (Schubfachprinzip).
+
+**P(keine Kollision für n Schlüssel)** ist dann das Produkt all dieser Einzelschritte (alle müssen kollisionsfrei sein):
+
+> P(keine Kollision) = ∏ (von i=1 bis n) (m − (i − 1)) / m
+
+**Geburtstagsnäherung (Teilaufgabe mit 48-Bit-Adressraum).** Für N mögliche Hashwerte und k eingefügte Werte gilt P(Kollision) ≈ 1 − e^(−k(k−1)/(2N)). Mit k = 2,3·10⁷ Dateien und N = 2⁴⁸ ≈ 2,8·10¹⁴:
+
+- Exponent: k(k−1)/(2N) ≈ (2,3·10⁷)² / (2 · 2,8·10¹⁴) ≈ 5,3·10¹⁴ / 5,6·10¹⁴ ≈ 0,94.
+- P(Kollision) ≈ 1 − e^(−0,94) ≈ 1 − 0,39 ≈ **0,61 = 61 %**.
+
+Das ist die Pointe des Geburtstagsparadoxons: obwohl es 2⁴⁸ ≈ 281 Billionen mögliche Hashwerte gibt, reichen schon 23 Millionen Dateien für eine Kollisionswahrscheinlichkeit von 61 %. Kollisionen kommen ungefähr ab √N Einträgen — *Wurzel* aus dem Adressraum, nicht der Adressraum selbst.
+
+> **Eselsbrücke:** Kollisionen drohen ab etwa √N Einträgen, nicht erst ab N. Deshalb braucht ein kryptografischer Hash gegen Kollisionen die *doppelte* Bitlänge (2ⁿ Werte → Kollision schon bei 2^(n/2) Versuchen).
+
+## Aufgabe 2 — Passwörter richtig speichern
+
+**Warum kein Klartext?** Liegen Benutzername und Passwort im Klartext in der Datenbank, kann *jeder mit Zugriff* (Admin, Angreifer nach einem Hack, ein durchgesickertes Backup) sie sofort lesen und sich überall anmelden, wo der Nutzer dasselbe Passwort verwendet.
+
+**Warum hilft Hashing?** Ein Hash ist eine **Einwegfunktion**: aus dem gespeicherten Hash lässt sich das Klartextpasswort nicht zurückrechnen. Beim Login hasht man die Eingabe und vergleicht nur die Hashes. Klaut ein Angreifer die Datenbank, hat er bloß Hashes — und kann sich damit nicht einloggen, weil der Login einen Klartext verlangt. Die entscheidenden Hash-Eigenschaften dafür: **Urbildresistenz** (Hash → Passwort ist praktisch unmöglich) und die **Avalanche-Eigenschaft** (kleinste Passwortänderung → komplett anderer Hash, also kein Rückschluss auf „ähnliche" Passwörter).
+
+**Rainbow-Table-Angriff und Salting.** Eine **Rainbow-Table** ist eine riesige *vorberechnete* Tabelle „Hash → Klartextpasswort". Der Angreifer schlägt den gestohlenen Hash einfach nach; steht er drin, kennt er das Passwort — Hashing allein ist also nicht genug. Die Gegenmaßnahme ist **Salting**: vor dem Hashen hängt man an jedes Passwort eine zufällige Zeichenkette (das **Salt**). Dadurch ergibt dasselbe Passwort bei jedem Nutzer einen *anderen* Hash, und eine allgemeine Rainbow-Table wird wertlos — der Angreifer müsste für jedes einzelne Salt eine eigene Tabelle vorberechnen, was den ganzen Vorberechnungs-Vorteil zerstört.
+
+> **Eselsbrücke:** Hashing schützt das Passwort (Einwegfunktion), Salting schützt gegen *vorberechnete* Angriffe (jedes Salt macht den Hash einzigartig). Beides zusammen ist Pflicht.
+
+## Klausur-Fokus
+
+Zwei Rechensachen und zwei Konzeptsachen. Rechnen: (1) eine Hash-Tabelle mit H(k)=k mod m und separate chaining korrekt befüllen — und erklären, dass die Einfügereihenfolge nur die *Kettenreihenfolge*, nicht die Bucket-Zuordnung ändert. (2) die Kollisionsformeln herleiten: P(i) = (m−(i−1))/m, das Produkt für n Schlüssel, und die Geburtstagsnäherung 1 − e^(−k(k−1)/(2N)) einsetzen können. Konzept: (3) warum Klartext-Speicherung gefährlich ist und welche Hash-Eigenschaften (Urbildresistenz, Avalanche) das Hashing rettet; (4) Rainbow-Table-Angriff und warum **Salting** ihn aushebelt. Und merke die Brücke zur Vorlesung: Kollisionen ab √N — das ist exakt der Grund für die „halbe Bitlänge"-Regel bei kryptografischen Hashes.`,
+  },
+};
+
+const ueb07: Explanation = {
+  id: "cs-2025-u07",
+  lesson: 7,
+  title: {
+    de: "Lösungsweg — Übungsblatt 7: Rainbow-Tables, Bitcoin & einen Block selbst minen",
+  },
+  content: {
+    de: `Dieses Blatt verbindet zwei Hashing-Anwendungen aus der echten Welt: das Knacken von Passwörtern mit vorberechneten Tabellen und die Blockchain. Die Krönung ist Aufgabe 3, in der du eine kleine Kryptowährung (CyberCoin) tatsächlich *minst* — also per Hand eine Nonce suchst, bis der Block-Hash gültig ist. Genau dieses Nonce-Suchen ist Proof-of-Work im Kleinformat. Wir rechnen alles aus.
+
+## Aufgabe 1 — Wie groß und wie teuer ist eine Rainbow-Table?
+
+Eine Rainbow-Table ist ein **Zeit-Speicher-Tausch**: man berechnet einmal *alle* Passwort-Hashes vor und speichert sie, um später jeden geklauten Hash sofort nachschlagen zu können. Die Frage ist nur: wie viele Passwörter gibt es, wie viel Platz brauchen die, und wie lange dauert das Vorberechnen?
+
+**1a — Anzahl der Passwörter.** Bei 77 erlaubten Zeichen und fester Länge L gibt es 77^L Kombinationen (jede Stelle unabhängig 77 Möglichkeiten). Für L = 4 … 8:
+
+| L | 77^L (Anzahl) |
+|---|---|
+| 4 | ≈ 3,5·10⁷ (35 153 041) |
+| 5 | ≈ 2,7·10⁹ |
+| 6 | ≈ 2,1·10¹¹ |
+| 7 | ≈ 1,6·10¹³ |
+| 8 | ≈ 1,24·10¹⁵ |
+
+**1b — Speicherplatz.** Jede Zeile braucht 26 Byte (char(10) fürs Passwort + binary(16) für den Hash). Also Disk = Anzahl · 26 B. **1c — Rechenzeit:** bei 200 000 Hashes/s ist CPU-Zeit = Anzahl / 200 000. Das ergibt die offizielle Tabelle:
+
+| L | Disk-Größe | CPU-Zeit |
+|---|---|---|
+| 4 | ≈ 913 MB | ≈ 3 Minuten |
+| 5 | ≈ 70 GB | ≈ 3,75 Stunden |
+| 6 | ≈ 5,4 TB | ≈ 12 Tage |
+| 7 | ≈ 417 TB | ≈ 2,5 Jahre |
+| 8 | ≈ 32 PB | ≈ 195 Jahre |
+
+Die Lehre: jedes zusätzliche Zeichen multipliziert Platz *und* Zeit mit 77. Schon bei Länge 8 ist die Vorberechnung mit einer normalen CPU sinnlos — genau deshalb sind lange Passwörter (plus Salting aus Blatt 6) so wirksam gegen Rainbow-Tables.
+
+## Aufgabe 2 — Bitcoin und Blockchain in der Theorie
+
+**Aufbau & Zweck einer Blockchain.** Ein **Block** enthält eine Liste von Transaktionen und den **Hash des vorherigen Blocks**. Dadurch hängt jeder Block am Vorgänger — ändert jemand einen alten Block, ändert sich dessen Hash und die ganze Kette dahinter wird ungültig. So entsteht ein **manipulationssicheres, dezentrales Kassenbuch** ohne zentrale Vertrauensinstanz.
+
+**Problem der byzantinischen Generäle.** In einem offenen Netzwerk kann man niemandem vertrauen, trotzdem müssen sich alle auf *eine* gültige Version der Kette einigen — auch wenn Betrüger („Verräter") mitmischen. Das ist das byzantinische Konsensproblem. Bitcoins Lösung: **Proof-of-Work**, und die Regel „die längste Kette gewinnt". (Alternative: Proof-of-Stake.)
+
+**Proof of Work.** Wer einen Block anhängen will, muss erst *Arbeit* leisten — ein **Hash-Puzzle** lösen (eine Nonce finden, sodass der Block-Hash eine Bedingung erfüllt). Das ist rechenintensiv, aber leicht zu *prüfen*. Bei Bitcoin erzeugt PoW den Konsens und macht Manipulation unbezahlbar teuer; der erfolgreiche Miner bekommt eine Belohnung.
+
+**Merkle-Tree.** Ein Baum aus Hashes: jeder Elternknoten ist der Hash seiner Kinder, ganz unten stehen die Transaktionen. Die **Merkle-Root** steht im Block-Header. So sind alle Transaktionen eines Blocks gegen Manipulation geschützt, und man kann effizient prüfen, ob eine Transaktion enthalten ist.
+
+## Aufgabe 3 — CyberCoin selbst minen
+
+CyberCoin nutzt eine vereinfachte Hashfunktion. Ein Block ist **gültig**, wenn block_hash ≥ 90 (Werte 0–99). Die Formeln:
+
+> block_header = (100000 · prev_blockhash + 1000 · time + 10 · tx_root) · (nonce + 1)
+>
+> block_hash = ganzzahliger Teil von (block_header / 773 + 4312), dann mod 100
+
+Minen heißt: alles außer der **Nonce** ist vorgegeben; du *probierst Nonce = 0, 1, 2, …* durch, bis der Hash ≥ 90 wird. Das ist Proof-of-Work zum Anfassen.
+
+### Schritt für Schritt — Block 1 (prev=93, time=22, tx_root=31)
+
+Der konstante Teil ist (100000·93 + 1000·22 + 10·31) = 9 300 000 + 22 000 + 310 = **9 322 310**. Jetzt mit verschiedenen Nonces multiplizieren und den Hash prüfen:
+
+| nonce | header = 9 322 310 · (nonce+1) | /773 + 4312, abgeschnitten | mod 100 | gültig? |
+|---|---|---|---|---|
+| 0 | 9 322 310 | 16 371 | 71 | nein |
+| 1 | 18 644 620 | 28 431 | 31 | nein |
+| 2 | 27 966 930 | 40 491 | **91** | **ja** (≥ 90) |
+
+Bei **nonce = 2** ist der Hash **91** — der erste gültige Block ist gemined.
+
+### Schritt für Schritt — Block 2 (time=38, tx_root=19)
+
+Wichtig: der neue Block verkettet sich, also ist sein **prev_blockhash = 91** (der Hash von Block 1). Konstanter Teil: (100000·91 + 1000·38 + 10·19) = 9 100 000 + 38 000 + 190 = **9 138 190**. Mit nonce = 3: header = 9 138 190 · 4 = 36 552 760; 36 552 760 / 773 + 4312 ≈ 51 598,9 → abgeschnitten 51 598; mod 100 = **98** ≥ 90 → gültig. Die fertige Tabelle:
+
+| prev_blockhash | time | tx_root | nonce | blockhash |
+|---|---|---|---|---|
+| 93 | 22 | 31 | 2 | **91** |
+| 91 | 38 | 19 | 3 | **98** |
+
+Beachte die Verkettung: der blockhash von Block 1 (91) wird zum prev_blockhash von Block 2 — genau so hängt eine Blockchain zusammen.
+
+### Schritt für Schritt — maximale Anzahl CyberCoins
+
+Pro Block gibt es 10 Coins, aber alle **730 Blöcke halbiert** sich die Belohnung. Über alle Epochen summiert: 730·10 + 730·5 + 730·2,5 + … = 730·10·(1 + ½ + ¼ + …). Die Klammer ist eine **geometrische Reihe** mit q = ½, und 1 + ½ + ¼ + … = 1/(1−½) = 2. Also Gesamtmenge = 7300 · 2 = **14 600 CyberCoins**.
+
+> **Eselsbrücke:** Halbierung der Belohnung + geometrische Reihe = endliche Gesamtmenge. Genau dieser Mechanismus (bei Bitcoin das „Halving") deckelt die Geldmenge — bei Bitcoin auf 21 Millionen.
+
+## Klausur-Fokus
+
+Drei Dinge: (1) **Rainbow-Table-Rechnung** — 77^L Kombinationen, Disk = Anzahl·26 B, Zeit = Anzahl/Hashrate, und die Erkenntnis „jedes Zeichen × 77". (2) **Bitcoin-Begriffe** sauber erklären: Blockchain (Block enthält Vorgänger-Hash → manipulationssicher), byzantinische Generäle (Konsens ohne Vertrauen), Proof-of-Work (Hash-Puzzle, längste Kette gewinnt), Merkle-Tree (Hash-Baum, Root im Header). (3) **Einen Block minen** — Nonce hochzählen bis die Gültigkeitsbedingung greift, den vorigen Hash als prev_blockhash einsetzen (Verkettung!), und die maximale Coin-Menge über die geometrische Reihe (Belohnung·Epochenlänge·1/(1−q)) ausrechnen.`,
+  },
+};
+
 export const cybersicherheit2025UebungWalkthroughs: Explanation[] = [
   uebPrep,
   ueb01,
   ueb02,
   ueb03,
   ueb04,
+  ueb05,
+  ueb06,
+  ueb07,
 ];
