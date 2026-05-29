@@ -17,6 +17,7 @@ import { clampedIndex, setLessonInUrl } from "@/lib/notebooks/nav";
 import { useI18n } from "@/lib/i18n/client";
 import { getExplanation } from "@/lib/notebooks/explanations/registry";
 import { getQuizSet } from "@/lib/notebooks/quizzes/registry";
+import { LBL } from "@/lib/notebooks/labels-i18n";
 import { QuizPlayer } from "@/components/quiz-player";
 import { getSubject } from "@/lib/subjects/registry";
 import { ACCENT_INK } from "@/lib/subjects/accents";
@@ -167,7 +168,7 @@ function ChapterView({
     ? [
         {
           key: "folien",
-          label: { de: "Folien", en: "Slides" },
+          label: LBL.folien,
           kind: "pdf",
           src: lesson.lecture.pdf.src,
         },
@@ -175,7 +176,7 @@ function ChapterView({
           ? [
               {
                 key: "video",
-                label: { de: "Video", en: "Video" },
+                label: LBL.video,
                 kind: "video" as const,
                 url: lesson.lecture.videoUrl,
               },
@@ -203,7 +204,7 @@ function ChapterView({
   const leftChips: Chip[] = [
     {
       key: "lecture",
-      label: "Vorlesung",
+      label: tr(LBL.vorlesung),
       active: leftKey === "lecture",
       onClick: () => {
         setLeftKey("lecture");
@@ -231,19 +232,19 @@ function ChapterView({
       ? [
           {
             key: "tief",
-            label: "Tief",
+            label: tr(LBL.tief),
             active: rightLecture === "tief",
             onClick: () => setRightLecture("tief"),
           },
           {
             key: "einfach",
-            label: "Einfach",
+            label: tr(LBL.einfach),
             active: rightLecture === "einfach",
             onClick: () => setRightLecture("einfach"),
           },
           {
             key: "quiz",
-            label: "Quiz",
+            label: tr(LBL.quiz),
             active: rightLecture === "quiz",
             onClick: () => setRightLecture("quiz"),
           },
@@ -251,13 +252,13 @@ function ChapterView({
       : [
           {
             key: "tief",
-            label: "Erklärung",
+            label: tr(LBL.erklaerung),
             active: rightLecture === "tief" || rightLecture === "einfach",
             onClick: () => setRightLecture("tief"),
           },
           {
             key: "quiz",
-            label: "Quiz",
+            label: tr(LBL.quiz),
             active: rightLecture === "quiz",
             onClick: () => setRightLecture("quiz"),
           },
@@ -265,13 +266,13 @@ function ChapterView({
     : [
         {
           key: "loesung",
-          label: "Lösung",
+          label: tr(LBL.loesung),
           active: rightUebung === "loesung",
           onClick: () => setRightUebung("loesung"),
         },
         {
           key: "walkthrough",
-          label: "Lösungsweg",
+          label: tr(LBL.loesungsweg),
           active: rightUebung === "walkthrough",
           onClick: () => setRightUebung("walkthrough"),
         },
