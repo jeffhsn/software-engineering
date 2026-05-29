@@ -33,8 +33,11 @@ const PdfViewer = dynamic(
   {
     ssr: false,
     loading: () => (
+      // Shown only while the viewer chunk first loads. Full-width slide shape
+      // (16:9) so it matches the placeholder the viewer keeps showing — no
+      // fixed-pixel box that resizes a frame later.
       <div className="w-full px-4 py-4 sm:px-6">
-        <PageSkeleton height={560} srLabel="Wird geladen" />
+        <PageSkeleton aspect={0.5625} srLabel="Wird geladen" />
       </div>
     ),
   },
@@ -719,9 +722,23 @@ interface Chip {
 
 /* ─────────────────────── Reusable bits ─────────────────────── */
 
+/**
+ * Expected page aspect (height / width) from the material type, so every
+ * loading placeholder has the real page shape from the first frame. Lecture
+ * slides are 16:9 (0.5625); all other materials (Übungen, Lösungen, Klausuren)
+ * are A4 portrait (1.414). pdfjs still measures page 1 and corrects any rare
+ * mismatch.
+ */
+const LECTURE_ASPECT = 0.5625;
+const SHEET_ASPECT = 1.4142;
+function pdfAspect(src: string): number {
+  return src.includes("/lectures/") ? LECTURE_ASPECT : SHEET_ASPECT;
+}
+
 function PdfBlock({ src, label }: { src: string; label?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
+  const aspect = pdfAspect(src);
 
   useEffect(() => {
     if (mounted || !ref.current) return;
@@ -746,12 +763,13 @@ function PdfBlock({ src, label }: { src: string; label?: string }) {
         </div>
       )}
       {mounted ? (
-        <PdfViewer key={src} src={src} mode="stack" />
+        <PdfViewer key={src} src={src} mode="stack" initialAspect={aspect} />
       ) : (
-        // Full-width landscape shimmer until the viewer mounts — never a
-        // thin/tall placeholder.
+        // Full-width shimmer in the real page shape until the viewer mounts —
+        // never a thin/tall placeholder, and the same shape the viewer then
+        // keeps, so nothing morphs.
         <div className="px-3 py-1 sm:px-0">
-          <PageSkeleton className="aspect-[16/9]" />
+          <PageSkeleton aspect={aspect} />
         </div>
       )}
     </div>

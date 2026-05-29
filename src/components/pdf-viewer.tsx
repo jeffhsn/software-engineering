@@ -29,6 +29,14 @@ interface Props {
    *          (so several PDFs can stack in one scrolling column).
    */
   mode?: "fit" | "stack";
+  /**
+   * Expected page aspect (height / width) before page 1 is measured — the
+   * caller knows the material type (lecture slides ≈ 0.5625 = 16:9, exercise
+   * sheets ≈ 1.414 = A4). Seeding it means every loading placeholder already
+   * has the real page shape, so nothing morphs from a thin/short box into the
+   * slide once parsing finishes; the measurement just confirms it.
+   */
+  initialAspect?: number;
 }
 
 /**
@@ -37,7 +45,13 @@ interface Props {
  * everything else is a sized placeholder so the scrollbar/track stays
  * stable. As the user scrolls, more pages mount in.
  */
-export function PdfViewer({ src, className, onReady, mode = "fit" }: Props) {
+export function PdfViewer({
+  src,
+  className,
+  onReady,
+  mode = "fit",
+  initialAspect,
+}: Props) {
   const [containerElement, setContainerElement] = useState<HTMLDivElement | null>(
     null,
   );
@@ -48,11 +62,14 @@ export function PdfViewer({ src, className, onReady, mode = "fit" }: Props) {
     numPages: null,
     loadError: false,
   });
-  // Real page aspect ratio (height / width). Slides are landscape (~0.56),
-  // exercise sheets are portrait (~1.41). We measure it from page 1 so the
-  // loading skeleton has the SAME shape as the slide — no ugly tall/thin
-  // placeholder that then snaps to a wide slide.
-  const [pageAspect, setPageAspect] = useState<number | null>(null);
+  // Real page aspect ratio (height / width). Slides are landscape (0.5625 =
+  // 16:9), exercise sheets are portrait (1.414 = A4). We SEED it with the
+  // caller's hint so every placeholder already has the slide's shape, then
+  // confirm it by measuring page 1 — no ugly tall/thin box that snaps to a
+  // wide slide. `null` only if the caller gave no hint.
+  const [pageAspect, setPageAspect] = useState<number | null>(
+    initialAspect ?? null,
+  );
   const currentDocument =
     documentState.src === src
       ? documentState
@@ -137,7 +154,7 @@ export function PdfViewer({ src, className, onReady, mode = "fit" }: Props) {
           loading={
             <div className={cn("w-full", isStack ? "py-1" : "px-4 py-4")}>
               <PageSkeleton
-                height={pageWidth ? Math.round(pageWidth * (pageAspect ?? 0.6)) : 320}
+                aspect={pageAspect ?? initialAspect ?? 0.5625}
                 srLabel="PDF wird geladen"
               />
             </div>
@@ -170,9 +187,9 @@ export function PdfViewer({ src, className, onReady, mode = "fit" }: Props) {
                 />
               ))
             ) : (
-              // Aspect not measured yet (a tick after parse): one matching-width
-              // skeleton, sized landscape-ish so no thin/tall slide flashes.
-              <PageSkeleton height={Math.round(pageWidth * 0.6)} />
+              // Aspect neither hinted nor measured yet: one full-width skeleton
+              // in the slide shape so no thin/tall box flashes.
+              <PageSkeleton aspect={initialAspect ?? 0.5625} />
             )
           ) : null}
         </Document>

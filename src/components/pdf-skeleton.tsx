@@ -9,11 +9,20 @@ import { cn } from "@/lib/utils";
  */
 export function PageSkeleton({
   height,
+  aspect,
   loading = true,
   srLabel,
   className,
 }: {
   height?: number;
+  /**
+   * Page aspect ratio as height / width (slides ≈ 0.5625 = 16:9, A4 sheets ≈
+   * 1.414). When given, the skeleton sizes itself full-width via CSS
+   * `aspect-ratio` — so it always has the real page shape regardless of the
+   * column width, and never flashes a fixed-pixel box of the wrong height.
+   * Preferred over `height`.
+   */
+  aspect?: number;
   loading?: boolean;
   /** Optional screen-reader text (only for the visible top-level loader). */
   srLabel?: string;
@@ -28,7 +37,13 @@ export function PageSkeleton({
         loading && "is-loading",
         className,
       )}
-      style={height ? { height } : undefined}
+      style={
+        aspect
+          ? { aspectRatio: `1 / ${aspect}` }
+          : height
+            ? { height }
+            : undefined
+      }
     >
       {srLabel ? <span className="sr-only">{srLabel}</span> : null}
       <div className="flex flex-col gap-2.5 p-5 sm:p-6">
