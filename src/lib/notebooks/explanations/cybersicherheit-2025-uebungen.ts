@@ -1151,6 +1151,167 @@ Drei Dinge, die wirklich drankommen: (1) **x86-Syscall-Konvention** — Nummer i
   },
 };
 
+const ueb12: Explanation = {
+  id: "cs-2025-u12",
+  lesson: 11,
+  title: {
+    de: "Lösungsweg — Übungsblatt 12: Multics Rings & Brackets und Linux-Dateirechte",
+  },
+  content: {
+    de: `Dieses Blatt dreht sich um die Frage, die jedes Betriebssystem beantworten muss: *Darf dieser Prozess auf dieses Segment zugreifen?* Multics beantwortet sie mit **Ringen und Klammern** — und das ist genau die Sorte Aufgabe, bei der man in der Klausur Punkte verschenkt, weil man das Entscheidungsverfahren nicht sauber im Kopf hat. Wir bauen dieses Verfahren hier als feste Schritt-für-Schritt-Maschine auf und füttern dann jeden Fall hindurch. Am Ende kommt das praktischere, aber verwandte Linux-Rechtemodell.
+
+## Theoriefragen (Aufgabe 1.1–1.4)
+
+**Warum Protection Rings — reichen ACLs nicht?** Eine ACL legt *feste* Rechte fest. Ein Prozess läuft damit in *einer* Domäne mit unveränderlichen Rechten. Manchmal braucht ein Prozess aber *kurzzeitig* mehr Rechte — etwa um einen System-Call auszuführen (int 0x80). Genau das leisten Ringe: sie erlauben einen kontrollierten, vorübergehenden Wechsel der Privilegstufe. ACLs sagen *wer* darf, Ringe sagen *mit welcher Privilegstufe*.
+
+**Wie wird die Einhaltung sichergestellt?** Der **Supervisor** wacht darüber. Er läuft in Ring 0/1, ist die höchste Instanz (Root of Trust) und setzt die Ring-Regeln bei jedem Zugriff durch.
+
+**Gate-Segmente.** Ein Gate ist eine *spezielle Art von Code-Segment*. Will ein Prozess Code aufrufen, der in einem **höher-privilegierten** Ring laufen muss, geht das nur über ein Gate. Das Gate **prüft die übergebenen Argumente** (aus dem niedriger-privilegierten Ring) auf Typ und Länge und kontrolliert, ob der Aufruf an einer *gültigen Startadresse* erfolgt. So kann ein unprivilegierter Prozess privilegierten Code nur an genau definierten, abgesicherten Eintrittspunkten betreten.
+
+**Warum muss für Gates r2 < r3 gelten?** Eine Ring-Transition zu einem höher-privilegierten Ring ist nur im Bereich r2 < r ≤ r3 möglich. Gälte r2 = r3, gäbe es diesen Bereich gar nicht — es könnte *nie* eine privilegierende Transition stattfinden, der Prozess bliebe in seinem Ring. Das widerspräche dem Sinn eines Gates (das ja genau solche Transitions ermöglichen soll). Also: **kein Gate ohne r2 < r3.**
+
+## Das Entscheidungsverfahren (auswendig können!)
+
+Jeder Zugriff läuft in dieser festen Reihenfolge. Notation: Access Bracket (r1, r2), Call Bracket (r2, r3), aktueller Prozessring r.
+
+**Schritt 1 — ACL prüfen.** Gibt es einen Eintrag, dessen User-ID (Person.Project.Tag, mit * als Platzhalter) zum Prozess passt *und* das gewünschte Recht (r/w/e) enthält? Wenn nein → **Zugriff verweigert**, fertig. Erst wenn ja, geht es weiter zu den Klammern.
+
+**Schritt 2a — Lesen/Schreiben (Access Bracket r1, r2):**
+
+- r ≤ r1 → **lesen und schreiben** erlaubt
+- r1 < r ≤ r2 → **nur lesen** (kein Schreiben)
+- r > r2 → weder lesen noch schreiben
+
+**Schritt 2b — Ausführen (Call Bracket r2, r3):**
+
+- r < r1 → **ausführen, Transition nach r1** (Prozess steigt auf r1 ab)
+- r1 ≤ r ≤ r2 → **ausführen, keine Transition**
+- r2 < r ≤ r3 → **ausführen, Transition nach r2** — nur über ein **Gate** (setzt r2 < r3 voraus)
+- r > r3 → **ausführen verboten**
+
+> **Eselsbrücke:** Erst ACL (*darf* der User das Recht überhaupt?), dann Klammern (*passt* der Ring?). Für r/w die Access-Klammer, fürs Ausführen die Call-Klammer mit ihren vier Zonen — von „zu privilegiert, steig auf r1 ab" über „passt genau" und „Gate nach r2" bis „zu unprivilegiert, verboten".
+
+## Schritt für Schritt — die Zugriffsfälle
+
+Die Segmente (als (r1, r2, r3) zusammengefasst) und die Prozessringe:
+
+| Segment | (r1, r2, r3) | Typ |
+|---|---|---|
+| A | (3, 5, 5) | Daten |
+| B | (0, 2, 2) | Daten |
+| C | (0, 0, 5) | Code |
+| D | (1, 3, 5) | Code |
+
+Prozesse: P1 r=3, P2 r=0, P3 r=5, P4 r=2, P5 r=6, P6 r=0, P7 r=4.
+
+**Die Ausführen-Fälle** (Call Bracket — hier glänzt das Verfahren):
+
+| # | Prozess (r) | Segment | passende Zone | Ergebnis |
+|---|---|---|---|---|
+| 7 | P6 (0) | C (0,0,5) | r1≤r≤r2: 0≤0≤0 | **Ausführen, keine Transition** |
+| 8 | P3 (5) | C (0,0,5) | r2<r≤r3: 0<5≤5 | **Ausführen, Transition nach r2 = 0** (Gate, da 0<5) |
+| 9 | P2 (0) | D (1,3,5) | r<r1: 0<1 | **Ausführen, Transition nach r1 = 1** (kein Gate nötig) |
+| 10 | P5 (6) | D (1,3,5) | r>r3: 6>5 | **Ausführen verboten** |
+| 11 | P4 (2) | D (1,3,5) | r1≤r≤r2: 1≤2≤3 | **Ausführen, keine Transition** (+ Pointer-Prüfung, s. u.) |
+
+Lies Fall 8 als Muster: P3 läuft in Ring 5, Segment C hat Call-Bracket (r2,r3)=(0,5). r=5 liegt in der Zone r2 < r ≤ r3 (0 < 5 ≤ 5) → Ausführen *mit Transition auf r2 = 0* ist erlaubt, **weil C ein Gate ist** (r2=0 < r3=5). P3 betritt also privilegierten Code an einem abgesicherten Eintrittspunkt. Fall 9 ist der Gegenpol: P2 ist mit r=0 *privilegierter* als die Heimatklammer von D (r1=1), also steigt es beim Ausführen auf r1=1 *herab* — keine Gate-Frage, weil keine Privilegierung stattfindet.
+
+**Fall 11 mit Pointer.** P4 (r=2) führt D aus: r1=1 ≤ 2 ≤ r2=3 → ausführen ohne Transition. Zusätzlich übergibt P4 einen **Pointer auf Speicher in Ring 3**. Hier greift die zweite Aufgabe von Gates/Supervisor: der übergebene Pointer muss geprüft werden, damit ein Prozess nicht über ein Argument auf Speicher zugreifen lässt, für den ihm die Rechte fehlen. Da P4 in Ring 2 läuft und Ring 3 *niedriger* privilegiert ist, ist der Zugriff auf die Ring-3-Daten unkritisch — die Prüfung bestätigt ihn.
+
+**Die Lesen/Schreiben-Fälle.** Hier entscheidet zuerst die ACL, dann die Access-Klammer. Die Musterlösung hält fest: Fall 3 (P2 liest B), Fall 5 (P6 liest B) und Fall 6 (P1 schreibt A) werden **verweigert** — es fehlt der passende ACL-Eintrag bzw. das Recht. Bei den positiven Fällen entscheidet die Access-Klammer: Fall 1 (P1 r=3 liest A, Access (3,5)) liegt mit r=r1=3 in der Zone „lesen und schreiben" → Lesen erlaubt; Fall 2 (P7 r=4 schreibt A) liegt mit r1=3 < 4 ≤ r2=5 in „nur lesen" → **Schreiben nicht erlaubt**; Fall 4 (P4 r=2 schreibt B, Access (0,2)) liegt mit r1=0 < 2 ≤ r2=2 ebenfalls in „nur lesen" → **Schreiben nicht erlaubt**. Merke: die Access-Klammer kann ein Schreibrecht kippen, selbst wenn die ACL „rw" gewährt — beide Hürden müssen passen.
+
+## Linux-Dateirechte (Aufgabe 2)
+
+Linux schreibt Rechte als zehn Zeichen, z. B. -rw-r--r--: das erste Zeichen ist der Typ (- Datei, d Verzeichnis), dann drei Dreiergruppen rwx für **Eigentümer**, **Gruppe**, **andere (others)**.
+
+- **a)** Datei -rw-r--r-- devconnect devconnect, Zugriff als Eigentümer devconnect → die Eigentümer-Gruppe ist rw- → **ja, er kann schreiben**.
+- **b)** Verzeichnis drwxr-xr-- Alice GroupAlice, Zugriff als Bob. Bob ist nicht Alice und nicht in GroupAlice → für ihn gelten die *others*-Rechte r-- (kein x). Ein Verzeichnis zu *öffnen/betreten* braucht das **Execute-Recht** → **nein, Bob kann nicht hinein**.
+- **c)** Die Nutzerliste steht in **/etc/passwd**.
+- **d)** chmod-Zahlen (jede Ziffer ist eine Oktal-Bitmaske rwx = 4/2/1): **444** = r--r--r--; **777** = rwxrwxrwx; **641** = rw-r----x (6=rw-, 4=r--, 1=--x).
+- **e)** Beim **Verzeichnis** bedeutet das **Execute-Recht** „durch das Verzeichnis navigieren/hineinwechseln dürfen", das **Write-Recht** „Einträge (Dateien/Ordner) darin anlegen/löschen dürfen".
+- **f)** **SUID**: ein Befehl läuft mit den Rechten des *Datei-Eigentümers* statt denen des ausführenden Nutzers. **SGID/GUID**: er läuft mit der *Gruppe der Datei* statt der Gruppe des Nutzers.
+
+> **Typische Falle (Linux):** Bei Verzeichnissen ist nicht „r" das Eintrittsrecht, sondern „x". Ohne x kommst du nicht hinein, selbst wenn du r hast. Genau daran scheitert Bob in (b).
+
+## Klausur-Fokus
+
+Das absolute Kernstück ist die **Rings-&-Brackets-Entscheidung**: erst ACL (User-ID-Match + Recht), dann für r/w die Access-Klammer (r≤r1: rw, r1<r≤r2: nur r, r>r2: nichts), für e die Call-Klammer mit den vier Zonen (r<r1: Transition nach r1; r1≤r≤r2: ohne Transition; r2<r≤r3: Gate-Transition nach r2; r>r3: verboten) — und r2<r3 als Gate-Bedingung. Übe, jeden Prozess-Segment-Fall in Sekunden der richtigen Zone zuzuordnen. Dazu die Theorie (warum Ringe statt nur ACLs, Supervisor als Root of Trust, Gates prüfen Argumente) und das Linux-Modell (Eigentümer/Gruppe/others, x = Verzeichnis betreten, w = Einträge ändern, chmod-Oktalzahlen, SUID/SGID, /etc/passwd).`,
+  },
+};
+
+const ueb13: Explanation = {
+  id: "cs-2025-u13",
+  lesson: 12,
+  title: {
+    de: "Lösungsweg — Übungsblatt 13: Reverse Engineering, strings-Analyse & Deobfuskation",
+  },
+  content: {
+    de: `Beim Reverse Engineering drehst du den Spieß um: statt Code zu schreiben, *liest* du fertige Programme und findest heraus, was sie tun — ohne Quellcode. Dieses Blatt zeigt die einfachste und oft erstaunlich mächtige Technik (das Extrahieren von Zeichenketten) und dann den nächsten Schritt, wenn die Malware sich wehrt: das *Deobfuskieren* eines versteckten Domainnamens. Genau das ist Analystenalltag — und die Deobfuskation rechnen wir Byte für Byte durch.
+
+## Aufgabe 1 — Statische Analyse mit strings
+
+Das Werkzeug **strings** durchsucht eine Programmdatei und gibt alle darin gefundenen lesbaren Zeichenketten aus. Das ist **statische Analyse** (man führt das Programm *nicht* aus) und verrät oft schon erstaunlich viel: Fehlermeldungen, Pfade, URLs, Bibliotheksnamen.
+
+**Welche Programme sind es?** Anhand der extrahierten Strings ließen sich die drei Dateien identifizieren als **7-Zip** (Datei 1), **Notepad** (Datei 2) und **VLC** (Datei 3) — die jeweiligen Strings (Versionsangaben, Menütexte, Bibliotheks- und Funktionsnamen) verraten Zweck und Funktionsweise.
+
+**Warum so viel Müll dazwischen?** strings versucht, *jedes* Byte als Text zu deuten. Eine Programmdatei enthält aber nicht nur Text, sondern auch andere Datentypen (int, double) und vor allem **Code (Maschineninstruktionen)**. Manche dieser Bytefolgen sehen *zufällig* wie druckbare ASCII-Zeichen aus und werden mit ausgegeben — daher die vielen sinnlosen Zeichenketten. Man muss die nützlichen Strings also aus dem Rauschen herausfiltern.
+
+## Aufgabe 2 — Den obfuskierten Domainnamen knacken
+
+Die Testmalware macht etwas Typisches: eine **DNS-Abfrage**, um Kontakt zu einem **Command-and-Control-Server** aufzubauen. Als Analyst willst du den Domainnamen herausfinden, um ihn zu sperren. Das Problem: der Name liegt nicht im Klartext vor, sondern ist **obfuskiert** (verschleiert), damit ein simpler strings-Lauf ihn nicht verrät.
+
+**Den Namen finden.** Führt man die Malware aus (oder analysiert sie), zeigt die DNS-Fehlermeldung den aufzulösenden Namen: **www.evil-domain.abcd** (die Domain existiert absichtlich nicht). Aber die spannende Aufgabe ist, ihn *aus den verschleierten Daten* zurückzurechnen.
+
+**Wie verschleiert die Malware?** Ein Decompiler zeigt: es ist simples **Byte-XOR**. Jedes Zeichen des Domainnamens wurde mit einem Schlüsselbyte ge-XOR-t. Und hier kommt der entscheidende Trick, den du schon von den Stromchiffren kennst: **XOR ist seine eigene Umkehrung.** Wenn obfusByte = klarByte ⊕ key, dann ist klarByte = obfusByte ⊕ key — derselbe Schlüssel deobfuskiert wieder.
+
+### Schritt für Schritt — die Deobfuskation
+
+Gegeben sind die verschleierten Bytes und der Schlüssel:
+
+    obfus = [22, 18, 18, 55, 124, 99, 124, 125, 60, 113, 122, 116, 120, 108, 107, 47, 96, 103, 102, 125]
+    key   = [97, 101, 101, 25, 25, 21, 21, 17, 17, 21, 21, 25, 25, 5, 5, 1, 1, 5, 5, 25]
+
+Du gehst stellenweise durch und XORst jedes Paar; das Ergebnis ist der ASCII-Code eines Klartextzeichens. Die ersten Schritte von Hand:
+
+- 22 ⊕ 97 = 119 → ASCII 119 = **w**
+- 18 ⊕ 101 = 119 → **w**
+- 18 ⊕ 101 = 119 → **w**
+- 55 ⊕ 25 = 46 → ASCII 46 = **.** (Punkt)
+- 124 ⊕ 25 = 101 → **e**, 99 ⊕ 21 = 118 → **v**, 124 ⊕ 21 = 105 → **i**, 125 ⊕ 17 = 108 → **l**, 60 ⊕ 17 = 45 → **-**
+
+Führt man das bis zum letzten Byte durch (… 125 ⊕ 25 = 100 → **d**), entsteht Zeichen für Zeichen wieder **www.evil-domain.abcd**. Als kleines Python-Programm, das den Deobfuskierungsalgorithmus „reimplementiert":
+
+    temp = ""
+    for i in range(len(obfus)):
+        temp += chr(obfus[i] ^ key[i])
+    print("Deobfuscated:", temp)
+
+Das gibt **www.evil-domain.abcd** aus. Genau dieses „den Algorithmus der Malware nachbauen, um ihre Geheimnisse offenzulegen" ist der Kern der dynamischen/statischen Malware-Analyse.
+
+> **Eselsbrücke:** Verschleiern mit XOR und Entschleiern mit XOR sind dieselbe Operation — a ⊕ k ⊕ k = a. Wer den Schlüssel hat (oder ihn aus dem dekompilierten Code abliest), dreht die Obfuskation in einer Zeile zurück.
+
+## Funktionsprolog und -epilog (Brücke zum Stack)
+
+Die Musterlösung schlägt am Ende den Bogen zurück zum Stack aus dem Exploit-Blatt — wichtig fürs Reverse Engineering, weil man im Disassembly *jede* Funktion an diesem Muster erkennt. Am **Anfang** jeder x86-Funktion steht der **Prolog**:
+
+    push ebp                 ; alten Base-Pointer sichern (Kontext der aufrufenden Funktion)
+    mov  ebp, esp            ; neuen Stack-Frame beginnen (ebp markiert den Anfang)
+    sub  esp, 20             ; Platz für lokale Variablen schaffen (hier 20 Byte)
+
+Bei pw_check aus Übung 9/11 sind die 20 Byte genau 4 Byte für die int-Variable auth plus 16 Byte für pw_buffer. Am **Ende** steht der **Epilog**, der alles sauber rückgängig macht:
+
+    mov  esp, ebp            ; lokale Variablen verwerfen (Stack-Pointer zurücksetzen)
+    pop  ebp                 ; alten Base-Pointer wiederherstellen
+    ret                      ; Rücksprungadresse vom Stack holen und dorthin springen
+
+Weil der Stack „nach unten" wächst, *verkleinert* sub esp den Stack-Pointer, um Platz zu schaffen. Das Argument (char *password) und die Rücksprungadresse wurden schon *vor* dem Prolog von der aufrufenden Funktion bzw. durch die call-Instruktion auf den Stack gelegt — genau darum lagen sie beim Buffer Overflow „über" dem pw_buffer.
+
+## Klausur-Fokus
+
+Können musst du: (1) **strings/statische Analyse** erklären — Programme an ihren Zeichenketten erkennen und sagen, *warum* viele sinnlose Strings entstehen (strings deutet auch Code/Zahlen als Text). (2) Die **XOR-Deobfuskation** rechnen — gegeben obfuskierte Bytes und Schlüssel, das Klartext-Zeichen je Stelle per XOR bestimmen, und das Prinzip „XOR ist seine eigene Umkehrung" benennen; typischer Malware-Zweck ist die DNS-Abfrage zum C&C-Server. (3) **Prolog/Epilog** lesen — push ebp / mov ebp,esp / sub esp,N am Anfang, mov esp,ebp / pop ebp / ret am Ende — und damit im Disassembly Funktionsgrenzen und das Stack-Frame-Layout erkennen.`,
+  },
+};
+
 export const cybersicherheit2025UebungWalkthroughs: Explanation[] = [
   uebPrep,
   ueb01,
@@ -1164,4 +1325,6 @@ export const cybersicherheit2025UebungWalkthroughs: Explanation[] = [
   ueb09,
   ueb10,
   ueb11,
+  ueb12,
+  ueb13,
 ];
