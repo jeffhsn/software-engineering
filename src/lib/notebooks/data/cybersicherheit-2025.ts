@@ -59,6 +59,7 @@ export const cybersicherheit2025: Notebook = {
         {
           label: L.uebung,
           aufgaben: { label: L.aufgaben, src: `${BASE}/uebungen/01/zusatzhilfe.pdf` },
+          walkthroughId: "cs-2025-u-prep",
           solutions: [],
         },
       ],
@@ -78,6 +79,7 @@ export const cybersicherheit2025: Notebook = {
         {
           label: L.uebung,
           aufgaben: { label: L.aufgaben, src: `${BASE}/uebungen/01/aufgaben.pdf` },
+          walkthroughId: "cs-2025-u01",
           solutions: [
             { label: L.loesung, src: `${BASE}/uebungen/01/loesung.pdf` },
           ],
@@ -100,6 +102,7 @@ export const cybersicherheit2025: Notebook = {
         {
           label: L.uebung,
           aufgaben: { label: L.aufgaben, src: `${BASE}/uebungen/02/aufgaben.pdf` },
+          walkthroughId: "cs-2025-u02",
           solutions: [
             { label: L.loesung, src: `${BASE}/uebungen/02/loesung.pdf` },
             { label: L.mitschrift, src: `${BASE}/uebungen/02/loesung-mitschrift.pdf` },
@@ -125,6 +128,7 @@ export const cybersicherheit2025: Notebook = {
         {
           label: L.uebungModi,
           aufgaben: { label: L.aufgaben, src: `${BASE}/uebungen/03/aufgaben.pdf` },
+          walkthroughId: "cs-2025-u03",
           solutions: [
             { label: L.loesung, src: `${BASE}/uebungen/03/loesung.pdf` },
             { label: L.mitschrift, src: `${BASE}/uebungen/03/loesung-mitschrift.pdf` },
@@ -133,6 +137,7 @@ export const cybersicherheit2025: Notebook = {
         {
           label: L.uebungWdh,
           aufgaben: { label: L.aufgaben, src: `${BASE}/uebungen/04/aufgaben.pdf` },
+          walkthroughId: "cs-2025-u04",
           solutions: [{ label: L.loesung, src: `${BASE}/uebungen/04/loesung.pdf` }],
         },
       ],
@@ -152,6 +157,7 @@ export const cybersicherheit2025: Notebook = {
         {
           label: L.uebung,
           aufgaben: { label: L.aufgaben, src: `${BASE}/uebungen/05/aufgaben.pdf` },
+          walkthroughId: "cs-2025-u05",
           solutions: [{ label: L.loesung, src: `${BASE}/uebungen/05/loesung.pdf` }],
         },
       ],
@@ -171,6 +177,7 @@ export const cybersicherheit2025: Notebook = {
         {
           label: L.uebung,
           aufgaben: { label: L.aufgaben, src: `${BASE}/uebungen/06/aufgaben.pdf` },
+          walkthroughId: "cs-2025-u06",
           solutions: [{ label: L.loesung, src: `${BASE}/uebungen/06/loesung.pdf` }],
         },
       ],
@@ -187,6 +194,7 @@ export const cybersicherheit2025: Notebook = {
         {
           label: L.uebung,
           aufgaben: { label: L.aufgaben, src: `${BASE}/uebungen/07/aufgaben.pdf` },
+          walkthroughId: "cs-2025-u07",
           solutions: [{ label: L.loesung, src: `${BASE}/uebungen/07/loesung.pdf` }],
         },
       ],
@@ -206,6 +214,7 @@ export const cybersicherheit2025: Notebook = {
         {
           label: L.uebung,
           aufgaben: { label: L.aufgaben, src: `${BASE}/uebungen/08/aufgaben.pdf` },
+          walkthroughId: "cs-2025-u08",
           solutions: [{ label: L.loesung, src: `${BASE}/uebungen/08/loesung.pdf` }],
         },
       ],
@@ -225,6 +234,7 @@ export const cybersicherheit2025: Notebook = {
         {
           label: L.uebung,
           aufgaben: { label: L.aufgaben, src: `${BASE}/uebungen/09/aufgaben.pdf` },
+          walkthroughId: "cs-2025-u09",
           solutions: [{ label: L.loesung, src: `${BASE}/uebungen/09/loesung.pdf` }],
         },
       ],
@@ -244,11 +254,13 @@ export const cybersicherheit2025: Notebook = {
         {
           label: L.uebungCIntro,
           aufgaben: { label: L.aufgaben, src: `${BASE}/uebungen/10/aufgaben.pdf` },
+          walkthroughId: "cs-2025-u10",
           solutions: [],
         },
         {
           label: L.uebungExploits,
           aufgaben: { label: L.aufgaben, src: `${BASE}/uebungen/11/aufgaben.pdf` },
+          walkthroughId: "cs-2025-u11",
           solutions: [{ label: L.loesung, src: `${BASE}/uebungen/11/loesung.pdf` }],
         },
       ],
@@ -268,6 +280,7 @@ export const cybersicherheit2025: Notebook = {
         {
           label: L.uebung,
           aufgaben: { label: L.aufgaben, src: `${BASE}/uebungen/12/aufgaben.pdf` },
+          walkthroughId: "cs-2025-u12",
           solutions: [
             { label: L.loesung, src: `${BASE}/uebungen/12/loesung.pdf` },
             { label: L.loesungMultics, src: `${BASE}/uebungen/12/loesung-multics.pdf` },
@@ -287,6 +300,7 @@ export const cybersicherheit2025: Notebook = {
         {
           label: L.uebung,
           aufgaben: { label: L.aufgaben, src: `${BASE}/uebungen/13/aufgaben.pdf` },
+          walkthroughId: "cs-2025-u13",
           solutions: [{ label: L.loesung, src: `${BASE}/uebungen/13/loesung.pdf` }],
         },
       ],

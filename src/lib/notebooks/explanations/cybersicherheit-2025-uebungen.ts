@@ -1,10 +1,578 @@
 import type { Explanation } from "../explanation-types";
 
 /**
- * Step-by-step walkthroughs for each Cybersicherheit SoSe 2025 Übung.
+ * Step-by-step Lösungswege for each Cybersicherheit SoSe 2025 Übung.
  *
- * Intentionally empty. Walkthroughs are written from the Übung's own `.md`
- * (created via `pdf-to-md` next to the source PDF) — never from prior
- * knowledge. See `AGENTS.md` for the pipeline.
+ * Written in the professor's method: grounded in the Übung's own `aufgaben.md`
+ * + `loesung.md` (created via `pdf-to-md` next to the source PDFs). The job is
+ * to make the *path* to the answer obvious — name the rule, say where it comes
+ * from, then compute every intermediate step by hand so the reader can
+ * reproduce it under exam pressure. Where a sheet has no official Lösung, the
+ * walkthrough is built from the lecture + sheet content. German is canonical.
+ *
+ * Gotcha: the whole body is one TS template literal — never use a backtick
+ * inside the content (use **bold** for code-ish terms), and never an ASCII
+ * double-quote inside a markdown image title.
  */
-export const cybersicherheit2025UebungWalkthroughs: Explanation[] = [];
+
+const uebPrep: Explanation = {
+  id: "cs-2025-u-prep",
+  lesson: 1,
+  title: {
+    de: "Lösungsweg — Grundlagenübung: Modulo- und Binärrechnung",
+  },
+  content: {
+    de: `Bevor in dieser Vorlesung irgendetwas verschlüsselt wird, brauchst du zwei Rechenwerkzeuge, die danach in *jeder* einzelnen Übung wieder auftauchen: das Rechnen mit Resten (**Modulo**) und das Rechnen mit Nullen und Einsen (**Binär**). Dieses Blatt hat keine offizielle Musterlösung — es ist reine Vorbereitung. Genau deshalb lohnt es sich, hier jeden Schritt einmal vollständig zu sehen, denn Caesar, Vigenère, RSA, DES und sogar das Bitcoin-Mining bestehen am Ende aus genau diesen beiden Handgriffen.
+
+## Modulo ist nichts als „Rechnen wie auf einer Uhr"
+
+Stell dir eine Uhr vor. Es ist 12 Uhr, und du wartest 100 Stunden. Du läufst nicht zu „112 Uhr" — die Zeiger drehen sich im Kreis und landen irgendwo zwischen 0 und 23. Genau das ist Modulo: Du interessierst dich nicht für die ganze Zahl, sondern nur für den **Rest**, der übrig bleibt, wenn du immer wieder eine volle Runde (einen vollen „Modul") abziehst.
+
+Die eine Formel, auf der alles steht, ist die **Division mit Rest**. Teilst du eine Zahl x durch einen Divisor d, dann lässt sich x immer eindeutig so zerlegen:
+
+> **Merksatz:** x = q · d + r, wobei q der Ganzzahlquotient (die vollen Runden) und r der Rest ist, mit 0 ≤ r < d. Der Rest r ist genau das, was „x mod d" liefert.
+
+Das Beispiel aus dem Blatt: 47 mod 7. Wie oft passt 7 ganz in 47? Sechsmal, denn 6 · 7 = 42. Was bleibt übrig? 47 − 42 = 5. Also 47 = 6 · 7 + 5, und damit **47 mod 7 = 5**. Der Trick ist immer derselbe: größtes Vielfaches des Moduls suchen, das noch hineinpasst, und den Rest ablesen.
+
+### Schritt für Schritt — Übung 1
+
+**(a) Es ist April. Welcher Monat ist in 50 Monaten?** Monate wiederholen sich alle 12. April ist Monat Nummer 4. Wir wollen also nicht 4 + 50 = 54 als „Monat 54" lesen, sondern auf den Bereich 1–12 zurückfalten. Rechne 54 mod 12: wie oft passt 12 in 54? Viermal, denn 4 · 12 = 48. Rest: 54 − 48 = 6. Monat 6 ist der **Juni**. (Kurzgedacht: 50 = 4·12 + 2, also vier volle Jahre plus zwei Monate; April + 2 Monate = Juni.)
+
+**(b) Es ist 13 Uhr. Wie spät ist es in 100 Stunden?** Stunden wiederholen sich alle 24. Falte zuerst die 100 Stunden zurück: 100 mod 24. Es gilt 4 · 24 = 96, Rest 100 − 96 = 4. In 100 Stunden sind also effektiv 4 Stunden „echte" Bewegung auf der Uhr. 13 + 4 = 17, und 17 mod 24 = 17. Antwort: **17 Uhr**.
+
+Beachte den feinen, aber wichtigen Punkt: Bei (b) musst du den Startwert (13) noch addieren, *bevor* du fertig bist. Bei reinen „in X Tagen/Monaten ab Startpunkt"-Aufgaben kannst du auch erst alles addieren und dann einmal modulo rechnen — beides führt zum selben Ergebnis, weil Modulo mit Addition verträglich ist. Das ist kein Zufall, sondern eine Regel, die uns bei RSA noch das Leben rettet: (a + b) mod n = ((a mod n) + (b mod n)) mod n.
+
+## Binär — die Sprache, in der jeder Rechner wirklich denkt
+
+Unser Dezimalsystem hat zehn Ziffern (0–9), und jede Stelle ist eine Zehnerpotenz: 372 heißt 3·100 + 7·10 + 2·1, also 3·10² + 7·10¹ + 2·10⁰. Ein Computer kennt nur zwei Zustände, Strom an / Strom aus, also nur zwei Ziffern: 0 und 1. Dieselbe Idee, aber mit **Basis 2**: jede Stelle ist eine Zweierpotenz.
+
+Merke dir die kleinen Zweierpotenzen auswendig, sie sind dein Lineal: 2⁰=1, 2¹=2, 2²=4, 2³=8, 2⁴=16, 2⁵=32, 2⁶=64, 2⁷=128, 2⁸=256, 2⁹=512, 2¹⁰=1024.
+
+### Schritt für Schritt — Binär nach Dezimal (Übung 2a)
+
+Du liest die Binärzahl von rechts nach links und addierst überall dort, wo eine 1 steht, die zugehörige Zweierpotenz. Stelle die Bits über ihre Wertigkeiten:
+
+| Binär | Rechnung (nur die 1-Stellen) | Dezimal |
+|---|---|---|
+| 1111 | 8 + 4 + 2 + 1 | **15** |
+| 10001 | 16 + 1 | **17** |
+| 101010 | 32 + 8 + 2 | **42** |
+| 101 | 4 + 1 | **5** |
+
+Bei 101010 zum Beispiel stehen die Einsen an den Stellen 2⁵, 2³ und 2¹ (von rechts gezählt ab 0), also 32 + 8 + 2 = 42.
+
+### Schritt für Schritt — Dezimal nach Binär (Übung 2b)
+
+Hier nimmst du die **Division mit Rest** von oben — aber fortlaufend durch 2. Du teilst die Zahl immer wieder durch 2, notierst jedes Mal den Rest (0 oder 1), und hörst auf, wenn 0 herauskommt. Die Reste **von unten nach oben** gelesen sind die Binärzahl. Beispiel mit 27:
+
+| Schritt | Rechnung | Rest |
+|---|---|---|
+| 27 / 2 | = 13 | **1** |
+| 13 / 2 | = 6 | **1** |
+| 6 / 2 | = 3 | **0** |
+| 3 / 2 | = 1 | **1** |
+| 1 / 2 | = 0 | **1** |
+
+Von unten nach oben: 11011. Probe (zurückrechnen): 16 + 8 + 0 + 2 + 1 = 27. ✓
+
+Die übrigen drei nach demselben Verfahren (oder, schneller, indem man die passenden Zweierpotenzen zusammensucht):
+
+- **127** = 64 + 32 + 16 + 8 + 4 + 2 + 1 = **1111111** (sieben Einsen — typisch für „eins weniger als eine Zweierpotenz").
+- **128** = 2⁷ = **10000000** (eine 1, dann sieben Nullen — genau eine Zweierpotenz). Schön zu sehen: 127 und 128 liegen direkt nebeneinander und sehen binär völlig verschieden aus.
+- **2025**: ziehe die größten Zweierpotenzen ab. 2025 − 1024 = 1001; − 512 = 489; − 256 = 233; − 128 = 105; − 64 = 41; − 32 = 9; − 8 = 1; − 1 = 0. Benutzt wurden 2¹⁰, 2⁹, 2⁸, 2⁷, 2⁶, 2⁵, 2³, 2⁰. Das ergibt **11111101001**. Probe: 1024+512+256+128+64+32+8+1 = 2025. ✓
+
+> **Eselsbrücke:** „Eins weniger als eine Zweierpotenz" ist immer eine lückenlose Kette von Einsen (127 = 1111111), „eine Zweierpotenz selbst" ist eine einzige 1 mit lauter Nullen dahinter (128 = 10000000).
+
+### Schritt für Schritt — Binäre Addition mit Übertrag (Übung 2c)
+
+Addieren funktioniert genau wie im Dezimalsystem von rechts nach links — nur dass der Übertrag schon bei 1 + 1 entsteht, denn 1 + 1 = 10 in Binär (also „0 hinschreiben, 1 weitertragen"). Rechnen wir 10101 + 11110:
+
+| Stelle (von rechts) | oben | unten | Übertrag rein | Summe | hingeschrieben | Übertrag raus |
+|---|---|---|---|---|---|---|
+| 1 | 1 | 0 | 0 | 1 | **1** | 0 |
+| 2 | 0 | 1 | 0 | 1 | **1** | 0 |
+| 3 | 1 | 1 | 0 | 10 | **0** | 1 |
+| 4 | 0 | 1 | 1 | 10 | **0** | 1 |
+| 5 | 1 | 1 | 1 | 11 | **1** | 1 |
+| 6 | — | — | 1 | 1 | **1** | 0 |
+
+Von oben nach unten gelesen (höchste Stelle zuerst): **110011**. Probe im Dezimalsystem: 10101 = 21, 11110 = 30, und 110011 = 32 + 16 + 2 + 1 = 51. Tatsächlich 21 + 30 = 51. ✓ „Was musst du beachten?" — genau den **Übertrag**: sobald zwei Einsen (oder drei) zusammenkommen, wandert eine 1 in die nächste Stelle.
+
+## Was du nach diesem Blatt sicher können musst
+
+Diese beiden Handgriffe sind keine Nebensache — sie sind das Rückgrat des halben Semesters. Modulo 26 ist Caesar und Vigenère; Modulo n ist RSA; binär denken brauchst du bei DES, bei XOR-Stromchiffren und beim Lesen von Speicheradressen in den Exploit-Kapiteln. Wenn du „x mod d" als „Rest nach vollen Runden" liest und Binärzahlen flüssig in beide Richtungen wandeln kannst, hast du die Rechen-Hürde, an der die meisten in der Klausur Zeit verlieren, schon hinter dir.`,
+  },
+};
+
+const ueb01: Explanation = {
+  id: "cs-2025-u01",
+  lesson: 2,
+  title: {
+    de: "Lösungsweg — Übungsblatt 1: Klassische Kryptografie (Caesar, Transposition, Vigenère)",
+  },
+  content: {
+    de: `Dieses Blatt ist deine erste echte Begegnung mit Verschlüsselung von Hand. Es führt dich durch genau drei historische Verfahren, und sie sind mit Absicht in dieser Reihenfolge gewählt: Caesar zeigt das Grundprinzip *und* sofort seine Schwäche, die Transposition dreht das Prinzip auf den Kopf, und Vigenère repariert die Caesar-Schwäche. Wer diese drei von Hand rechnen kann, versteht danach jede Substitutions- und Permutationsidee im Kurs. Wir lösen jede Aufgabe so, wie der Professor sie an der Tafel vorrechnet: erst die Regel, dann jeder einzelne Buchstabe.
+
+Eine Sache vorweg, die *alle* drei Verfahren teilen: jeder Buchstabe bekommt eine Zahl, A = 0, B = 1, …, Z = 25. Das ganze Rechnen passiert dann „modulo 26", weil das Alphabet 26 Buchstaben hat und wir am Ende von Z wieder bei A landen wollen — dasselbe Uhren-Prinzip wie auf dem Grundlagenblatt.
+
+## Aufgabe 1 — Caesar (Shift-Chiffre) und warum sie auffliegt
+
+Caesar ist eine **Substitutionschiffre**: jeder Buchstabe wird durch einen anderen *ersetzt*, indem man ihn um eine feste Zahl k im Alphabet weiterschiebt. Die Regel, die im Blatt formal steht und die du auswendig können musst:
+
+> **Merksatz:** Verschlüsseln e_k(x) = (x + k) mod 26. Entschlüsseln d_k(y) = (y − k) mod 26. Mehr ist Caesar nicht.
+
+In der Aufgabe ist der Schlüssel k = 5. Nehmen wir das erste Wort des Klartexts, **Sehr**, und verschlüsseln es Buchstabe für Buchstabe — genau das ist der Schritt, den die Musterlösung als fertigen Block ausgibt, aber nicht vorrechnet:
+
+### Schritt für Schritt — Caesar mit k = 5
+
+| Klartext | Zahl x | x + 5 | mod 26 | Geheimtext |
+|---|---|---|---|---|
+| S | 18 | 23 | 23 | **X** |
+| e | 4 | 9 | 9 | **j** |
+| h | 7 | 12 | 12 | **m** |
+| r | 17 | 22 | 22 | **w** |
+
+So wird aus **Sehr** das **Xjmw** der Musterlösung. Du wiederholst das für jeden Buchstaben; nur an einer Stelle wird es spannend: wenn x + 5 über 25 hinausläuft. Beispiel V: V = 21, 21 + 5 = 26, und 26 mod 26 = 0 = **A**. Genau hier sieht man, warum „mod 26" dabeistehen muss — ohne den Rest gäbe es keinen Buchstaben mehr.
+
+**Warum Caesar so leicht zu brechen ist (Aufgaben 3–5, Häufigkeitsanalyse).** Caesar verschiebt *alle* Buchstaben um denselben Betrag. Das heißt: das häufigste Zeichen im Klartext bleibt auch im Geheimtext das häufigste — es heißt nur anders. Im Deutschen ist E mit Abstand am häufigsten (rund 17 %). Macht man eine **Häufigkeitsanalyse** (man zählt, wie oft jedes Zeichen vorkommt, und malt ein Balkendiagramm), dann ist das Diagramm des Geheimtexts exakt dasselbe wie das des Klartexts, nur seitlich verschoben — um genau k Stellen. Ein Angreifer sucht also einfach den höchsten Balken, nimmt an „das ist das E", misst die Verschiebung ab und hat k. Deshalb beobachtest du in Aufgabe 5 auch: je *länger* der Text, desto mehr ähnelt seine Verteilung der amtlichen deutschen Häufigkeitstabelle — kurze Texte schwanken, lange Texte tragen mehr Statistik in sich und verraten den Schlüssel umso zuverlässiger.
+
+> **Eselsbrücke:** Eine monoalphabetische Chiffre *verschiebt* das Häufigkeits-Histogramm, sie *zerstört* es nicht. Genau das ist ihr Todesurteil.
+
+## Aufgabe 2 — Spaltenweise Transposition
+
+Jetzt wird das Prinzip umgedreht. Eine **Transpositionschiffre** ersetzt keine Buchstaben, sie *vertauscht ihre Reihenfolge*. Die Buchstaben bleiben dieselben — eine Häufigkeitsanalyse sieht deshalb völlig normal aus —, aber sie stehen an anderer Stelle. Bei der **spaltenweisen Transposition** schreibt man den Text zeilenweise in ein Raster mit so vielen Spalten, wie der Schlüssel Buchstaben hat, und liest die Spalten dann in der **alphabetischen Reihenfolge der Schlüsselbuchstaben** wieder aus.
+
+Das Beispiel aus dem Blatt zeigt die Verschlüsselung: Klartext **Beispiele**, Schlüssel **HAL**. In drei Spalten (B/E/I, S/P/I, E/L/E). Sortiert man H, A, L alphabetisch zu A, H, L, dann kommt die A-Spalte (das war Spalte 2) zuerst, dann die H-Spalte (Spalte 1), dann die L-Spalte (Spalte 3) — Ergebnis EBIPSILEE.
+
+**Aufgabe 2.1 fragt: wie entschlüsselt man das wieder?** Antwort, und das ist der ganze Kniff: man **kehrt die Permutation um**. Bei der Verschlüsselung ist Spalte 1 an Position 2 gewandert, Spalte 3 an Position 3 usw. Beim Entschlüsseln macht man genau diese Zuordnung rückgängig — was beim Verschlüsseln „Spalte 1 → Position 2" war, wird jetzt „Position 2 → Spalte 1".
+
+### Schritt für Schritt — Entschlüsseln von YRCOTPCSILOO mit Schlüssel SEC
+
+**Schritt 1 — Maße bestimmen.** Der Geheimtext hat 12 Zeichen, der Schlüssel **SEC** hat 3 Buchstaben → 3 Spalten, also 12 / 3 = 4 Zeilen. Der Geheimtext füllt die Spalten *in alphabetischer Schlüsselreihenfolge* von oben nach unten. Alphabetisch geordnet ist SEC → **C, E, S**.
+
+**Schritt 2 — Geheimtext blockweise in die sortierten Spalten eintragen.** Wir schneiden YRCOTPCSILOO in drei Blöcke zu je 4 Zeichen (YRCO, TPCS, ILOO) und legen sie unter C, E, S:
+
+| C-Spalte | E-Spalte | S-Spalte |
+|---|---|---|
+| Y | T | I |
+| R | P | L |
+| C | C | O |
+| O | S | O |
+
+**Schritt 3 — Spalten in die Original-Schlüsselreihenfolge zurücksortieren.** Der Schlüssel hieß im Original **S-E-C**. Also gehört in die echte Spalte 1 die S-Spalte (I, L, O, O), in Spalte 2 die E-Spalte (T, P, C, S) und in Spalte 3 die C-Spalte (Y, R, C, O). Zeilenweise zusammengesetzt:
+
+| Spalte 1 (S) | Spalte 2 (E) | Spalte 3 (C) |
+|---|---|---|
+| C | R | Y |
+| P | T | O |
+| I | S | C |
+| O | O | L |
+
+**Schritt 4 — zeilenweise lesen.** C-R-Y, P-T-O, I-S-C, O-O-L ergibt **CRYPTOISCOOL** — „crypto is cool". Das ist exakt das Ergebnis der Musterlösung. Die Beobachtung, die der Professor festhält: Spalte 1 ist beim Verschlüsseln zu Spalte 3 geworden und umgekehrt — wir haben diese Vertauschung nur rückwärts gefahren.
+
+> **Typische Falle:** Bei der Transposition wird **permutiert, nicht verschoben**. Wer hier (wie bei Caesar) Buchstaben um k zu verschieben versucht, hat das Verfahren verwechselt. Die Buchstaben bleiben unverändert — nur ihre Plätze tauschen.
+
+## Aufgabe 3 — Vigenère (polyalphabetische Substitution)
+
+Vigenère repariert Caesars Schwäche mit einer einfachen Idee: statt *einer* Verschiebung für den ganzen Text benutzt man *viele* — eine pro Schlüsselbuchstabe, und der Schlüssel wiederholt sich zyklisch. Es ist also „Caesar, aber der Schlüssel wechselt mit jedem Buchstaben". Der Schlüssel **SICHER** liefert die Verschiebungen S=18, I=8, C=2, H=7, E=4, R=17; danach beginnt er wieder von vorn.
+
+Die Regel pro Stelle ist wieder die Caesar-Formel, nur dass k jetzt vom Schlüsselbuchstaben an *dieser* Position kommt: e(x) = (x + k_i) mod 26. Das Vigenère-Quadrat im Blatt ist nur eine Nachschlagetabelle für genau diese Addition (Zeile = Klartextbuchstabe, Spalte = Schlüsselbuchstabe).
+
+### Schritt für Schritt — Verschlüsseln von „Cybersicherheitsvorlesung" mit SICHER
+
+Schreibe den Schlüssel zeichenweise unter den Klartext (zyklisch wiederholt) und addiere modulo 26. Hier die ersten elf Stellen vollständig vorgerechnet — der Rest läuft identisch:
+
+| # | Klartext | x | Schlüssel | k | x + k | mod 26 | Geheimtext |
+|---|---|---|---|---|---|---|---|
+| 1 | C | 2 | S | 18 | 20 | 20 | **U** |
+| 2 | y | 24 | I | 8 | 32 | 6 | **G** |
+| 3 | b | 1 | C | 2 | 3 | 3 | **D** |
+| 4 | e | 4 | H | 7 | 11 | 11 | **L** |
+| 5 | r | 17 | E | 4 | 21 | 21 | **V** |
+| 6 | s | 18 | R | 17 | 35 | 9 | **J** |
+| 7 | i | 8 | S | 18 | 26 | 0 | **A** |
+| 8 | c | 2 | I | 8 | 10 | 10 | **K** |
+| 9 | h | 7 | C | 2 | 9 | 9 | **J** |
+| 10 | e | 4 | H | 7 | 11 | 11 | **L** |
+| 11 | r | 17 | E | 4 | 21 | 21 | **V** |
+
+Beachte Stelle 6 und 7: 18 + 17 = 35, und 35 mod 26 = 9 → J; 8 + 18 = 26, und 26 mod 26 = 0 → A. Immer wenn die Summe 26 erreicht oder überschreitet, zieht man 26 ab. Führt man das bis zum Ende durch (…h-e-i-t-s-v-o-r-l-e-s-u-n-g mit den weiterlaufenden Schlüsselbuchstaben), erhält man den vollständigen Geheimtext der Musterlösung:
+
+> **Ugdlvjakjlvywqvzzfjtgzyey**
+
+**Warum Vigenère die Häufigkeitsanalyse aushebelt (Aufgabe 3.3).** Weil derselbe Klartextbuchstabe je nach Position mit einer *anderen* Verschiebung verschlüsselt wird, wird aus einem E mal dieser, mal jener Geheimbuchstabe. Schau in die Tabelle: das e an Stelle 4 wird zu L, das e an Stelle 10 ebenfalls zu L (zufällig wieder Schlüsselposition H), aber ein e weiter hinten, das auf den Schlüsselbuchstaben S fällt, würde zu W. Der eine hohe E-Balken aus dem Caesar-Histogramm wird so über viele Buchstaben *verschmiert*. Das Geheimtext-Histogramm wird flach — und ein Angreifer kann nicht mehr einfach „höchster Balken = E" raten. Das ist der ganze Fortschritt von monoalphabetisch zu polyalphabetisch.
+
+> **Eselsbrücke:** Caesar = ein Alphabet, verschiebt das Histogramm. Vigenère = viele Alphabete, plättet das Histogramm. Transposition = dasselbe Histogramm, andere Reihenfolge.
+
+## Klausur-Fokus
+
+Was hier wirklich geprüft wird, ist Handarbeit unter Zeitdruck. Übe, bis es sitzt: (1) Buchstabe ↔ Zahl ohne Nachdenken (A=0 … Z=25), (2) Caesar in beide Richtungen mit der Formel und dem sauberen „mod 26" am Schluss, (3) eine spaltenweise Transposition ver- **und** entschlüsseln — der Stolperstein ist immer das Sortieren des Schlüssels und das korrekte Umkehren der Permutation beim Entschlüsseln, (4) ein paar Vigenère-Stellen mit untergeschriebenem, zyklisch wiederholtem Schlüssel. Und sei bereit, in einem Satz zu erklären, *warum* die Häufigkeitsanalyse Caesar und einfache Substitution killt, aber an Vigenère und an Transposition (aus zwei ganz verschiedenen Gründen!) scheitert.`,
+  },
+};
+
+const ueb02: Explanation = {
+  id: "cs-2025-u02",
+  lesson: 3,
+  title: {
+    de: "Lösungsweg — Übungsblatt 2: Vernam/One-Time-Pad, Formbarkeit, DES & S-Boxen",
+  },
+  content: {
+    de: `Dieses Blatt hat zwei Gesichter. In der ersten Hälfte rechnest du die Vernam-Chiffre — und entdeckst dabei, warum „perfekte" Verschlüsselung in der Praxis trotzdem gefährlich sein kann (Stichwort Formbarkeit). In der zweiten Hälfte schaust du DES unter die Haube: S-Boxen, Feistelnetzwerk, Konfusion und Diffusion. Beide Hälften sind klausurrelevant, und beide leben von genau einer Operation, die du sicher beherrschen musst: dem **XOR** (⊕). Wir gehen jede Aufgabe einzeln durch und rechnen jeden Bit-Schritt aus.
+
+## Aufgabe 1 — Vernam-Chiffre (One-Time-Pad) von Hand
+
+Vernam ist „Vigenère zu Ende gedacht": der Schlüssel ist genauso lang wie der Klartext. Jeder Klartextbuchstabe wird mit *seinem eigenen* Schlüsselbuchstaben addiert (mod 26). Ist der Schlüssel echt zufällig und wird nur einmal benutzt, heißt das Verfahren **One-Time-Pad** und ist beweisbar unbrechbar. Die Regel ist die alte Caesar-Formel, nur mit wechselndem k: e(x) = (x + k) mod 26.
+
+### Schritt für Schritt — VORLESUNG mit Schlüssel SECUNIDUE
+
+Buchstaben in Zahlen wandeln (A=0 … Z=25), stellenweise addieren, und überall dort 26 abziehen, wo das Ergebnis größer als 25 ist:
+
+| Klartext | V | O | R | L | E | S | U | N | G |
+|---|---|---|---|---|---|---|---|---|---|
+| x | 21 | 14 | 17 | 11 | 4 | 18 | 20 | 13 | 6 |
+| Schlüssel | S | E | C | U | N | I | D | U | E |
+| k | 18 | 4 | 2 | 20 | 13 | 8 | 3 | 20 | 4 |
+| x + k | 39 | 18 | 19 | 31 | 17 | 26 | 23 | 33 | 10 |
+| mod 26 | 13 | 18 | 19 | 5 | 17 | 0 | 23 | 7 | 10 |
+| Chiffrat | **N** | **S** | **T** | **F** | **R** | **A** | **X** | **H** | **K** |
+
+Das Chiffrat ist **NSTFRAXHK**. Achte auf die drei Stellen, an denen 26 abgezogen wird: 39→13, 26→0 (das wird ein A!), 33→7. Genau dort entscheidet sich, ob man das „mod 26" verstanden hat.
+
+**Aufgabe 1.2 — Wie viele Schlüssel gibt es?** Jede der Stellen kann unabhängig einen von 26 Buchstaben tragen. Bei Länge 5 also 26 · 26 · 26 · 26 · 26 = **26⁵**, und allgemein bei Länge n eben **26ⁿ**. Das ist die ganze Stärke des One-Time-Pads: der Schlüsselraum wächst exponentiell mit der Nachrichtenlänge.
+
+**Aufgabe 1.3 — Wie lange dauert Brute-Force?** Hier rechnest du nur sauber Einheiten zusammen. Gegeben: 1 GHz = 10⁶ Operationen/s (so im Blatt definiert), die CPU hat 2 Kerne à 4 GHz, und jede Schlüsselprüfung kostet 4 Operationen.
+
+- Pro Kern: 4 GHz = 4 · 10⁶ Operationen/s ÷ 4 Operationen pro Schlüssel = 10⁶ Schlüssel/s.
+- Zwei Kerne: 2 · 10⁶ Schlüssel/s.
+- Schlüssel für Länge 1024: 26¹⁰²⁴ ≈ 8,56 · 10¹⁴⁴⁸.
+- Zeit: 8,56 · 10¹⁴⁴⁸ ÷ (2 · 10⁶) ≈ 4,28 · 10¹⁴⁴² Sekunden ≈ **1,35 · 10¹⁴³⁵ Jahre**.
+
+Die Zahl ist absurd groß — das ist die Pointe. Brute-Force gegen ein vollwertiges One-Time-Pad ist physikalisch chancenlos.
+
+**Aufgabe 1.4 — Bringt doppeltes Verschlüsseln etwas?** Nein, und das ist überraschend. Verschlüsselt man zweimal, e_{k2}(e_{k1}(x)) = (x + k1 + k2) mod 26. Setzt man k3 = (k1 + k2) mod 26, ist das exakt eine *einfache* Vernam-Verschlüsselung mit Schlüssel k3. Der Schlüsselraum bleibt also **26ⁿ** — kein Gewinn. Der Grund: die Addition mod 26 ist „abgeschlossen", zwei Verschiebungen ergeben zusammen wieder genau eine Verschiebung. (Bei DES ist das anders, dort lohnt sich Mehrfachverschlüsselung — daher Triple-DES.)
+
+## Aufgabe 2 — Formbarkeit (Malleability) von Stromchiffren
+
+Eine Stromchiffre verschlüsselt mit **y = x ⊕ s** (Klartext XOR Schlüsselstrom). Genau daraus folgt eine gefährliche Eigenschaft: ein Kryptosystem heißt **formbar**, wenn ein Angreifer den Geheimtext gezielt so verändern kann, dass sich der Klartext kontrolliert ändert — *ohne den Klartext zu kennen*.
+
+**Aufgabe 2.1 — Warum sind Stromchiffren immer formbar?** Weil XOR „durchschlägt". Addiert der Angreifer einen beliebigen Bitstring Δ auf den Geheimtext, dann gilt: y ⊕ Δ = (x ⊕ s) ⊕ Δ = (x ⊕ Δ) ⊕ s. Beim Entschlüsseln fällt s wieder weg und es bleibt **x ⊕ Δ**. Anders gesagt: jedes Bit, das der Angreifer im Geheimtext kippt, kippt exakt dasselbe Bit im Klartext. Er hat volle Kontrolle über die Klartextänderung, obwohl er den Klartext nie sieht.
+
+### Schritt für Schritt — Aufgabe 2.2 (Bitcoin-Broker)
+
+Der Kontostand (Anzahl Bitcoins) steckt als Zahl im Geheimtext. Du bekommst 1 BTC (≈ 40 000 €) und willst Millionär werden, also ≥ 10⁶ €. Das sind 10⁶ ÷ 40 000 = **25 BTC**. Du musst also den gespeicherten Wert von 1 auf 25 hochdrehen — per XOR, ohne den Schlüsselstrom zu kennen. Du suchst das Δ mit 1 ⊕ Δ = 25:
+
+| | Wert | binär (5 Bit) |
+|---|---|---|
+| aktuell | 1 | 00001 |
+| Ziel | 25 | 11001 |
+| Δ = 1 ⊕ 25 | 24 | **11000** |
+
+Probe: 00001 ⊕ 11000 = 11001 = 25. ✓ Du musst also **11000** auf das Chiffrat XOR-addieren. Das Bit-Muster Δ ist genau dort 1, wo sich 1 und 25 unterscheiden.
+
+### Schritt für Schritt — Aufgabe 2.3 (Streaming, m → p, known-plaintext)
+
+Du kennst den Klartext (**m**), den zugehörigen Geheimtext, und willst stattdessen den Geheimtext für **p** setzen. ASCII (7 Bit): m = 109 = 1101101, p = 112 = 1110000. Gegeben ist das Chiffrat von m: y(m) = 1000000.
+
+**Schritt 1 — Schlüsselstrom rekonstruieren.** Weil du Klartext *und* Geheimtext kennst (known-plaintext), berechnest du s = m ⊕ y(m):
+
+    m   = 1 1 0 1 1 0 1
+    y(m)= 1 0 0 0 0 0 0
+    s   = 0 1 0 1 1 0 1   (Stelle für Stelle XOR)
+
+**Schritt 2 — neues Chiffrat für p bauen.** Jetzt verschlüsselst du p mit demselben Schlüsselstrom: y(p) = p ⊕ s:
+
+    p   = 1 1 1 0 0 0 0
+    s   = 0 1 0 1 1 0 1
+    y(p)= 1 0 1 1 1 0 1
+
+Du trägst also **1011101** in die Datenbank ein. (Kürzer geht es über die Differenz: Δ = m ⊕ p = 0011101, dann y(p) = y(m) ⊕ Δ = 1000000 ⊕ 0011101 = 1011101 — dasselbe Ergebnis, weil x ⊕ s = y und y ⊕ s = x die beiden Seiten derselben XOR-Medaille sind.)
+
+> **Eselsbrücke:** Stromchiffre = XOR. Und XOR ist seine eigene Umkehrung: a ⊕ b ⊕ b = a. Deshalb kann ein Angreifer Bits kippen, ohne den Schlüssel zu kennen — das ist der ganze Malleability-Angriff.
+
+## Aufgabe 3 — DES: Schlüssellänge, Konfusion & Diffusion, Feistel
+
+**3.1 — Schlüssellänge.** Ursprünglich waren **128 Bit** vorgeschlagen, am Ende wurde auf **56 Bit** (effektiv) reduziert — auf Drängen der **NSA**. Diese kurze Schlüssellänge ist genau der Grund, warum DES heute per Brute-Force angreifbar und überholt ist.
+
+**3.2 — Konfusion und Diffusion** sind die zwei Prinzipien (von Shannon), nach denen jede gute Blockchiffre gebaut ist:
+
+- **Konfusion** verschleiert die Beziehung zwischen Schlüssel und Geheimtext — jeder Geheimtextteil soll auf komplizierte, undurchschaubare Weise vom Schlüssel abhängen. Baustein bei DES: die **S-Boxen** (Substitution).
+- **Diffusion** streut den Einfluss eines einzelnen Klartextsymbols über möglichst viele Geheimtextstellen — kippt ein Klartextbit, sollen sich viele Geheimtextbits ändern. Baustein bei DES: die **Bit-Permutation**.
+
+> **Eselsbrücke:** Konfusion = Schlüssel ↔ Chiffrat verschleiern (S-Box). Diffusion = ein Klartextbit über viele Chiffratbits verstreuen (Permutation).
+
+**3.3 — Feistelnetzwerk.** Der Block wird in zwei Hälften L und R geteilt. In jeder Runde i gilt: die neue linke Hälfte ist die alte rechte (L_i = R_{i−1}), und die neue rechte Hälfte ist die alte linke XOR einer Funktion der alten rechten mit dem Rundenschlüssel: R_i = L_{i−1} ⊕ f(R_{i−1}, k_i). Der Clou: weil XOR seine eigene Umkehrung ist, lässt sich diese Runde *rückwärts* rechnen, **ohne** dass f umkehrbar sein müsste — deshalb funktioniert ent- und verschlüsseln mit demselben Hardware-Baustein, nur die Rundenschlüssel laufen rückwärts.
+
+## Aufgabe 4 — Nichtlinearität der S-Box #1
+
+Eine S-Box wäre **linear**, wenn S(x1) ⊕ S(x2) = S(x1 ⊕ x2) gälte. Lineare Boxen wären leicht zu brechen; DES-S-Boxen sind absichtlich **nichtlinear**. Zu zeigen ist: die Gleichung stimmt *nicht*. Dazu musst du zuerst wissen, wie man eine S-Box überhaupt liest.
+
+### Schritt für Schritt — wie man S-Box #1 abliest
+
+Die Eingabe hat 6 Bit: b1 b2 b3 b4 b5 b6. Die **äußeren** Bits (b1 und b6) bilden die **Zeile** (0–3), die **inneren** vier Bits (b2 b3 b4 b5) bilden die **Spalte** (0–15). Der Tabellenwert (dezimal) wird als 4-Bit-Zahl ausgegeben. Beispiel 011011: außen 0|1 → Zeile 1, innen 1101 = 13 → Spalte 13.
+
+Jetzt die drei Paare. Für jedes berechnen wir links S(x1) ⊕ S(x2) und rechts S(x1 ⊕ x2) und zeigen, dass beide verschieden sind:
+
+**Paar 1: x1 = 000000, x2 = 000001.**
+- S(000000): Zeile 0|0 = 0, Spalte 0000 = 0 → Wert 14 = 1110.
+- S(000001): Zeile 0|1 = 1, Spalte 0000 = 0 → Wert 0 = 0000.
+- Links: 1110 ⊕ 0000 = **1110**.
+- x1 ⊕ x2 = 000001; S(000001) = 0000. Rechts: **0000**.
+- 1110 ≠ 0000 → nichtlinear. ✓
+
+**Paar 2: x1 = 111111, x2 = 100000.**
+- S(111111): Zeile 1|1 = 3, Spalte 1111 = 15 → Wert 13 = 1101.
+- S(100000): Zeile 1|0 = 2, Spalte 0000 = 0 → Wert 4 = 0100.
+- Links: 1101 ⊕ 0100 = **1001**.
+- x1 ⊕ x2 = 011111; S(011111): Zeile 0|1 = 1, Spalte 1111 = 15 → Wert 8 = 1000. Rechts: **1000**.
+- 1001 ≠ 1000 → nichtlinear. ✓
+
+**Paar 3: x1 = 101010, x2 = 010101.**
+- S(101010): Zeile 1|0 = 2, Spalte 0101 = 5 → Wert 6 = 0110.
+- S(010101): Zeile 0|1 = 1, Spalte 1010 = 10 → Wert 12 = 1100.
+- Links: 0110 ⊕ 1100 = **1010**.
+- x1 ⊕ x2 = 111111; S(111111): Zeile 1|1 = 3, Spalte 1111 = 15 → Wert 13 = 1101. Rechts: **1101**.
+- 1010 ≠ 1101 → nichtlinear. ✓
+
+> **Typische Falle:** Die Zeile kommt aus dem **ersten und letzten** Bit (nicht aus den ersten zwei!), die Spalte aus den **mittleren vier**. Wer das verwechselt, liest jeden Wert falsch ab. Und vergiss nicht, den Dezimalwert am Ende in 4 Bit zurückzuwandeln.
+
+## Aufgabe 5 — Schwache DES-Schlüssel (Bonus)
+
+Ein Schlüssel heißt **schwach**, wenn Ver- und Entschlüsselung dieselbe Operation sind (DES mit diesem Schlüssel ist eine Involution: zweimal anwenden ergibt wieder den Klartext).
+
+**5.1 — Welche Subkeys?** DES entschlüsselt, indem es die 16 Rundenschlüssel in *umgekehrter* Reihenfolge anwendet. Ver- und Entschlüsselung sind also genau dann identisch, wenn die umgekehrte Reihenfolge gleich der normalen ist — das heißt, wenn **alle 16 Subkeys gleich** sind (K1 = K2 = … = K16). Das passiert genau dann, wenn die beiden Schlüsselhälften nach der Permuted-Choice jeweils ganz aus Nullen oder ganz aus Einsen bestehen, denn dann ändern die Rundenrotationen nichts mehr.
+
+**5.2 — Die 4 schwachen Schlüssel** (mit Paritätsbits, hexadezimal) sind: 0101010101010101 (beide Hälften nur Nullen), FEFEFEFEFEFEFEFE (nur Einsen), 1F1F1F1F0E0E0E0E und E0E0E0E0F1F1F1F1 (eine Hälfte Nullen, die andere Einsen).
+
+**5.3 — Wahrscheinlichkeit.** Bei effektiv 56 Bit gibt es 2⁵⁶ Schlüssel, davon 4 schwache. Also P = 4 / 2⁵⁶ = 2⁻⁵⁴ ≈ 5,6 · 10⁻¹⁷ — verschwindend gering. Schwache Schlüssel sind ein theoretisch wichtiges, praktisch winziges Risiko (man vermeidet sie einfach).
+
+## Klausur-Fokus
+
+Trainiere drei Dinge, bis sie sitzen: (1) **Vernam von Hand** — Buchstaben↔Zahlen, addieren, mod 26, und die Erkenntnis „doppelt verschlüsseln bringt nichts, weil die Schlüssel sich addieren". (2) **XOR-Malleability** — gib zu einem gegebenen alten/neuen Wert das Δ an (Δ = alt ⊕ neu) oder rekonstruiere bei known-plaintext den Schlüsselstrom (s = x ⊕ y) und baue daraus ein neues Chiffrat. (3) **S-Box ablesen** — Zeile aus äußeren Bits, Spalte aus inneren vier, und Nichtlinearität zeigen, indem du S(x1)⊕S(x2) gegen S(x1⊕x2) rechnest. Dazu die Begriffe parat haben: Konfusion/Diffusion mit ihren DES-Bausteinen, die 56-Bit-Geschichte (NSA), und der Feistel-Trick, dass XOR die Runde umkehrbar macht.`,
+  },
+};
+
+const ueb03: Explanation = {
+  id: "cs-2025-u03",
+  lesson: 4,
+  title: {
+    de: "Lösungsweg — Übungsblatt 3: Betriebsmodi (ECB/CBC/OFB) & RSA",
+  },
+  content: {
+    de: `Eine Blockchiffre wie AES verschlüsselt immer nur einen Block fester Größe. Echte Nachrichten sind länger — und *wie* man die Blöcke aneinanderhängt, entscheidet über Sicherheit. Genau das sind die **Betriebsmodi**. Die erste Aufgabe lässt dich ECB, CBC und OFB mit einer winzigen Spielzeug-Chiffre von Hand durchrechnen, damit du den Unterschied im Knochenmark spürst. Die zweite Aufgabe ist deine erste vollständige RSA-Rechnung. Wir machen beides Schritt für Schritt.
+
+## Aufgabe 1 — Betriebsmodi mit einer 5-Bit-Spielzeugchiffre
+
+Statt AES nimmt das Blatt eine durchschaubare Blockchiffre mit 5-Bit-Blöcken: sie *permutiert* nur die Bits. Konkret:
+
+> e(b1 b2 b3 b4 b5) = (b2 b5 b4 b1 b3)
+
+Das liest du so: die Ausgabe entsteht, indem man an Position 1 das Bit b2 schreibt, an Position 2 das b5, an Position 3 das b4, an Position 4 das b1, an Position 5 das b3. Mehr macht e(·) nicht. Klartext: x = 01101 11011 11010 00110 (vier Blöcke x1…x4).
+
+### ECB — jeder Block für sich
+
+**ECB** (Electronic Code Book) ist der naivste Modus: jeder Block wird einzeln und unabhängig verschlüsselt, y_i = e(x_i). Wenden wir die Permutation auf jeden Block an:
+
+| Block | b1 b2 b3 b4 b5 | → (b2 b5 b4 b1 b3) | y_i |
+|---|---|---|---|
+| x1 = 01101 | 0 1 1 0 1 | 1 1 0 0 1 | **11001** |
+| x2 = 11011 | 1 1 0 1 1 | 1 1 1 1 0 | **11110** |
+| x3 = 11010 | 1 1 0 1 0 | 1 0 1 1 0 | **10110** |
+| x4 = 00110 | 0 0 1 1 0 | 0 0 1 0 1 | **00101** |
+
+ECB-Chiffrat: **y = 11001 11110 10110 00101**.
+
+**Warum ECB gefährlich ist:** gleiche Klartextblöcke ergeben *immer* dasselbe Chiffrat. Verschlüsselt man ein Bild, bleiben große einfarbige Flächen als Muster sichtbar — das berühmte „ECB-Pinguin"-Bild zeigt das. ECB versteckt die Struktur der Daten nicht.
+
+### CBC — jeder Block wird in den nächsten verkettet
+
+**CBC** (Cipher Block Chaining) repariert das: bevor ein Block verschlüsselt wird, wird er mit dem *vorherigen Chiffratblock* per XOR vermischt. Für den allerersten Block gibt es keinen Vorgänger, deshalb der **Initialisierungsvektor IV**. Die Regel: y_i = e(x_i ⊕ y_{i−1}), mit y_0 = IV = 11001.
+
+- y1 = e(x1 ⊕ IV) = e(01101 ⊕ 11001) = e(10100) = **00011**
+- y2 = e(x2 ⊕ y1) = e(11011 ⊕ 00011) = e(11000) = **10010**
+- y3 = e(x3 ⊕ y2) = e(11010 ⊕ 10010) = e(01000) = **10000**
+- y4 = e(x4 ⊕ y3) = e(00110 ⊕ 10000) = e(10110) = **00111**
+
+CBC-Chiffrat: **y = 00011 10010 10000 00111**. (In der Musterlösung ist nur die Zusammenfassungszeile verrutscht — maßgeblich sind die vier Einzelschritte, die wir hier nachgerechnet haben.) Der Effekt: derselbe Klartextblock liefert je nach Vorgeschichte ein *anderes* Chiffrat — die ECB-Muster verschwinden.
+
+### OFB — die Chiffre erzeugt einen Schlüsselstrom
+
+**OFB** (Output Feedback) macht aus der Blockchiffre eine **Stromchiffre**: man verschlüsselt gar nicht den Klartext direkt, sondern erzeugt aus dem IV einen Schlüsselstrom, indem man e(·) immer wieder auf seine eigene Ausgabe anwendet, und XORt diesen Strom dann auf den Klartext. Schlüsselstrom: s_1 = e(IV), s_i = e(s_{i−1}); Chiffrat: y_i = s_i ⊕ x_i.
+
+- s1 = e(11001) = 11010, s2 = e(11010) = 10110, s3 = e(10110) = 00111, s4 = e(00111) = 01101
+- y1 = s1 ⊕ x1 = 11010 ⊕ 01101 = **10111**
+- y2 = s2 ⊕ x2 = 10110 ⊕ 11011 = **01101**
+- y3 = s3 ⊕ x3 = 00111 ⊕ 11010 = **11101**
+- y4 = s4 ⊕ x4 = 01101 ⊕ 00110 = **01011**
+
+OFB-Chiffrat: **y = 10111 01101 11101 01011**. Wichtig: der Schlüsselstrom hängt *nur* vom IV und vom Schlüssel ab, nicht vom Klartext — man könnte ihn sogar im Voraus berechnen.
+
+> **Eselsbrücke:** ECB = jeder Block allein (Muster bleiben). CBC = Chiffrat des Vorgängers wird *vor* die Chiffre per XOR eingespeist. OFB = Chiffre läuft im Kreis und erzeugt einen Schlüsselstrom, der *nach* der Chiffre per XOR auf den Klartext kommt.
+
+## Aufgabe 2 — RSA von Hand
+
+RSA ist **asymmetrisch**: es gibt einen öffentlichen Schlüssel zum Verschlüsseln und einen privaten zum Entschlüsseln. Die Schlüsselerzeugung in fünf Schritten (steht so im Blatt): zwei Primzahlen p, q wählen → N = p·q → Totient T = (p−1)(q−1) → e und d so, dass (e·d) mod T = 1 → Public (N, e), Private (N, d). Verschlüsseln: y = x^e mod N. Entschlüsseln: x = y^d mod N.
+
+**Aufgabe 2a — Schlüssel zuordnen.** Gegeben p=2, q=7, N=14, T=6, e=5, d=11. Der **Public-Key** ist das Paar mit e: **(N, e) = (14, 5)**. Der **Private-Key** ist das Paar mit d: **(N, d) = (14, 11)**. (Kurzprobe, dass die Schlüssel zusammenpassen: e·d = 5·11 = 55, und 55 mod 6 = 1. ✓ — genau die Bedingung aus Schritt 4.)
+
+### Schritt für Schritt — Aufgabe 2b: „BCD" verschlüsseln und prüfen
+
+Erst die Buchstaben in Zahlen (Tabelle): B=1, C=2, D=3. Jede Zahl muss kleiner als N=14 sein — passt. **Verschlüsseln** mit y = x^5 mod 14:
+
+| Buchstabe | x | x⁵ | mod 14 | Chiffre |
+|---|---|---|---|---|
+| B | 1 | 1 | 1 | **B** |
+| C | 2 | 32 | 4 | **E** |
+| D | 3 | 243 | 5 | **F** |
+
+Bei C: 2⁵ = 32, und 32 = 2·14 + 4, also mod 14 = 4 = E. Bei D: 3⁵ = 243 = 17·14 + 5, also mod 14 = 5 = F. Das Chiffrat ist **BEF**.
+
+**Kontrolle durch Entschlüsseln** mit x = y^11 mod 14 — kommt wieder BCD heraus?
+
+- y1 = 1: 1¹¹ mod 14 = 1 = B ✓
+- y2 = 4: 4¹¹ mod 14. Die Potenzen von 4 mod 14 laufen im Zyklus 4, 2, 8, 4, 2, 8 … (Periode 3); der 11. Wert ist 2 = C ✓
+- y3 = 5: 5¹¹ mod 14. Potenzen von 5 mod 14: 5, 11, 13, 9, 3, 1 (Periode 6); der 11. Wert (11 mod 6 = 5 → fünfter im Zyklus) ist 3 = D ✓
+
+Entschlüsseln liefert wieder **BCD** — die Rechnung ist konsistent. (Der Trick beim Potenzieren mod N von Hand: nie die Riesenzahl ausrechnen, sondern nach jedem Schritt sofort mod N reduzieren, dann bleiben die Zahlen klein.)
+
+**Aufgabe 2c — symmetrisch vs. asymmetrisch.**
+
+| | symmetrisch (z. B. AES) | asymmetrisch (z. B. RSA) |
+|---|---|---|
+| Schlüssel | *ein* gemeinsamer Schlüssel | Schlüsselpaar (öffentlich + privat) |
+| Tempo | sehr schnell | langsam |
+| Schlüsselverteilung | Problem: jeder Kanal braucht einen eigenen Schlüssel | einfach: öffentlichen Schlüssel kann man frei verteilen |
+| Signaturen / Nachweisbarkeit | nicht möglich | möglich (digitale Signatur, Nonrepudiation) |
+
+**Aufgabe 2d — Schlüsselanzahl für 120 Mitarbeiter.** Bei **AES** braucht jedes *Paar* von Personen einen eigenen gemeinsamen Schlüssel. Anzahl Paare = n·(n−1)/2 = 120·119/2 = **7140 Schlüssel**. Bei **RSA** hat jede Person *ein* Schlüsselpaar, und der öffentliche Teil wird einfach mit allen geteilt — also nur **120 Schlüsselpaare**. Das ist der Skalierungsvorteil asymmetrischer Verfahren: linear statt quadratisch.
+
+**Aufgabe 2e — 1-GB-Video entschlüsseln.** 1 GB = 8·10⁹ Bit.
+
+- RSA bei 100 kbit/s = 10⁵ Bit/s: 8·10⁹ / 10⁵ = 8·10⁴ s = 80 000 s ≈ **22,2 Stunden**.
+- AES bei 17 Mbit/s = 1,7·10⁷ Bit/s: 8·10⁹ / 1,7·10⁷ ≈ 471 s ≈ **7 min 51 s**.
+
+**Aufgabe 2f — woher der Unterschied, und wie kombiniert man die Vorteile?** RSA rechnet teure modulare Potenzen mit riesigen Zahlen; AES macht nur billige Bit-Operationen (Substitution, Permutation, XOR) — daher der gewaltige Tempo-Unterschied. Die Lösung ist die **Hybridverschlüsselung**: man benutzt das langsame asymmetrische Verfahren *nur*, um einen zufälligen symmetrischen Sitzungsschlüssel sicher auszutauschen, und verschlüsselt die eigentlichen Daten dann schnell mit AES. Genau so arbeitet TLS — das verbindet RSAs einfache Schlüsselverteilung mit AES' Geschwindigkeit.
+
+> **Eselsbrücke:** „Asymmetrisch fürs Schloss, symmetrisch für die Last." RSA tauscht nur den Schlüssel, AES trägt die Daten.
+
+## Klausur-Fokus
+
+Drei Fertigkeiten: (1) **Betriebsmodi von Hand** — die CBC-Kette (XOR mit vorigem Chiffrat *vor* der Chiffre) und den OFB-Schlüsselstrom (Chiffre läuft im Kreis, XOR *nach* der Chiffre) sauber durchziehen, und in einem Satz sagen können, warum ECB Muster durchscheinen lässt. (2) **RSA rechnen** — Schlüsselpaar zuordnen, x^e mod N und y^d mod N, immer früh modulo reduzieren; und e·d ≡ 1 (mod T) als Konsistenzbedingung kennen. (3) **Die großen Vergleiche** — Schlüsselanzahl n(n−1)/2 (symmetrisch) gegen n Paare (asymmetrisch), das Tempo-Argument, und die Hybrid-Idee als Auflösung.`,
+  },
+};
+
+const ueb04: Explanation = {
+  id: "cs-2025-u04",
+  lesson: 4,
+  title: {
+    de: "Lösungsweg — Übungsblatt 4: Wiederholung (Kerckhoffs, AES-Brute-Force, Stromchiffre, S-Box-Angriff)",
+  },
+  content: {
+    de: `Dieses Blatt ist eine Wiederholung der gesamten symmetrischen Kryptografie — und genau deshalb ein perfekter Klausur-Probelauf. Es prüft die Grundbegriffe, lässt dich die Langzeitsicherheit von AES *ausrechnen* (statt nur zu behaupten), verallgemeinert die Stromchiffre vom Bit aufs Alphabet, und endet mit einem kleinen, aber lehrreichen Angriff auf eine S-Box. Wir gehen alles der Reihe nach durch.
+
+## Aufgabe 1 — Grundbegriffe sicher beherrschen
+
+**Kerckhoffs'sches Prinzip:** Die Sicherheit eines Kryptosystems darf *nur* von der Geheimhaltung des Schlüssels abhängen, niemals von der Geheimhaltung des Algorithmus. Anschaulich: Caesar ist bei bekanntem Verfahren völlig unsicher, RSA bleibt trotz komplett öffentlichem Algorithmus sicher — weil bei RSA das Geheimnis allein im Schlüssel steckt.
+
+**Der gegenteilige Ansatz** — die Sicherheit auf der Geheimhaltung des *Designs* aufzubauen — heißt **Security by Obscurity** und gilt als schlechte Praxis (sobald das Design durchsickert, ist alles offen).
+
+**Kryptologie** teilt sich in zwei Teilgebiete: **Kryptografie** (das *Bauen* von Schutz, z. B. Verschlüsselung) und **Kryptanalyse** (das *Brechen* von Kryptosystemen). Die klassische Situation: Alice und Bob reden über einen *unsicheren Kanal*, und Oscar (der Angreifer) kann alles mitlesen — deshalb müssen sie kryptografische Algorithmen einsetzen, sonst liegt jede Nachricht offen.
+
+**Die Notation, die du im ganzen Kurs brauchst** (häufige Klausurfrage — einfach auswendig):
+
+| Symbol | Bedeutung |
+|---|---|
+| x | Klartext (plaintext) |
+| y | Chiffrat (ciphertext) |
+| e(·) | Verschlüsselungsfunktion |
+| d(·) | Entschlüsselungsfunktion |
+| k | Schlüssel |
+| K | Schlüsselraum (Menge aller Schlüssel) |
+| \\|K\\| | Anzahl möglicher Schlüssel |
+
+> **Typische Falle:** kleines **k** ist *ein* Schlüssel, großes **K** ist der ganze *Schlüsselraum*. Verwechsle die beiden nicht.
+
+## Aufgabe 2 — Brute-Force gegen AES-128 ausrechnen
+
+**2a — Wie viele Schlüssel?** Ein 128-Bit-Schlüssel ist eine Folge aus 128 Nullen/Einsen, jede Stelle unabhängig zwei Möglichkeiten: |K| = **2¹²⁸**.
+
+**2b — Wie lange dauert die vollständige Suche mit ASICs?** Reine Einheiten-Rechnung, Schritt für Schritt:
+
+- Kosten pro ASIC: 40 € + 100 % Overhead = **80 €**.
+- Bei 10⁶ € Budget: 10⁶ / 80 = **12 500 ASICs**.
+- Jeder testet 7·10⁸ Schlüssel/s, zusammen 7·10⁸ · 12 500 = **8,75·10¹² Schlüssel/s**.
+- Im Durchschnitt muss man nur die *Hälfte* aller Schlüssel testen: 2¹²⁷ Stück.
+- Zeit: 2¹²⁷ / (8,75·10¹²) ≈ 1,94·10²⁵ Sekunden ≈ **6,16·10¹⁷ Jahre**.
+
+Das Universum ist etwa 10¹⁰ Jahre alt — die Suche dauert also rund **10⁷-mal so lange wie das gesamte bisherige Alter des Universums**. Das ist die quantitative Begründung dafür, warum AES-128 als langzeitsicher gilt: nicht „weil es schwer aussieht", sondern weil man es ausrechnen kann.
+
+> **Eselsbrücke:** Jedes zusätzliche Schlüssel-Bit *verdoppelt* den Aufwand. Bei 128 Bit ist selbst die halbe Suche (2¹²⁷) mit Spezialhardware und Millionenbudget jenseits jeder vorstellbaren Zeit.
+
+## Aufgabe 3 — Stromchiffre vom Bit aufs Alphabet verallgemeinern
+
+Die binäre Stromchiffre rechnet y_i = x_i ⊕ s_i = (x_i + s_i) mod 2. Jetzt soll sie direkt auf Buchstaben laufen.
+
+- **3a — Welches Alphabet?** Im Originalfall nur Bits: {0, 1}.
+- **3b — Neuer Modulus?** Bei A…Z (als 0…25 kodiert) wiederholt sich das Alphabet alle 26 Zeichen, also **m = 26** statt 2.
+- **3c — Wie sieht der Schlüsselstrom aus?** Jeder Schlüsselstrom-Wert s_i kommt jetzt aus {0, 1, …, 25} (statt nur {0, 1}).
+- **3d — Was ändert sich an der Entschlüsselung?** Aus dem XOR (das mod 2 nichts anderes als Addition/Subtraktion ist) wird jetzt eine echte Subtraktion mod 26: Verschlüsseln y_i = (x_i + s_i) mod 26, Entschlüsseln **x_i = (y_i − s_i) mod 26**.
+
+### Schritt für Schritt — 3e: HWHWZB mit Schlüssel BSASRP entschlüsseln
+
+Buchstaben in Zahlen, dann stellenweise (Chiffrebuchstabe − Schlüsselbuchstabe) mod 26:
+
+| Chiffre | y | Schlüssel | k | y − k mod 26 | Klartext |
+|---|---|---|---|---|---|
+| H | 7 | B | 1 | 6 | **G** |
+| W | 22 | S | 18 | 4 | **E** |
+| H | 7 | A | 0 | 7 | **H** |
+| W | 22 | S | 18 | 4 | **E** |
+| Z | 25 | R | 17 | 8 | **I** |
+| B | 1 | P | 15 | −14 → 12 | **M** |
+
+Der Klartext ist **GEHEIM**. Achte auf die letzte Stelle: 1 − 15 = −14, und −14 mod 26 = 26 − 14 = 12 = M. Negative Zwischenergebnisse einfach um 26 nach oben schieben — das ist die einzige Stelle, an der man hier stolpert.
+
+## Aufgabe 4 — Angriff auf eine reduzierte S-Box-Chiffre
+
+Gegeben eine bewusst schwache Chiffre: y = S1(x ⊕ k), mit 6-Bit-Eingaben x und k, 4-Bit-Ausgabe y, und S1 = erste DES-S-Box. Du kennst zwei Klartext-Chiffrat-Paare: (x1 = 111000, y1 = 1100) und (x2 = 000111, y2 = 0110). Gesucht ist der Schlüssel k.
+
+**4a — Blockdiagramm.** x und k werden zuerst per XOR verknüpft, das Ergebnis geht in die S-Box S1, heraus kommt y. Also: (x ⊕ k) → S1 → y.
+
+**4b — Wie oft kommt jeder 4-Bit-Ausgabewert vor?** Es gibt 2⁶ = 64 mögliche 6-Bit-Eingaben, aber nur 2⁴ = 16 mögliche Ausgaben. Bei Gleichverteilung also 64 / 16 = **4-mal** — anschaulich: in jeder der 4 Zeilen der S-Box steht jeder Wer­t genau einmal, macht 4 Vorkommen über alle Zeilen.
+
+**4c — Wie viele Schlüsselkandidaten liefert *ein* Paar?** Da y aus 4 verschiedenen Eingaben entstehen kann, gibt es zu y genau 4 Urbilder unter S1. Jedes Urbild ist ein mögliches (x ⊕ k), also ergeben sich **4 Kandidaten** für k (denn k = x ⊕ Urbild). Ein einzelnes Paar reicht nicht — es bleiben vier Verdächtige.
+
+### Schritt für Schritt — 4d: k bestimmen
+
+**Idee:** Für jedes Paar berechne alle 4 Schlüsselkandidaten (k = x ⊕ S1⁻¹(y)), und nimm den Schlüssel, der in *beiden* Listen auftaucht.
+
+**Paar 1 (x1 = 111000, y1 = 1100 = dezimal 12).** Die vier Urbilder von 12 in S1 (der Wert 12 steht in Zeile 0 Spalte 11, Zeile 1 Spalte 10, Zeile 2 Spalte 9, Zeile 3 Spalte 1; daraus die 6-Bit-Eingabe als Zeile=äußere Bits, Spalte=innere Bits): 010110, 010101, 110010, 100011. Jetzt k = x1 ⊕ Urbild:
+
+- 111000 ⊕ 010110 = 101110
+- 111000 ⊕ 010101 = **101101**
+- 111000 ⊕ 110010 = 001010
+- 111000 ⊕ 100011 = 011011
+
+**Paar 2 (x2 = 000111, y2 = 0110 = dezimal 6).** Die vier Urbilder von 6: 010100, 010011, 101010, 111101. Jetzt k = x2 ⊕ Urbild:
+
+- 000111 ⊕ 010100 = 010011
+- 000111 ⊕ 010011 = 010100
+- 000111 ⊕ 101010 = **101101**
+- 000111 ⊕ 111101 = 111010
+
+**Schnittmenge bilden.** Liste 1 = {101110, **101101**, 001010, 011011}, Liste 2 = {010011, 010100, **101101**, 111010}. Der einzige Schlüssel, der in *beiden* Listen steht, ist **k = 101101**. Das ist der gesuchte Schlüssel.
+
+> **Eselsbrücke:** Ein Klartext-Chiffrat-Paar grenzt den Schlüssel nur auf wenige Kandidaten ein; erst der *Schnitt* mehrerer Paare macht ihn eindeutig. Genau dieses „mehrere Beobachtungen schneiden" ist das Herz vieler kryptanalytischer Angriffe.
+
+## Klausur-Fokus
+
+Das hier ist die Generalprobe für den symmetrischen Teil. Sicher können: (1) Kerckhoffs in einem Satz + den Gegenbegriff Security by Obscurity, Kryptografie vs. Kryptanalyse, und die Symboltabelle (x, y, e, d, k, K, |K|). (2) Eine **Schlüsselraum-/Brute-Force-Rechnung** sauber durchziehen — Schlüsselanzahl als Zweierpotenz, Hardware-Durchsatz, Faktor „nur die Hälfte im Schnitt", Vergleich mit dem Universumsalter. (3) Eine Stromchiffre **subtraktiv mod 26 entschlüsseln** (negativ → +26). (4) Den **S-Box-Angriff mit Schnittmenge** — Urbilder über die S-Box finden, Kandidaten k = x ⊕ Urbild bilden, und über zwei Paare schneiden.`,
+  },
+};
+
+export const cybersicherheit2025UebungWalkthroughs: Explanation[] = [
+  uebPrep,
+  ueb01,
+  ueb02,
+  ueb03,
+  ueb04,
+];
