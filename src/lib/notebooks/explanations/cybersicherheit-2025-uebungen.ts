@@ -823,6 +823,162 @@ Drei Dinge: (1) **Rainbow-Table-Rechnung** — 77^L Kombinationen, Disk = Anzahl
   },
 };
 
+const ueb08: Explanation = {
+  id: "cs-2025-u08",
+  lesson: 8,
+  title: {
+    de: "Lösungsweg — Übungsblatt 8: Diffie-Hellman-Schlüsselaustausch, X.509 & Vertrauensmodelle",
+  },
+  content: {
+    de: `Wie einigen sich zwei Fremde über eine *abgehörte* Leitung auf einen geheimen Schlüssel, den der Lauscher trotzdem nicht kennt? Das ist die fast magische Leistung des Diffie-Hellman-Schlüsselaustauschs — und der rechnerische Kern dieses Blatts. Drumherum geht es um Vertrauen: Wer bürgt im Internet dafür, dass ein öffentlicher Schlüssel wirklich der richtigen Person gehört? Das beantworten X.509-Zertifikate, das Web of Trust und Let's Encrypt. Wir rechnen erst DH dreimal vollständig durch und ordnen dann die Vertrauenswelt.
+
+## Aufgabe 1 — Diffie-Hellman-Schlüsselaustausch
+
+Die Idee in einem Bild: Alice und Bob mischen Farben. Öffentlich bekannt sind eine Basisfarbe und die Mischregel; geheim bleibt jeweils die eigene Zutat. Beide mischen über Kreuz und landen am Ende bei *derselben* Mischfarbe — aber ein Lauscher, der nur die ausgetauschten Mischungen sieht, kann sie nicht in die geheimen Zutaten zerlegen. In Zahlen:
+
+- Öffentlich: eine große Primzahl **p** (der Modul) und eine Basis **g**.
+- Geheim: Alice wählt **a**, Bob wählt **b**.
+- Alice schickt **A = g^a mod p**, Bob schickt **B = g^b mod p**.
+- Gemeinsames Geheimnis: Alice rechnet **s = B^a mod p**, Bob rechnet **s = A^b mod p**.
+
+*Warum kommt bei beiden dasselbe heraus?* Weil B^a = (g^b)^a = g^(a·b) = (g^a)^b = A^b — die Reihenfolge der Exponenten ist egal. *Warum ist es sicher?* Der Lauscher kennt g, p, A, B, müsste daraus aber a oder b zurückrechnen — das ist das **diskrete-Logarithmus-Problem**, für große p praktisch unlösbar.
+
+### Schritt für Schritt — a) p = 13, g = 2, a = 4, b = 5
+
+- **A = 2⁴ mod 13** = 16 mod 13 = **3**. Alice schickt 3.
+- **B = 2⁵ mod 13** = 32 mod 13 = **6**. Bob schickt 6.
+- Alice: **s = B^a = 6⁴ mod 13**. Rechne schrittweise mit Zwischenreduktion: 6² = 36 ≡ 10, dann 6⁴ = 10² = 100 ≡ 9 (mod 13). **s = 9**.
+- Bob zur Kontrolle: **s = A^b = 3⁵ mod 13** = 243 ≡ 9 (mod 13). Gleiches Ergebnis → **gemeinsames Geheimnis s = 9**. ✓
+
+Genau dieses „nie die Riesenzahl bilden, sondern nach jedem Quadrieren mod p reduzieren" ist **Square-and-Multiply** — dieselbe Technik wie bei RSA.
+
+### b) p = 23, g = 9, a = 15, b = 17
+
+- A = 9¹⁵ mod 23. Über Quadrate: 9² ≡ 12, 9⁴ ≡ 6, 9⁸ ≡ 13; dann 9¹⁵ = 9⁸·9⁴·9²·9¹ ≡ 13·6·12·9 ≡ **6**.
+- B = 9¹⁷ mod 23 = 9¹⁶·9 ≡ (9⁸)²·9 ≡ 13²·9 ≡ 8·9 ≡ **3**.
+- s = B^a = 3¹⁵ mod 23 ≡ 6·12·9·3 (über dieselben Quadrate von 3) ≡ **12**; Kontrolle A^b = 6¹⁷ mod 23 ≡ **12**. → **s = 12**. ✓
+
+### c) p = 19, g = 13, a = 10, b = 2
+
+- A = 13¹⁰ mod 19. Quadrate: 13² ≡ 17, 13⁴ ≡ 4, 13⁸ ≡ 16; dann 13¹⁰ = 13⁸·13² ≡ 16·17 ≡ **6**.
+- B = 13² mod 19 = 169 ≡ **17**.
+- s = B^a = 17¹⁰ mod 19. Mit 17 ≡ −2: (−2)¹⁰ = 2¹⁰ = 1024 ≡ **17** (mod 19); Kontrolle A^b = 6² = 36 ≡ **17**. → **s = 17**. ✓
+
+> **Eselsbrücke:** g und p sind öffentlich, a und b bleiben geheim. Beide potenzieren über Kreuz: g^(ab) erreicht man von beiden Seiten. Der Lauscher scheitert am diskreten Logarithmus.
+
+## Aufgabe 2 — X.509-Zertifikate und ihr Widerruf
+
+**Was macht eine CA (Certificate Authority)?** Eine CA ist eine **vertrauenswürdige dritte Partei** (Trusted Third Party). Sie prüft die Identität eines Antragstellers und stellt ein **Zertifikat** aus, das die Bindung „diese Identität ↔ dieser öffentliche Schlüssel" beglaubigt (signiert). So kann jeder, der der CA vertraut, dem Schlüssel vertrauen.
+
+**Wie widerruft man ein Zertifikat** (z. B. wenn ein privater Schlüssel gestohlen wurde)? Zwei Ansätze:
+
+- **CRL (Certificate Revocation List):** Die CA führt eine Sperrliste aller vorzeitig widerrufenen Zertifikate. Nachteil: bei jeder Verbindung muss man die (potenziell große) Liste abgleichen — träge.
+- **OCSP (Online Certificate Status Protocol):** Echtzeit-Abfrage. Der Client schickt die Seriennummer des Zertifikats per HTTP an einen OCSP-Server, der mit dem Status antwortet: **good**, **revoked** oder **unknown**. Effizienter als das Herunterladen der ganzen CRL.
+
+## Aufgabe 3 — CA-PKI gegen Web of Trust
+
+Beide lösen dieselbe Frage („gehört dieser Schlüssel wirklich zu dieser Person?"), aber mit gegensätzlicher Struktur:
+
+| | X.509 / PKI (z. B. TLS) | Web of Trust (z. B. GPG/PGP) |
+|---|---|---|
+| Modell | **zentral** — wenige CAs beglaubigen | **dezentral** — die Nutzer beglaubigen sich gegenseitig |
+| Vertrauen | man vertraut der CA | man vertraut Freunden (und deren Freunden) |
+| Aufbau | hierarchisch, formal | Netz aus signierten Schlüsseln |
+
+- **Organisation mit zentraler Verwaltung:** PKI passt — alle Zertifikate zentral steuerbar; im Web of Trust wäre es mühsam (jeder müsste jeden zertifizieren) und ein Entzug bei Austritt schwer.
+- **Privatanwender:** PKI verlangt Vertrauen in eine CA; im Web of Trust kann man Freunde einfach privat (persönliches Treffen) prüfen.
+- **Aktivisten/Dissidenten:** Eine CA kann staatlich unter Druck gesetzt werden — beim Web of Trust gibt es **keine zentrale Kontrollstelle**, was sie vor staatlichen Repressalien besser schützt.
+
+## Aufgabe 4 — Let's Encrypt
+
+**Validierung (mindestens eine Methode).** Let's Encrypt nutzt das **ACME-Protokoll** und prüft per *Challenge*, dass du wirklich die Domain kontrollierst:
+
+- **HTTP-01:** Der ACME-Client legt eine Datei mit einem Token unter http://DEINE-DOMAIN/.well-known/acme-challenge/ ab; Let's Encrypt ruft sie ab. Einfach zu automatisieren, nur Port 80, keine Wildcards.
+- **DNS-01:** Du legst einen speziellen TXT-Eintrag unter _acme-challenge.DEINE-DOMAIN an; Let's Encrypt fragt das DNS ab. Funktioniert auch für **Wildcard-Zertifikate**, braucht aber DNS-API-Zugriff.
+
+**Vor- und Nachteile.** Vorteile: Zertifikate sind **kostenlos**, der Identitätsnachweis läuft *technisch automatisiert* (statt teurem manuellem Prozess), und sie lassen sich leicht einbinden/erneuern. Nachteile: nur **domain-validierte** Zertifikate (keine Extended Validation), kein Support, und die kurze Lebensdauer von **90 Tagen** zwingt zur Automatisierung (das ist zugleich ein Sicherheitsvorteil — gestohlene Zertifikate verfallen schnell).
+
+**Certificate Transparency (CT).** Jedes neu ausgestellte Zertifikat wird in öffentliche, **append-only** CT-Logs eingetragen, die kryptografisch (auf Merkle-Tree-Basis) gesichert sind. Vorteil: CAs stehen unter starker öffentlicher Kontrolle, betrügerische/falsch ausgestellte Zertifikate fallen schneller auf. Nachteil: die Logs wachsen mit der Zeit immer weiter an.
+
+## Klausur-Fokus
+
+Der Rechenkern ist **Diffie-Hellman**: A = g^a mod p, B = g^b mod p, s = B^a = A^b mod p — von Hand mit Square-and-Multiply (immer früh mod p reduzieren), und beide Wege als Kontrolle. Wissen, *warum* es funktioniert (g^(ab) von beiden Seiten) und *warum* es sicher ist (diskreter Logarithmus). Dazu konzeptionell sicher: Aufgaben einer CA, die zwei Widerrufswege **CRL vs. OCSP** (Liste vs. Echtzeit-Abfrage), der Gegensatz **zentrale PKI vs. dezentrales Web of Trust** (mit den drei Nutzergruppen), und Let's Encrypt (ACME-Challenges HTTP-01/DNS-01, 90-Tage-Zertifikate, Certificate Transparency).`,
+  },
+};
+
+const ueb09: Explanation = {
+  id: "cs-2025-u09",
+  lesson: 9,
+  title: {
+    de: "Lösungsweg — Übungsblatt 9: XSS, SQL-Injection, DoS/DDoS & Botnetze",
+  },
+  content: {
+    de: `Dieses Blatt verlässt die Mathematik und betritt das offene Internet — hier sind die Angriffe konkret und oft erschreckend einfach. Du lernst, wie man fremden Code in Webseiten einschleust (XSS), wie man eine Login-Maske mit einer einzigen Eingabe austrickst (SQL-Injection) und wie man ganze Dienste lahmlegt (DoS/DDoS). Die meisten Aufgaben sind Verständnisfragen; das eine, das du *konkret hinschreiben* können musst, ist die SQL-Injection — die rechnen wir Zeichen für Zeichen durch.
+
+## Aufgabe 1 — XSS, CSP und SQL-Injection
+
+**Die drei XSS-Typen.** Cross-Site Scripting heißt: ein Angreifer schleust HTML/JavaScript in eine Seite ein, das dann im Browser des *Opfers* läuft. Die drei Spielarten unterscheiden sich darin, *woher* der Schadcode kommt:
+
+- **Stored XSS:** Der Code wird dauerhaft auf dem Server gespeichert (Forenbeitrag, Kommentar, Besucherlog). Jeder, der die Seite abruft, bekommt ihn mitgeliefert — ein Treffer, viele Opfer.
+- **Reflected XSS:** Der Code wird nicht gespeichert, sondern vom Server direkt in die Antwort *zurückgespiegelt* (z. B. über eine Fehlermeldung oder einen Suchparameter). Das Opfer wird meist über einen *manipulierten Link* hingelockt.
+- **DOM-based (Client-Side) XSS:** Der Angriff läuft komplett im Browser — clientseitiges JavaScript verändert die lokale DOM-Struktur. Der Schadcode taucht gar nicht in der Serverantwort auf, sondern entsteht erst durch lokale Manipulation der Umgebung.
+
+**CSP (Content Security Policy).** Ein HTTP-Header, den der Server mitschickt und der per **Whitelist** festlegt, aus welchen Quellen Inhalte (Skripte, Bilder …) überhaupt geladen werden dürfen — z. B. nur von der eigenen Domain, keine Inline-Skripte. *Vorteil:* erschwert XSS deutlich (eingeschleuste Inline-Skripte werden geblockt). *Nachteil:* erschwert lokales Debugging / legitime Inline-Skripte, und CSP **ersetzt keine Input-Validierung** — es ist eine zweite Verteidigungslinie, kein Ersatz.
+
+### Schritt für Schritt — die Login-Maske per SQL-Injection umgehen
+
+Der verwundbare Code (Listing 1) baut die Query, indem er Nutzereingaben *direkt* in den String klebt:
+
+    SELECT uid FROM users WHERE username = "$username" AND password = "$password"
+
+Das ist die Schwachstelle: **$username und $password sind frei eingebbar und werden ungeprüft eingesetzt** (fehlende Sanitization). Trägst du normal „test"/„test" ein, entsteht eine harmlose Query. Trägst du aber als Passwort etwas ein, das die Query-Struktur selbst verändert, übernimmst du die Kontrolle.
+
+**Variante A — Batched Statement (so in der Musterlösung).** Setze als $password:
+
+    test"; SELECT * FROM users WHERE username = "administrator
+
+Dann lautet die zusammengebaute Query (gekürzt): `… password = "test"; SELECT * FROM users WHERE username = "administrator"`. Das angehängte zweite Statement holt direkt den administrator-Datensatz — das eingeschobene `;` beendet die erste Anweisung und schmuggelt eine eigene hinterher.
+
+**Variante B — die klassische Tautologie.** Setze als Passwort `" OR "1"="1`. Die WHERE-Bedingung wird dann `… AND password = "" OR "1"="1"`, und weil „1"="1" *immer* wahr ist, liefert die Query alle Nutzer (bzw. den ersten = oft den Admin) zurück — Login umgangen, ganz ohne Passwort.
+
+**Wie verhindert man das?** *Abstrakt:* Nutzereingaben dürfen niemals als Code interpretiert werden — man muss sie als reine *Daten* behandeln. *Konkret:* gefährliche Sonderzeichen (vor allem `;` und Anführungszeichen) maskieren, z. B. in PHP mit mysql_real_escape_string($password). Die saubere moderne Lösung sind **Prepared Statements** (parametrisierte Queries): dort wird die Eingabe getrennt von der Query übergeben und kann die Struktur prinzipiell nicht mehr verändern.
+
+> **Eselsbrücke:** SQL-Injection entsteht, wenn Eingabe zu *Code* wird. Whitelisting/Escaping/Prepared Statements machen aus Eingabe wieder reine *Daten*.
+
+## Aufgabe 2 — Denial-of-Service
+
+**Technisches Ziel.** Ein DoS-Angriff legt ein Zielsystem lahm, indem er dessen **Ressourcen erschöpft** (CPU, RAM, Bandbreite) — danach können *legitime* Anfragen nicht mehr bedient werden.
+
+**CIA-Ziele.** Die drei Schutzziele sind **Confidentiality** (Vertraulichkeit), **Integrity** (Integrität) und **Availability** (Verfügbarkeit). Ein DoS verletzt *nur die Verfügbarkeit* — er liest oder verändert keine Daten, er macht den Dienst bloß unerreichbar.
+
+**DDoS-Angriffstechniken.** (a) **Single Client** — ein Rechner schickt viele Anfragen; (b) **Amplification** — fremde Protokolle erzeugen aus kleinen Anfragen große Antworten; (c) **Botnetze** — viele mit Malware infizierte Rechner feuern koordiniert.
+
+**DoS vs. DDoS.** DoS kann von *einem* Rechner ausgehen; DDoS verteilt den Angriff auf *viele* heterogene Quellen. Letztere sind schwerer abzuwehren, weil sich die Flut kaum von echten Anfragen unterscheiden lässt und es kaum Möglichkeiten gibt, die Quelle auf Netzebene zu identifizieren oder zu sperren.
+
+**Amplification-Konzept.** Man missbraucht Protokolle, die auf eine *kleine* Anfrage eine *große* Antwort geben (typisch kleine UDP-Anfragen → große Pakete), z. B. **DNS, NTP, SNMP**. Per **IP-Spoofing** fälscht der Angreifer die Absenderadresse, sodass die großen Antworten alle beim *Opfer* landen — der Angreifer verstärkt seinen Datenstrom um ein Vielfaches, ohne selbst viel zu senden.
+
+## Aufgabe 3 — Botnetze
+
+- **Drei bekannte Botnetze:** Zeus, Mirai (Ziel: IoT-Geräte), Conficker (auch Bredolab).
+- **Wie wird ein System Teil eines Botnetzes?** Z. B. durch **Malware** (etwa per E-Mail-Anhang) oder durch **Exploits** (Ausnutzen von Sicherheitslücken); seltener durch manuelle Installation auf Servern.
+- **Command-&-Control-Server (C&C):** steuert die Kommunikation zwischen Angreifer und Botnetz — verteilt neue Befehle und überträgt Daten. Häufige Protokolle: IRC, HTTP, DNS; alternativ als P2P-Netz organisiert.
+- **Skizze des DDoS-Flusses:** Angreifer → C&C → die drei Bots → und von den Bots gebündelt auf das Opfer (Victim). Der Angreifer spricht nie direkt mit dem Opfer, sondern nur über C&C mit den Bots, die dann die eigentliche Last erzeugen.
+
+## Aufgabe 4 — Abwehr von DoS-Angriffen
+
+- **Grundansätze:** Ressourcen erhöhen, plus **On-Site-Maßnahmen** (White-/Blacklisting, Login-Beschränkung, CAPTCHAs, Browser-Detection, Sperren von Adressbereichen) und **Off-Site-Maßnahmen** (Cloud-Umzug, Caching über ein CDN, BGP-Routing anpassen).
+- **Layer-7-Erkennung (Application Layer) ist schwer:** Angriffe sehen aus wie viele *normale* Requests; tiefe Packet Inspection ist teuer und komplex; und bei TLS-Verschlüsselung sind die Pakete schwer zu inspizieren (und Inspektion würde das Sicherheitsmodell aushebeln).
+- **Problem beim bloßen Aufrüsten der Kapazität:** Angreifer haben oft *mehr* Ressourcen, als man wirtschaftlich nachrüsten kann — und die teure Extra-Kapazität liegt im Normalbetrieb brach (schlechter Kosten-Nutzen-Effekt).
+- **On-Site vs. Off-Site:** On-Site ist durch die *eigenen* Ressourcen (Bandbreite, Serverkapazität) begrenzt; Off-Site lagert die Abwehr an externe Dienstleister/CDN aus und filtert den Traffic *vor* dem eigenen Netz.
+- **CDN (Content Delivery Network):** ein weit verteiltes Servernetz mit guter Anbindung. Es schirmt das eigene Netz ab (Caching, Mitigation/Detection, Scaling) und fängt Angriffslast bereits in der Cloud ab.
+- **DNS-basiertes Routing im CDN:** Die DNS-Namensauflösung liefert je nach Anfrage *unterschiedliche* IP-Adressen (mit kurzer Gültigkeitsdauer), sodass sich die Last gleichmäßig und stabil auf viele Server verteilt.
+
+## Klausur-Fokus
+
+Das einzige „rechnerische" Muss ist die **SQL-Injection**: zeige, wie eine ungeprüfte Eingabe die Query-Struktur kapert (Batched Statement mit `;` *oder* die `" OR "1"="1`-Tautologie), und nenne die Abwehr (Escaping / Prepared Statements). Sonst ist es Begriffssicherheit: die drei **XSS-Typen** (Stored/Reflected/DOM) sauber unterscheiden, **CSP** als Whitelist-Header (mindert XSS, ersetzt keine Validierung), bei **DoS** „nur die Verfügbarkeit der CIA-Ziele" und das **Amplification**-Prinzip (kleine Anfrage → große Antwort, IP-Spoofing lenkt sie aufs Opfer), die **Botnetz**-Begriffe (Mirai/IoT, C&C), und die **Abwehr** (On-Site vs. Off-Site, CDN + DNS-Routing, warum Layer-7-Erkennung und reines Aufrüsten schwer sind).`,
+  },
+};
+
 export const cybersicherheit2025UebungWalkthroughs: Explanation[] = [
   uebPrep,
   ueb01,
@@ -832,4 +988,6 @@ export const cybersicherheit2025UebungWalkthroughs: Explanation[] = [
   ueb05,
   ueb06,
   ueb07,
+  ueb08,
+  ueb09,
 ];
