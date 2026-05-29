@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type {
   MultipleChoiceQuestion,
   Quiz,
@@ -14,11 +14,9 @@ import { cn } from "@/lib/utils";
 
 interface Props {
   quizSet: QuizSet;
-  /** Reports true while a quiz is actually being played (runner/summary), so the
-      column can hand the quiz its full height; the picker reports false. */
-  onActiveChange?: (active: boolean) => void;
-  /** Inline reading column: pad the picker so its first row clears the floating
-      chips. Off in the fullscreen overlay, which has a real header bar instead. */
+  /** Inline reading column: pad the picker/runner/summary so their top content
+      clears the floating chips. Off in the fullscreen overlay, which has a real
+      header bar instead. */
   chipInset?: boolean;
 }
 
@@ -36,13 +34,9 @@ interface QuizAttempt {
 
 /* ────────── Outer: picker → quiz ────────── */
 
-export function QuizPlayer({ quizSet, onActiveChange, chipInset }: Props) {
+export function QuizPlayer({ quizSet, chipInset }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = quizSet.quizzes.find((q) => q.id === selectedId) ?? null;
-
-  useEffect(() => {
-    onActiveChange?.(!!selected);
-  }, [selected, onActiveChange]);
 
   if (!selected) {
     return (
@@ -59,6 +53,7 @@ export function QuizPlayer({ quizSet, onActiveChange, chipInset }: Props) {
       key={selected.id}
       quiz={selected}
       onBack={() => setSelectedId(null)}
+      chipInset={chipInset}
     />
   );
 }
@@ -225,9 +220,11 @@ function QuizRow({
 function SingleQuizPlayer({
   quiz,
   onBack,
+  chipInset,
 }: {
   quiz: Quiz;
   onBack: () => void;
+  chipInset?: boolean;
 }) {
   const { tr } = useI18n();
   const storageKey = `quiz:${quiz.id}:attempts`;
@@ -307,6 +304,7 @@ function SingleQuizPlayer({
         attempts={attempts}
         onRetake={restart}
         onBack={onBack}
+        chipInset={chipInset}
       />
     );
   }
@@ -320,6 +318,7 @@ function SingleQuizPlayer({
       onPrev={prev}
       onExit={onBack}
       tr={tr}
+      chipInset={chipInset}
     />
   );
 }
@@ -334,6 +333,7 @@ function QuizRunner({
   onPrev,
   onExit,
   tr,
+  chipInset,
 }: {
   quiz: Quiz;
   view: {
@@ -347,6 +347,7 @@ function QuizRunner({
   onPrev: () => void;
   onExit: () => void;
   tr: (text: LocalizedText | undefined) => string;
+  chipInset?: boolean;
 }) {
   const questions = quiz.questions;
   const question = questions[view.index];
@@ -356,37 +357,39 @@ function QuizRunner({
   const score = Object.values(view.answers).filter((a) => a.correct).length;
   const finished = view.index === total - 1 && answered;
 
+  // One scrolling column under the floating chips — no header/footer bars, just
+  // like the Erklärung panel. The back link, progress and nav buttons flow with
+  // the content. chipInset pads the top clear of the chips in the reading column.
   return (
-    <div className="flex h-full flex-col bg-background">
-      <header className="shrink-0 border-b border-border/60 px-6 py-4 sm:px-10">
+    <div className="h-full overflow-y-auto bg-background">
+      <div
+        className={cn(
+          "mx-auto max-w-3xl px-6 pb-16 sm:px-10",
+          chipInset ? "pt-20" : "pt-8",
+        )}
+      >
         <div className="flex items-center justify-between gap-4 text-xs">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={onExit}
-              className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-              title="Quiz verlassen"
-            >
-              <span aria-hidden className="rtl:rotate-180">
-                ‹
-              </span>
-              <span>Quiz-Liste</span>
-            </button>
-            <span aria-hidden className="text-base leading-none">
-              🧠
+          <button
+            type="button"
+            onClick={onExit}
+            className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            title="Quiz verlassen"
+          >
+            <span aria-hidden className="rtl:rotate-180">
+              ‹
             </span>
-            <span className="font-semibold tabular-nums">
+            <span>Quiz-Liste</span>
+          </button>
+          <span className="flex items-center gap-3 text-muted-foreground">
+            <span className="font-semibold tabular-nums text-foreground">
               {view.index + 1} / {total}
             </span>
-          </div>
-          <span className="text-muted-foreground">
-            Punkte:{" "}
-            <span className="font-semibold tabular-nums text-foreground">
-              {score}
-            </span>
-            <span className="text-muted-foreground">
-              {" "}
-              / {Object.keys(view.answers).length}
+            <span>
+              Punkte{" "}
+              <span className="font-semibold tabular-nums text-foreground">
+                {score}
+              </span>
+              /{Object.keys(view.answers).length}
             </span>
           </span>
         </div>
@@ -412,10 +415,8 @@ function QuizRunner({
             );
           })}
         </div>
-      </header>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-6 py-10 sm:px-10 sm:py-14">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+        <p className="mt-10 text-[10px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
           Frage {view.index + 1}
         </p>
         <h3
@@ -460,40 +461,40 @@ function QuizRunner({
             {tr(question.explanation)}
           </div>
         )}
-      </div>
 
-      <footer className="flex shrink-0 items-center justify-between gap-3 border-t border-border/60 px-6 py-4 sm:px-10">
-        <button
-          type="button"
-          onClick={onPrev}
-          disabled={view.index === 0}
-          className={cn(
-            "inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-full border border-border bg-card px-4 text-sm font-medium",
-            "transition-colors hover:bg-accent",
-            "disabled:pointer-events-none disabled:opacity-30",
-          )}
-        >
-          <span aria-hidden className="rtl:rotate-180">
-            ‹
-          </span>
-          <span>Zurück</span>
-        </button>
-        <button
-          type="button"
-          onClick={onNext}
-          disabled={!answered}
-          className={cn(
-            "inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-full border border-foreground bg-foreground px-5 text-sm font-semibold text-background",
-            "transition-opacity hover:opacity-90",
-            "disabled:pointer-events-none disabled:opacity-30",
-          )}
-        >
-          <span>{finished ? "Quiz abschließen" : "Weiter"}</span>
-          <span aria-hidden className="rtl:rotate-180">
-            ›
-          </span>
-        </button>
-      </footer>
+        <div className="mt-10 flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={onPrev}
+            disabled={view.index === 0}
+            className={cn(
+              "inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-full border border-border bg-card px-4 text-sm font-medium",
+              "transition-colors hover:bg-accent",
+              "disabled:pointer-events-none disabled:opacity-30",
+            )}
+          >
+            <span aria-hidden className="rtl:rotate-180">
+              ‹
+            </span>
+            <span>Zurück</span>
+          </button>
+          <button
+            type="button"
+            onClick={onNext}
+            disabled={!answered}
+            className={cn(
+              "inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-full border border-foreground bg-foreground px-5 text-sm font-semibold text-background",
+              "transition-opacity hover:opacity-90",
+              "disabled:pointer-events-none disabled:opacity-30",
+            )}
+          >
+            <span>{finished ? "Quiz abschließen" : "Weiter"}</span>
+            <span aria-hidden className="rtl:rotate-180">
+              ›
+            </span>
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -506,12 +507,14 @@ function QuizSummary({
   attempts,
   onRetake,
   onBack,
+  chipInset,
 }: {
   attempt: QuizAttempt;
   previousBest: QuizAttempt | undefined;
   attempts: QuizAttempt[];
   onRetake: () => void;
   onBack: () => void;
+  chipInset?: boolean;
 }) {
   const pct = Math.round((attempt.score / attempt.total) * 100);
   const newRecord =
@@ -521,7 +524,12 @@ function QuizSummary({
   const history = attempts;
 
   return (
-    <div className="flex h-full flex-col items-center overflow-y-auto bg-background px-6 py-10">
+    <div
+      className={cn(
+        "flex h-full flex-col items-center overflow-y-auto bg-background px-6 pb-10",
+        chipInset ? "pt-20" : "pt-10",
+      )}
+    >
       <div className="my-auto flex w-full max-w-md flex-col items-center gap-6 rounded-3xl border border-border bg-card p-8 text-center shadow-sm">
         <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
           Ergebnis

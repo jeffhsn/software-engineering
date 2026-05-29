@@ -101,10 +101,6 @@ function ChapterView({
   const [rightUebung, setRightUebung] =
     useState<RightUebungKey>("loesung");
   const [solutionIdx, setSolutionIdx] = useState(0);
-  // True only while a quiz is actually being played (runner/summary), which
-  // owns the column with its own header/body/footer. The quiz *picker* is just
-  // a list and floats under the chips like every other panel.
-  const [quizActive, setQuizActive] = useState(false);
   // Which source (slides/video, DE/EN, …) of the active left material shows.
   // null = the first/default variant.
   const [leftVariant, setLeftVariant] = useState<string | null>(null);
@@ -120,7 +116,6 @@ function ChapterView({
       setRightLecture("tief");
       setRightUebung("loesung");
       setSolutionIdx(0);
-      setQuizActive(false);
       leftScrollRef.current?.scrollTo({ top: 0 });
       rightScrollRef.current?.scrollTo({ top: 0 });
     }
@@ -325,14 +320,10 @@ function ChapterView({
         scrollRef={rightScrollRef}
         chips={rightChips}
         progress={onLecture ? rightLecture !== "quiz" : rightUebung === "walkthrough"}
-        fill={onLecture && rightLecture === "quiz" && quizActive}
       >
         {onLecture ? (
           rightLecture === "quiz" ? (
-            <QuizPanel
-              quizBankId={lesson.lecture.quizBankId}
-              onActiveChange={setQuizActive}
-            />
+            <QuizPanel quizBankId={lesson.lecture.quizBankId} />
           ) : (
             <ErklaerungPanel
               walkthroughId={lesson.lecture.walkthroughId}
@@ -698,14 +689,7 @@ function ErklaerungPanel({
   );
 }
 
-function QuizPanel({
-  quizBankId,
-  onActiveChange,
-}: {
-  quizBankId?: string;
-  /** Reports true while a quiz is being played (so the column switches to fill). */
-  onActiveChange?: (active: boolean) => void;
-}) {
+function QuizPanel({ quizBankId }: { quizBankId?: string }) {
   if (!quizBankId) {
     return (
       <EmptyHint>
@@ -719,11 +703,9 @@ function QuizPanel({
   if (!quizSet) {
     return <EmptyHint>{`Kein Quiz mit der ID „${quizBankId}".`}</EmptyHint>;
   }
-  // The picker scrolls under the floating chips like every other panel; only a
-  // running quiz takes over the column (ColumnPane switches to `fill` then).
-  return (
-    <QuizPlayer quizSet={quizSet} onActiveChange={onActiveChange} chipInset />
-  );
+  // Picker, runner and summary all scroll under the floating chips like every
+  // other panel — no header/footer bars. chipInset pads them clear of the chips.
+  return <QuizPlayer quizSet={quizSet} chipInset />;
 }
 
 /* ─────────────────────── Chips & shared bits ─────────────────────── */

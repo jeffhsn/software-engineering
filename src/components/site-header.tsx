@@ -13,6 +13,7 @@ import {
   getNotebooksForSubject,
 } from "@/lib/notebooks/registry";
 import { YearPicker } from "@/components/year-picker";
+import { SubjectPicker } from "@/components/subject-picker";
 import { ChapterPicker } from "@/components/chapter-picker";
 import { NotebookSearch } from "@/components/notebook-search";
 import { clampedIndex } from "@/lib/notebooks/nav";
@@ -84,18 +85,9 @@ export function SiteHeader() {
                   💻
                 </span>
               </Link>
-              {/* Current subject — its own pill. */}
-              <Link
-                href={`/subjects/${subject.slug}`}
-                className="group inline-flex h-9 min-w-0 items-center gap-2 rounded-full bg-foreground/[0.05] px-3.5 transition-colors hover:bg-foreground/[0.1]"
-              >
-                <span className="shrink-0 text-[16px] leading-none transition-transform group-hover:-rotate-6">
-                  {subject.emoji}
-                </span>
-                <span className="truncate font-serif text-[13.5px] font-medium text-foreground">
-                  {subject.title}
-                </span>
-              </Link>
+              {/* Current subject — a searchable dropdown of all notebooks,
+                  same pattern as the language switcher. */}
+              <SubjectPicker current={subject} />
               {notebook && (
                 <YearPicker
                   current={notebook}
