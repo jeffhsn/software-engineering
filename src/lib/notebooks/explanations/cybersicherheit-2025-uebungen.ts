@@ -987,6 +987,170 @@ Das einzige „rechnerische" Muss ist die **SQL-Injection**: zeige, wie eine ung
   },
 };
 
+const ueb10: Explanation = {
+  id: "cs-2025-u10",
+  lesson: 10,
+  title: {
+    de: "Lösungsweg — Übungsblatt 10: C-Crashkurs (Kompilierung, Pointer & der Boden für Exploits)",
+  },
+  content: {
+    de: `Dieses Blatt stellt keine Aufgaben — es ist ein C-Crashkurs. Und das hat einen Grund: das *nächste* Blatt lässt dich Programme *kaputtmachen*, und du kannst nichts brechen, was du nicht verstehst. C ist die Sprache, in der Betriebssysteme und alte, verwundbare Software geschrieben sind, und C hat eine gefährliche Eigenschaft: es prüft fast nichts für dich. Genau diese fehlenden Prüfungen sind später die Einfallstore. Dieser Lösungsweg führt dich durch die C-Grundlagen — mit Blick darauf, was davon im Exploit-Kapitel zur Waffe wird.
+
+## Von Quellcode zu Programm — die vier Kompilierungsphasen
+
+Wenn du gcc aufrufst, läuft eine **Pipeline** aus vier Stufen ab, und du solltest jede benennen können (beliebte Klausurfrage):
+
+1. **Präprozessor** — verarbeitet Direktiven wie #include und #define und erzeugt *erweiterten* Quellcode (er fügt Header-Inhalte ein, ersetzt Makros).
+2. **Compiler** — übersetzt den vorverarbeiteten C-Code in **Assembler** (architekturspezifisch, z. B. x86).
+3. **Assembler** — wandelt den Assemblercode in maschinenlesbaren **Objektcode** (.o).
+4. **Linker** — kombiniert die Objektdateien und Bibliotheken zur fertigen **ausführbaren Datei**.
+
+> **Eselsbrücke:** „PCAL" — Präprozessor, Compiler, Assembler, Linker. Aus Text wird Assembler, aus Assembler Objektcode, aus Objektcode ein lauffähiges Programm.
+
+## Variablen, Typen und ihre Größen
+
+In C musst du jede Variable *vor* Gebrauch deklarieren (Typ + Name, optional Initialwert). Die Typgrößen solltest du kennen, denn im Exploit-Kapitel zählt jedes Byte:
+
+| Typ | Größe | Bedeutung |
+|---|---|---|
+| char | 1 Byte | einzelnes Zeichen |
+| int | 4 Byte | ganze Zahl |
+| float | 4 Byte | Fließkommazahl |
+| double | 8 Byte | große Fließkommazahl |
+
+C ist **case-sensitiv** (alter ≠ Alter), und lokale Variablen leben nur innerhalb ihrer geschweiften Klammern (ihr **Scope**).
+
+## Verzweigungen und Schleifen — kurz
+
+Verzweigungen steuern den Fluss: **if / else if / else** und **switch-case** (wo break den Fall-Through verhindert). Schleifen wiederholen Code: **while** (Bedingung *vor* dem Durchlauf — null oder mehr Durchläufe), **do-while** (Bedingung *nach* dem Durchlauf — mindestens einer), **for** (Zähler kompakt in einer Zeile). break verlässt die Schleife sofort, continue überspringt nur den Rest des aktuellen Durchlaufs. Das alles ist Handwerkszeug — wichtig wird gleich der Speicher.
+
+## Funktionen: Call by Value vs. Call by Reference
+
+Hier liegt der erste echte Stolperstein und die Brücke zu den Pointern. C kennt zwei Arten, einer Funktion etwas zu übergeben:
+
+- **Call by Value (Wertübergabe):** Die Funktion bekommt eine *Kopie*. Ändert sie den Parameter, bleibt die Originalvariable des Aufrufers unberührt. Eine Funktion quadrat(int x), die x = x*x rechnet, ändert *nichts* draußen.
+- **Call by Reference (Referenzübergabe):** Die Funktion bekommt die *Adresse* (einen **Pointer**). Über die Adresse kann sie die Originalvariable wirklich verändern. quadrat(int *x), die *x = (*x)*(*x) rechnet, ändert den Wert beim Aufrufer.
+
+Der Stern hat zwei Rollen, die man am Anfang verwechselt: in der Deklaration **int *x** heißt er „x ist ein Pointer auf int", im Ausdruck **(*x)** heißt er „der Wert, auf den x zeigt" (Dereferenzieren). Das **&** vor einer Variable liefert ihre Adresse.
+
+## Arrays und Pointer — hier wird C gefährlich
+
+Ein **Array** ist ein zusammenhängender Speicherbereich gleichartiger Werte. Deklarierst du **int buffer[8]**, hast du 8 ganze Zahlen hintereinander, gültige Indizes 0 bis 7. Und jetzt der Punkt, auf den alles hinausläuft: **C prüft die Array-Grenzen nicht.** Schreibst du buffer[8] oder buffer[100], gibt es keinen Fehler — du schreibst einfach in den Speicher *daneben*. Das ist **undefiniertes Verhalten**, im besten Fall ein Absturz (Segfault), im schlimmsten Fall die Grundlage eines Exploits (genau das ist der **Buffer Overflow** aus Blatt 11).
+
+Arrays und Pointer sind eng verwandt: der Array-Name ist praktisch ein Pointer auf das erste Element. Es gilt **arr[i]** ist dasselbe wie ***(arr + i)**. Pointer-Arithmetik rechnet dabei in *Element*-Schritten: ptr + 1 springt um sizeof(Typ) Bytes weiter, nicht um ein Byte.
+
+### Schritt für Schritt — einen Pointer von Hand verfolgen
+
+Betrachte: **int var = 42; int \\*ptr = &var;** Jetzt zeigt ptr auf var. Dann ist *ptr gleich 42 (Dereferenzieren liefert den Wert). Schreibst du **\\*ptr = 100;**, änderst du *durch den Pointer* die Variable var — danach ist var = 100, obwohl du var nie direkt angefasst hast. Genau diese Macht (über eine Adresse fremden Speicher ändern) ist es, die ein Angreifer später missbraucht.
+
+## Dynamischer Speicher und Strings
+
+Mit **malloc(n)** holt man sich zur Laufzeit n Bytes vom Heap, mit **free()** gibt man sie zurück — vergisst man free, leckt Speicher; benutzt man Speicher nach free, droht ein weiterer Exploit-Typ. Ein **String** ist in C nur ein char-Array, das mit einem unsichtbaren **Nullbyte** (0, das „\\0") endet — daran erkennen Funktionen wie strcpy oder strcmp das Ende. Merke dir das Nullbyte gut: viele C-Bugs drehen sich darum, dass es fehlt, an der falschen Stelle steht oder mitkopiert wird.
+
+> **Typische Falle:** **char name[] = "Max"** belegt *vier* Bytes (M, a, x und das Nullbyte), nicht drei. Wer die Grenze um eins verrechnet, produziert den klassischen „Off-by-one"-Fehler.
+
+## Klausur-Fokus und Brücke zu den Exploits
+
+Können musst du: die **vier Kompilierungsphasen** (Präprozessor → Compiler → Assembler → Linker) und was jede tut; die **Typgrößen** (char 1, int 4, float 4, double 8); der Unterschied **Call by Value vs. Reference** und warum dafür Pointer nötig sind; und vor allem das eine, das alles trägt: **C prüft keine Array-Grenzen**. Ein Schreibzugriff jenseits eines Buffers landet im Nachbarspeicher — das ist die Saat, aus der im nächsten Blatt der Buffer Overflow, der Data-Only-Angriff und am Ende das Einschleusen von fremdem Code wächst. Wer Pointer, Array-Grenzen und das Stack-Layout im Griff hat, versteht die ganze Exploit-Welt.`,
+  },
+};
+
+const ueb11: Explanation = {
+  id: "cs-2025-u11",
+  lesson: 10,
+  title: {
+    de: "Lösungsweg — Übungsblatt 11: Software-Exploits (x86, Data-Only-Angriff & Canary-Bypass)",
+  },
+  content: {
+    de: `Jetzt wird es ernst: du brichst zum ersten Mal ein echtes Programm. Das Blatt führt dich vom Lesen von Maschinencode (was tut die CPU wirklich?) über deinen ersten Angriff (ein Passwort umgehen, ohne es zu kennen) bis zum Aushebeln einer Schutzmaßnahme (dem Stack-Canary). Der rote Faden ist der **Buffer Overflow** aus Blatt 10: weil C keine Array-Grenzen prüft, schreibt eine zu lange Eingabe in den Nachbarspeicher — und dort liegen Dinge, die über Erfolg oder Misserfolg entscheiden. Wir gehen jeden Schritt durch.
+
+## Aufgabe 1 — Hello World in x86-Assembler und System Calls
+
+Ein winziges Assemblerprogramm (Linux i386) gibt „Hello World" aus und beendet sich. Disassembliert sieht die Routine _start so aus — jede Zeile erklärt:
+
+    mov eax,0x4        ; Syscall-Nummer 4 = SYS_WRITE
+    mov ebx,0x1        ; 1. Parameter: fd 1 = Standardausgabe
+    mov ecx,0x804901f  ; 2. Parameter: Adresse des Strings "Hello World"
+    mov edx,0xd        ; 3. Parameter: Länge 0xd = 13 Zeichen
+    int 0x80           ; Kernel aufrufen: write(1, str, 13)
+    mov eax,0x1        ; Syscall-Nummer 1 = SYS_EXIT
+    xor ebx,ebx        ; Parameter: Exit-Code 0 (xor mit sich selbst = 0)
+    int 0x80           ; Kernel aufrufen: exit(0)
+
+**Wie funktionieren Linux-System-Calls auf x86-32?** Ein System-Call ist die Tür vom Benutzerprogramm zum Kernel (für Hardware-Zugriff, Prozesse, Speicher). Das Schema:
+
+- Die **Syscall-Nummer** kommt ins Register **eax** (4 = write, 1 = exit, …).
+- Die **Parameter** kommen der Reihe nach in **ebx, ecx, edx** (dann esi, edi).
+- Ausgelöst wird der Call mit der Instruktion **int 0x80** (32-Bit; im 64-Bit-Modus heißt sie syscall).
+- Der **Rückgabewert** landet wieder in **eax**.
+
+> **Eselsbrücke:** eax sagt *was* (welcher Syscall), ebx/ecx/edx sagen *womit* (die Parameter), int 0x80 sagt *los*, und eax bringt das Ergebnis zurück.
+
+## Aufgabe 2 — Data-Only-Angriff: ein Passwort umgehen
+
+Der verwundbare Code (Listing 1):
+
+    int pw_check(char *password) {
+        int auth = 0;
+        char pw_buffer[16] = {0};
+        strcpy(pw_buffer, password);              // kopiert ALLES, ungeprüft
+        if (strcmp(pw_buffer, "cyssec") == 0)
+            auth = 1;
+        return auth;
+    }
+
+**2.1 — Wo ist der Fehler?** In Zeile mit **strcpy(pw_buffer, password)**. strcpy kopiert den *gesamten* String (inklusive Nullbyte) nach pw_buffer — **ohne zu prüfen, ob er hineinpasst**. pw_buffer ist nur 16 Byte groß. Ist password länger, schreibt strcpy über das Buffer-Ende hinaus in den Nachbarspeicher (Buffer Overflow). Beheben: vor dem Kopieren die Länge prüfen, z. B. if (strlen(password) > 16) exit(0); — oder gleich das sichere strncpy verwenden.
+
+**2.2 — Stackframe-Layout von pw_check.** Auf dem Stack liegen die Daten der Funktion in dieser Reihenfolge (von niedrigen zu höheren Adressen):
+
+| Adresse | Inhalt |
+|---|---|
+| niedrig | **pw_buffer[16]** (der überlaufende Puffer) |
+| ↓ | **auth** (die Entscheidungsvariable) |
+| ↓ | saved ebp |
+| ↓ | return address |
+| hoch | &password |
+
+Entscheidend: **auth liegt direkt hinter pw_buffer**. Ein Überlauf von pw_buffer trifft also als Erstes auth.
+
+### Schritt für Schritt — auth überschreiben (2.3)
+
+Du sollst eine Eingabe finden, die *nicht* „cyssec" ist, aber trotzdem „Gut gemacht!" auslöst. „Gut gemacht!" erscheint, wenn pw_check etwas Wahres (auth ≠ 0) zurückgibt. Die Idee: den Buffer überlaufen lassen, bis ein Byte in auth landet und es von 0 verschieden macht.
+
+- Gib **16-mal 'A'** ein, um pw_buffer komplett zu füllen (Indizes 0–15).
+- Hänge **ein weiteres Zeichen** an, z. B. ein 'B'. strcpy schreibt dieses 'B' an die Stelle direkt hinter dem Buffer — also in **auth**.
+- Jetzt ist auth = … irgendein von Null verschiedener Wert (durch das 'B' = 0x42). Der strcmp schlägt zwar fehl (der Inhalt ist nicht „cyssec"), aber **auth wurde nicht durch strcmp gesetzt, sondern durch den Überlauf** — und return auth gibt einen Wahr-Wert zurück.
+
+Eine funktionierende Eingabe ist also **AAAAAAAAAAAAAAAAB** (16 A + 1 B), oder großzügiger AAAAAAAAAAAAAAAABBBB. Das Programm gibt „Gut gemacht!" aus, obwohl niemand das Passwort kennt. Weil hier eine *Daten*variable (auth) und nicht der Kontrollfluss manipuliert wird, heißt das ein **Data-Only-Angriff** (Non-Control-Data).
+
+**2.4 — Was, wenn der Compiler die Variablen anders anordnet?** Dann hängt der Angriff davon ab, ob auth *hinter* pw_buffer liegt. Legt der Compiler auth an eine niedrigere Adresse (vor den Buffer), läuft der Überlauf von pw_buffer *weg* von auth — und dieser konkrete Angriff trifft ins Leere. Die Anordnung der lokalen Variablen ist also nicht garantiert; sie ist compiler-/architekturabhängig, und genau das macht solche Layout-abhängigen Angriffe brüchig.
+
+## Aufgabe 3 — Bonus: den Canary aushebeln
+
+Der Entwickler hat dazugelernt und das Programm canary gebaut: es **terminiert bei zu langen Eingaben** bzw. erkennt Buffer Overflows. Der Trick ist ein **Stack-Canary** — ein bekannter Wächter-Wert, der zwischen Buffer und den schützenswerten Daten auf den Stack gelegt wird.
+
+**3.1 / 3.2 — Was hat sich geändert?** pw_check legt jetzt einen Canary auf den Stack. Im Disassembly sieht man, wie vier Bytes gesetzt werden: 0x63 ('c'), 0x68 ('h'), 0x61 ('a'), 0x64 ('d') — der Canary ist das Wort **„chad"**. Am *Ende* der Funktion prüft das Programm, ob dieser Wert noch unverändert ist. Ein normaler Überlauf, der durch den Buffer läuft, überschreibt zwangsläufig den Canary — die Prüfung schlägt an und das Programm bricht ab, bevor der Schaden wirkt.
+
+**3.3 — Wie umgeht man das?** Der Canary schützt nur, *solange sein Wert geheim ist*. Hier ist er aber konstant und bekannt („chad"). Der Trick: man überschreibt den Canary mit **genau seinem eigenen Wert** wieder — dann ist er beim Abschluss-Check unverändert, die Prüfung merkt nichts, und man kann *darüber hinaus* weiterschreiben, um auth zu treffen.
+
+### Schritt für Schritt — die Eingabe bauen (3.4)
+
+Layout: zuerst die 16 Buffer-Bytes, dann der 4-Byte-Canary „chad", dann auth. Also baust du die Eingabe genau in dieser Reihenfolge:
+
+- **16-mal 'A'** → füllt pw_buffer.
+- **chad** → überschreibt den Canary mit *seinem korrekten Wert* (Prüfung bleibt zufrieden).
+- **B** → landet in auth und setzt es auf einen Wahr-Wert.
+
+Die fertige Eingabe ist **AAAAAAAAAAAAAAAAchadB**. Das Programm erkennt den Overflow *nicht* (Canary intakt) und gibt trotzdem „Gut gemacht!" aus. Die Lehre: ein Canary ist nur so stark wie die Geheimhaltung seines Werts — ein vorhersagbarer Canary ist kein Schutz.
+
+> **Eselsbrücke:** Der Canary ist der „Kanarienvogel im Bergwerk": stirbt er (ändert sich sein Wert), Alarm. Kennt der Angreifer den Vogel aber, setzt er ihn unversehrt zurück und schleicht vorbei.
+
+## Klausur-Fokus
+
+Drei Dinge, die wirklich drankommen: (1) **x86-Syscall-Konvention** — Nummer in eax, Parameter in ebx/ecx/edx, int 0x80 löst aus, Rückgabe in eax; und ein paar Instruktionen lesen können (mov, xor ebx,ebx = 0, int 0x80). (2) Der **Data-Only-Angriff** — erkläre, warum strcpy ohne Längenprüfung gefährlich ist, zeichne das Stackframe (pw_buffer → auth → saved ebp → return address) und gib eine konkrete Eingabe an, die auth über den Überlauf setzt (16 Füllbytes + 1). (3) Der **Canary** — was er ist, warum ein normaler Overflow ihn auslöst, und wie ein *bekannter* Canary umgangen wird (im Klartext zurückschreiben), inklusive der Eingabe AAAAAAAAAAAAAAAAchadB. Und das übergreifende Warum: alles wurzelt in der fehlenden Array-Grenzprüfung von C.`,
+  },
+};
+
 export const cybersicherheit2025UebungWalkthroughs: Explanation[] = [
   uebPrep,
   ueb01,
@@ -998,4 +1162,6 @@ export const cybersicherheit2025UebungWalkthroughs: Explanation[] = [
   ueb07,
   ueb08,
   ueb09,
+  ueb10,
+  ueb11,
 ];
