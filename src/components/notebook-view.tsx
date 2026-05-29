@@ -390,8 +390,20 @@ function ColumnPane({
 
       {fill ? (
         // Child fills the column beneath the floating chips and manages its
-        // own scrolling (e.g. the quiz player).
-        <div className="absolute inset-0 pt-14">{children}</div>
+        // own scrolling (e.g. the quiz player). A top fade dissolves rows into
+        // the page as they scroll up under the chips, so no bold line ever sits
+        // right beneath them and reads as a subheader.
+        <>
+          <div className="absolute inset-0 pt-14">{children}</div>
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 top-0 z-10 h-28"
+            style={{
+              background:
+                "linear-gradient(to bottom, var(--background) 68%, transparent)",
+            }}
+          />
+        </>
       ) : (
         /* Content scrolls full-bleed from the very top; the chips float
            directly over it. overscroll-contain keeps the fixed header
