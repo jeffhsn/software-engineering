@@ -20,6 +20,7 @@ import { SettingsMenu } from "@/components/settings-menu";
 import { NotebookSearch } from "@/components/notebook-search";
 import { clampedIndex } from "@/lib/notebooks/nav";
 import { ACCENT_INK } from "@/lib/subjects/accents";
+import { ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const SUBJECT_RE = /^\/subjects\/([^/]+)(?:\/([^/]+))?\/?$/;
@@ -96,6 +97,16 @@ export function SiteHeader() {
             </Link>
           ) : (
             <>
+              {/* Mobile: a back chevron to the library (home) — not a logo,
+                  not a home button, just "go back" like leaving a book. */}
+              <Link
+                href="/"
+                aria-label="Zurück zur Bibliothek"
+                title="Zurück zur Bibliothek"
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-foreground/[0.05] transition-colors hover:bg-foreground/[0.1] lg:hidden"
+              >
+                <ChevronLeft className="h-[20px] w-[20px] text-muted-foreground" strokeWidth={2} />
+              </Link>
               {/* Mobile: chapter drawer (☰) replaces the in-header pickers. */}
               {notebook && (
                 <span className="lg:hidden">

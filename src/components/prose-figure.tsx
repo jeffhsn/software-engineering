@@ -25,4 +25,13 @@ export const figureComponents: Components = {
       </figure>
     );
   },
+  // Wrap every table so a wide one scrolls within its own box instead of
+  // letting the whole reading column scroll sideways on a narrow screen.
+  table({ children }) {
+    return (
+      <div className="prose-table-scroll">
+        <table>{children}</table>
+      </div>
+    );
+  },
 };

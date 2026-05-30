@@ -109,6 +109,14 @@ html {
   /* Bump the base so every rem-based size (UI text, headings, the reading
      prose) reads a notch larger and easier across the whole site. */
   font-size: 17.5px;
+  /* The page itself only ever scrolls vertically — no element may make the
+     whole document scroll sideways. (Nested scrollers like the notebook's
+     column-swipe track keep their own horizontal scroll; this doesn't touch
+     them.) */
+  overflow-x: hidden;
+}
+body {
+  overflow-x: hidden;
 }
 
 body {
@@ -137,6 +145,21 @@ body {
   font-size: calc(1.15rem * var(--reading-scale, 1));
   line-height: calc(1.78 * var(--reading-leading, 1));
   letter-spacing: 0.005em;
+  /* Never let long tokens (URLs, formulae) push the column wider than the
+     screen — they wrap instead, so the column has no horizontal scroll. */
+  overflow-wrap: break-word;
+}
+.prose-notebook a,
+.prose-notebook code {
+  word-break: break-word;
+}
+/* Wide tables scroll inside their OWN box, never the whole column. */
+.prose-notebook .prose-table-scroll {
+  margin: 1.4rem 0;
+  overflow-x: auto;
+}
+.prose-notebook .prose-table-scroll > table {
+  margin: 0;
 }
 
 /* The h1 is reserved for the page anchor (rendered above the markdown by

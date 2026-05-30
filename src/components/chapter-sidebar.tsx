@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { Menu, X, Home } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import type { Lesson, Notebook } from "@/lib/notebooks/types";
 import { useI18n } from "@/lib/i18n/client";
 import { setLessonInUrl } from "@/lib/notebooks/nav";
@@ -124,15 +123,6 @@ export function ChapterSidebar({
                 );
               })}
             </ul>
-
-            <Link
-              href="/"
-              onClick={() => setOpen(false)}
-              className="flex shrink-0 items-center gap-2 border-t border-border/60 px-4 py-3 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <Home className="h-4 w-4" strokeWidth={1.75} />
-              Alle Notizbücher
-            </Link>
           </div>
         </div>
       )}

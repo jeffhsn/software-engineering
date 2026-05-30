@@ -427,43 +427,12 @@ function ChapterView({
         </div>
       </div>
 
-      {/* Mobile: which page am I on — tap a dot to jump, or swipe. */}
-      <MobilePageDots page={mobilePage} onGo={goToPage} />
-
-      <FloatingChapterNav prev={prev} next={next} />
-    </div>
-  );
-}
-
-/**
- * Minimal 2-dot page indicator for the mobile column swipe. Sits above the
- * chapter chevrons, hidden once both columns are visible (lg+). Each dot is
- * tappable for readers who'd rather tap than swipe.
- */
-function MobilePageDots({
-  page,
-  onGo,
-}: {
-  page: number;
-  onGo: (i: 0 | 1) => void;
-}) {
-  return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[5.5rem] z-30 flex justify-center lg:hidden">
-      <div className="pointer-events-auto flex items-center gap-2 rounded-full bg-card px-3 py-2 shadow-[0_5px_12px_-2px_rgba(0,0,0,0.32),0_22px_50px_-10px_rgba(0,0,0,0.8)]">
-        {([0, 1] as const).map((i) => (
-          <button
-            key={i}
-            type="button"
-            aria-label={i === 0 ? "Material" : "Hilfe"}
-            aria-current={page === i}
-            onClick={() => onGo(i)}
-            className={cn(
-              "h-2 cursor-pointer rounded-full transition-all",
-              page === i ? "w-5 bg-[var(--accent)]" : "w-2 bg-foreground/25",
-            )}
-          />
-        ))}
-      </div>
+      <FloatingChapterNav
+        prev={prev}
+        next={next}
+        mobilePage={mobilePage}
+        onGoToPage={goToPage}
+      />
     </div>
   );
 }
@@ -524,7 +493,10 @@ function ColumnPane({
         <div
           ref={scrollRef}
           className={cn(
-            "h-full overflow-y-auto overscroll-contain",
+            // overflow-x-hidden: a column never scrolls sideways (wide prose,
+            // long URLs, tables stay contained) — and it stops the vertical
+            // scroller from hijacking the horizontal swipe between columns.
+            "h-full overflow-y-auto overflow-x-hidden overscroll-contain",
             // Clear the floating dots + chevrons on mobile; desktop keeps none.
             bottomPad && "pb-28 lg:pb-0",
           )}
@@ -637,20 +609,42 @@ function ChipRow({ chips, small }: { chips: Chip[]; small?: boolean }) {
 function FloatingChapterNav({
   prev,
   next,
+  mobilePage,
+  onGoToPage,
 }: {
   prev?: Lesson;
   next?: Lesson;
+  /** Mobile column-swipe page (0/1) + jump handler; rendered between the
+      chevrons as a 2-dot indicator. Hidden on lg (both columns show). */
+  mobilePage: number;
+  onGoToPage: (i: 0 | 1) => void;
 }) {
   return (
     <nav
       aria-label="Kapitelnavigation"
-      className="pointer-events-none fixed inset-x-0 bottom-6 z-30 flex justify-center gap-2.5"
+      className="pointer-events-none fixed inset-x-0 bottom-6 z-30 flex items-center justify-center gap-2.5"
     >
       <ArrowButton
         direction="prev"
         lesson={prev}
         ariaLabel="Vorheriges Kapitel"
       />
+      {/* Column-swipe page dots — between the chevrons, mobile only. */}
+      <div className="pointer-events-auto flex h-10 items-center gap-2 rounded-full bg-card px-3.5 shadow-[0_5px_12px_-2px_rgba(0,0,0,0.32),0_22px_50px_-10px_rgba(0,0,0,0.8)] lg:hidden">
+        {([0, 1] as const).map((i) => (
+          <button
+            key={i}
+            type="button"
+            aria-label={i === 0 ? "Material" : "Hilfe"}
+            aria-current={mobilePage === i}
+            onClick={() => onGoToPage(i)}
+            className={cn(
+              "h-2 cursor-pointer rounded-full transition-all",
+              mobilePage === i ? "w-5 bg-[var(--accent)]" : "w-2 bg-foreground/25",
+            )}
+          />
+        ))}
+      </div>
       <ArrowButton
         direction="next"
         lesson={next}
