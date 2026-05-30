@@ -49,11 +49,6 @@ export function ChapterPicker({ notebook, currentLesson }: Props) {
         >
           {String(currentLesson.number).padStart(2, "0")}
         </span>
-        <span
-          aria-hidden
-          className="h-3.5 w-px shrink-0"
-          style={{ backgroundColor: `color-mix(in oklab, ${accent} 35%, transparent)` }}
-        />
         <span className="truncate font-serif text-[13.5px] font-medium text-foreground">
           {tr(currentLesson.title)}
         </span>
