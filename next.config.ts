@@ -9,6 +9,17 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/subjects/[slug]": ["./public/content-i18n/**/*.json"],
   },
+  // Resolve react-pdf's `import * as pdfjs from "pdfjs-dist"` to the LEGACY
+  // build. The default pdf.js v5 build targets very recent browsers (it calls
+  // Promise.withResolvers — Safari 17.4+ — and ships a module worker needing
+  // Safari 16.4+), so it throws and crashes the Safari tab on an older iPad
+  // (iPadOS 16.0–16.3). The legacy build is transpiled/polyfilled for those.
+  // The worker file is pointed at the matching legacy build in pdf-viewer.tsx.
+  turbopack: {
+    resolveAlias: {
+      "pdfjs-dist": "pdfjs-dist/legacy/build/pdf.min.mjs",
+    },
+  },
   // Materials under /public/content are immutable: once we ship a PDF for
   // SoSe 2025 it never changes. Mark them so browsers cache forever and
   // re-visits skip the network entirely.

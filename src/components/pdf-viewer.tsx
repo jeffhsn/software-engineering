@@ -12,8 +12,14 @@ interface DocumentState {
   loadError: boolean;
 }
 
+// Use the LEGACY worker build (matches the legacy engine aliased in
+// next.config). pdf.js v5's default build targets very recent browsers: its
+// module worker needs Safari 16.4+ and the engine calls Promise.withResolvers
+// (Safari 17.4+). On an older iPad (iPadOS 16.0–16.3) the default build throws
+// while rendering and Safari kills the tab ("a problem repeatedly occurred").
+// The legacy build is transpiled/polyfilled for those browsers.
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.mjs",
+  "pdfjs-dist/legacy/build/pdf.worker.min.mjs",
   import.meta.url,
 ).toString();
 
