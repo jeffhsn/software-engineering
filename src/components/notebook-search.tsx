@@ -75,14 +75,17 @@ export function NotebookSearch({ notebooks, scope }: Props) {
       <PopoverTrigger
         aria-label={placeholder}
         className={cn(
-          "inline-flex h-9 w-[min(70vw,28rem)] cursor-text items-center gap-2.5 rounded-full bg-card px-4 text-left text-muted-foreground ring-1 ring-[var(--rule)]",
+          // Phones: a compact icon button so the brand/controls keep their room.
+          // sm+: the full search bar with placeholder text.
+          "inline-flex h-9 w-9 cursor-text items-center justify-center gap-2.5 rounded-full bg-card text-left text-muted-foreground ring-1 ring-[var(--rule)]",
+          "sm:w-[min(70vw,28rem)] sm:justify-start sm:px-4",
           "transition-colors hover:text-foreground hover:ring-[var(--rule-strong)]/50",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           "data-[state=open]:ring-[var(--rule-strong)]/50",
         )}
       >
         <Search className="h-4 w-4 shrink-0" strokeWidth={1.75} />
-        <span className="flex-1 truncate font-serif text-[13.5px] italic">
+        <span className="hidden flex-1 truncate font-serif text-[13.5px] italic sm:block">
           {placeholder}
         </span>
       </PopoverTrigger>

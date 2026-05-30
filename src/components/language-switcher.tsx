@@ -39,7 +39,7 @@ export function LanguageSwitcher() {
         <span className="text-sm leading-none" aria-hidden>
           {current.flag}
         </span>
-        <span className="font-serif italic text-muted-foreground group-hover:text-foreground">
+        <span className="hidden font-serif italic text-muted-foreground group-hover:text-foreground sm:inline">
           {current.nativeLabel}
         </span>
         <ChevronDown

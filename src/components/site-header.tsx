@@ -71,18 +71,21 @@ export function SiteHeader() {
           : "fixed inset-x-0 top-0 shadow-[0_4px_18px_-2px_rgba(0,0,0,0.2)] dark:shadow-[0_6px_22px_-2px_rgba(0,0,0,0.7)]",
       )}
     >
-      <div className="grid h-14 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 px-4 sm:px-8 lg:px-12">
+      {/* Mobile: left track takes all the slack so the brand/subject crumb
+          isn't squeezed by an equal-width right track the small controls never
+          fill. lg+: a symmetric 3-track grid keeps the middle slot centered. */}
+      <div className="grid h-14 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 px-4 sm:px-8 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:px-12">
         <div className="flex min-w-0 items-center gap-2">
           {!subject ? (
             <Link
               href="/"
               aria-label={dict.brand}
-              className="group inline-flex h-9 shrink-0 cursor-pointer items-center gap-2 rounded-full bg-foreground/[0.05] px-2.5 pe-3.5 transition-colors hover:bg-foreground/[0.1]"
+              className="group inline-flex h-9 min-w-0 cursor-pointer items-center gap-2 rounded-full bg-foreground/[0.05] px-2.5 pe-3.5 transition-colors hover:bg-foreground/[0.1]"
             >
-              <span className="text-[16px] leading-none transition-transform group-hover:-rotate-6">
+              <span className="shrink-0 text-[16px] leading-none transition-transform group-hover:-rotate-6">
                 💻
               </span>
-              <span className="font-serif text-[13.5px] font-semibold">
+              <span className="truncate font-serif text-[13.5px] font-semibold">
                 {dict.brand}
               </span>
             </Link>
@@ -102,13 +105,15 @@ export function SiteHeader() {
                   same pattern as the language switcher. */}
               <SubjectPicker current={subject} />
               {notebook && (
-                <YearPicker
-                  current={notebook}
-                  available={getNotebooksForSubject(notebook.subject)}
-                  onSelect={(n) =>
-                    router.push(`/subjects/${notebook.subject}?y=${n.year}&l=1`)
-                  }
-                />
+                <span className="hidden shrink-0 sm:inline-flex">
+                  <YearPicker
+                    current={notebook}
+                    available={getNotebooksForSubject(notebook.subject)}
+                    onSelect={(n) =>
+                      router.push(`/subjects/${notebook.subject}?y=${n.year}&l=1`)
+                    }
+                  />
+                </span>
               )}
             </>
           )}
