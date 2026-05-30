@@ -83,6 +83,37 @@ function readStored(key: string, fallback: number) {
 }
 
 export function ReadingSettings() {
+  return (
+    <Popover>
+      <PopoverTrigger
+        aria-label="Textgröße & Lesedarstellung"
+        title="Text"
+        className={cn(
+          "group inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-foreground/[0.05]",
+          "transition-colors hover:bg-foreground/[0.1]",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          "data-[state=open]:bg-foreground/[0.1]",
+        )}
+      >
+        <ALargeSmall
+          aria-hidden
+          className="h-[19px] w-[19px] text-muted-foreground transition-transform duration-300 group-hover:scale-110 group-hover:text-foreground"
+          strokeWidth={1.75}
+        />
+      </PopoverTrigger>
+      <PopoverContent align="end" sideOffset={6} className="w-64 gap-3">
+        <ReadingControls />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+/**
+ * The text controls themselves (size / font / leading), with no popover
+ * around them — so they can live inside the standalone ReadingSettings
+ * popover OR inside the combined mobile settings menu.
+ */
+export function ReadingControls() {
   // Mirror whatever the pre-paint inline script already applied.
   const [scale, setScale] = useState(() => clampScale(readStored(SCALE_KEY, 1)));
   const [leading, setLeading] = useState(() => readStored(LEADING_KEY, 1));
@@ -117,24 +148,7 @@ export function ReadingSettings() {
   const atMax = scale >= MAX - 1e-9;
 
   return (
-    <Popover>
-      <PopoverTrigger
-        aria-label="Textgröße & Lesedarstellung"
-        title="Text"
-        className={cn(
-          "group inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-foreground/[0.05]",
-          "transition-colors hover:bg-foreground/[0.1]",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-          "data-[state=open]:bg-foreground/[0.1]",
-        )}
-      >
-        <ALargeSmall
-          aria-hidden
-          className="h-[19px] w-[19px] text-muted-foreground transition-transform duration-300 group-hover:scale-110 group-hover:text-foreground"
-          strokeWidth={1.75}
-        />
-      </PopoverTrigger>
-      <PopoverContent align="end" sideOffset={6} className="w-64 gap-3">
+    <div className="grid gap-3">
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
             Text
@@ -235,7 +249,6 @@ export function ReadingSettings() {
             })}
           </div>
         </div>
-      </PopoverContent>
-    </Popover>
+    </div>
   );
 }

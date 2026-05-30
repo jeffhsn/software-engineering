@@ -215,6 +215,29 @@ body {
   margin-top: 0.2rem;
 }
 
+/* Phones: dial the reading baseline down so Erklärungen/Walkthroughs aren't
+   oversized on a small screen. Still multiplied by --reading-scale, so the
+   reader's own size control keeps working from this smaller default. */
+@media (max-width: 640px) {
+  .prose-notebook {
+    font-size: calc(1rem * var(--reading-scale, 1));
+    line-height: calc(1.7 * var(--reading-leading, 1));
+  }
+  .prose-notebook > p:first-of-type {
+    font-size: calc(1.1rem * var(--reading-scale, 1));
+  }
+  .prose-notebook h1 {
+    font-size: calc(1.7rem * var(--reading-scale, 1));
+  }
+  .prose-notebook h2 {
+    font-size: calc(1.32rem * var(--reading-scale, 1));
+    margin: 2.4rem 0 0.8rem;
+  }
+  .prose-notebook h3 {
+    font-size: calc(1.15rem * var(--reading-scale, 1));
+  }
+}
+
 .prose-notebook a {
   color: var(--ink);
   text-decoration: underline;

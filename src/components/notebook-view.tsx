@@ -135,14 +135,15 @@ function ChapterView({
   const [rightUebung, setRightUebung] =
     useState<RightUebungKey>("loesung");
   const [solutionIdx, setSolutionIdx] = useState(0);
-  // Mobile only: which of the two facing pages is shown full-screen. On lg+
-  // both columns render side by side and this is ignored.
-  const [mobileSide, setMobileSide] = useState<"left" | "right">("left");
+  // Mobile only: which column page the swipe track is on (0 = material,
+  // 1 = help). On lg+ both columns show and this is ignored.
+  const [mobilePage, setMobilePage] = useState(0);
   // Which source (slides/video, DE/EN, …) of the active left material shows.
   // null = the first/default variant.
   const [leftVariant, setLeftVariant] = useState<string | null>(null);
   const leftScrollRef = useRef<HTMLDivElement>(null);
   const rightScrollRef = useRef<HTMLDivElement>(null);
+  const mobileTrackRef = useRef<HTMLDivElement>(null);
 
   // Reset to lecture chip + scroll each column to top on chapter change.
   const lastSeen = useRef<number | null>(null);
@@ -153,9 +154,10 @@ function ChapterView({
       setRightLecture("tief");
       setRightUebung("loesung");
       setSolutionIdx(0);
-      setMobileSide("left");
+      setMobilePage(0);
       leftScrollRef.current?.scrollTo({ top: 0 });
       rightScrollRef.current?.scrollTo({ top: 0 });
+      mobileTrackRef.current?.scrollTo({ left: 0 });
     }
   }, [lesson.number]);
 
@@ -318,18 +320,62 @@ function ChapterView({
   const subject = getSubject(notebook.subject);
   const accentInk = subject ? ACCENT_INK[subject.accent] : "var(--ink)";
 
-  // Labels for the mobile facing-page toggle — reuse the active chip on each
-  // side so the toggle always names what it switches to (no extra strings).
-  const activeLeftLabel = leftChips.find((c) => c.active)?.label ?? "";
-  const activeRightLabel = rightChips.find((c) => c.active)?.label ?? "";
+  // The two pages' content, extracted so both the desktop two-column layout
+  // and the mobile single-pane layout render the exact same nodes.
+  const leftContent = activeVariant ? (
+    activeVariant.kind === "video" ? (
+      <VideoEmbed url={activeVariant.url} />
+    ) : (
+      <PdfBlock src={activeVariant.src} />
+    )
+  ) : !onLecture && activeExercise ? (
+    <EmptyHint>
+      {`Kein Aufgaben-PDF zu „${tr(activeExercise.label) || "dieser Übung"}“. Manchmal wird nur die Lösung veröffentlicht — schau unter „Lösung“.`}
+    </EmptyHint>
+  ) : null;
+
+  const rightContent = onLecture ? (
+    rightLecture === "quiz" ? (
+      <QuizPanel quizBankId={lesson.lecture.quizBankId} />
+    ) : (
+      <ErklaerungPanel
+        walkthroughId={lesson.lecture.walkthroughId}
+        mode={rightLecture === "einfach" ? "simple" : "deep"}
+      />
+    )
+  ) : activeExercise ? (
+    rightUebung === "loesung" ? (
+      <SolutionPanel
+        solutions={activeExercise.solutions}
+        activeIdx={solutionIdx}
+        onChange={setSolutionIdx}
+      />
+    ) : (
+      <ErklaerungPanel
+        walkthroughId={activeExercise.walkthroughId}
+        mode="deep"
+        emptyHint="Noch kein Lösungsweg. Sobald ich die Lösung gelesen habe, schreibe ich einen — Schritt für Schritt, im Stil des Profs."
+      />
+    )
+  ) : null;
+
+  const leftProgress = onLecture;
+  const rightProgress = onLecture
+    ? rightLecture !== "quiz"
+    : rightUebung === "walkthrough";
+
+  const goToPage = (i: 0 | 1) => {
+    const el = mobileTrackRef.current;
+    if (el) el.scrollTo({ left: i * el.clientWidth, behavior: "smooth" });
+  };
 
   return (
     <div
       style={{ ["--accent" as string]: accentInk }}
-      className="relative h-[calc(100dvh-3.5rem)] w-full lg:grid lg:grid-cols-2"
+      className="relative h-[calc(100dvh-3.5rem)] w-full"
     >
       {/* Centre fold — a soft book-gutter shadow instead of a hard
-          divider, so the two columns read like facing pages. */}
+          divider, so the two columns read like facing pages (desktop only). */}
       <div
         aria-hidden
         className={cn(
@@ -338,68 +384,86 @@ function ChapterView({
           "dark:bg-[linear-gradient(to_right,transparent,rgba(0,0,0,0.28)_47%,rgba(0,0,0,0.42)_50%,rgba(0,0,0,0.28)_53%,transparent)]",
         )}
       />
-      <ColumnPane
-        ariaLabel="Materialien"
-        scrollRef={leftScrollRef}
-        chips={leftChips}
-        subChips={leftSubChips}
-        progress={onLecture}
-        className={cn(mobileSide === "left" ? "block" : "hidden", "lg:block")}
-      >
-        {activeVariant ? (
-          activeVariant.kind === "video" ? (
-            <VideoEmbed url={activeVariant.url} />
-          ) : (
-            <PdfBlock src={activeVariant.src} />
-          )
-        ) : !onLecture && activeExercise ? (
-          <EmptyHint>
-            {`Kein Aufgaben-PDF zu „${tr(activeExercise.label) || "dieser Übung"}“. Manchmal wird nur die Lösung veröffentlicht — schau in der rechten Spalte unter „Lösung“.`}
-          </EmptyHint>
-        ) : null}
-      </ColumnPane>
 
-      <ColumnPane
-        ariaLabel="Hilfen"
-        scrollRef={rightScrollRef}
-        chips={rightChips}
-        progress={onLecture ? rightLecture !== "quiz" : rightUebung === "walkthrough"}
-        className={cn(mobileSide === "right" ? "block" : "hidden", "lg:block")}
+      {/* The two columns keep the exact same logic as the web (each owns its
+          chips). On lg they sit side by side; on mobile they become two
+          full-width pages you SWIPE between (CSS scroll-snap — no second
+          column crammed in, no merged chips). */}
+      <div
+        ref={mobileTrackRef}
+        onScroll={(e) => {
+          const el = e.currentTarget;
+          const p = Math.round(el.scrollLeft / el.clientWidth);
+          if (p !== mobilePage) setMobilePage(p === 1 ? 1 : 0);
+        }}
+        className={cn(
+          "flex h-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain",
+          "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+          "lg:snap-none lg:overflow-x-hidden",
+        )}
       >
-        {onLecture ? (
-          rightLecture === "quiz" ? (
-            <QuizPanel quizBankId={lesson.lecture.quizBankId} />
-          ) : (
-            <ErklaerungPanel
-              walkthroughId={lesson.lecture.walkthroughId}
-              mode={rightLecture === "einfach" ? "simple" : "deep"}
-            />
-          )
-        ) : activeExercise ? (
-          rightUebung === "loesung" ? (
-            <SolutionPanel
-              solutions={activeExercise.solutions}
-              activeIdx={solutionIdx}
-              onChange={setSolutionIdx}
-            />
-          ) : (
-            <ErklaerungPanel
-              walkthroughId={activeExercise.walkthroughId}
-              mode="deep"
-              emptyHint="Noch kein Lösungsweg. Sobald ich die Lösung gelesen habe, schreibe ich einen — Schritt für Schritt, im Stil des Profs."
-            />
-          )
-        ) : null}
-      </ColumnPane>
+        <div className="h-full w-full shrink-0 snap-start lg:w-1/2">
+          <ColumnPane
+            ariaLabel="Materialien"
+            scrollRef={leftScrollRef}
+            chips={leftChips}
+            subChips={leftSubChips}
+            progress={leftProgress}
+            bottomPad
+          >
+            {leftContent}
+          </ColumnPane>
+        </div>
+        <div className="h-full w-full shrink-0 snap-start lg:w-1/2">
+          <ColumnPane
+            ariaLabel="Hilfen"
+            scrollRef={rightScrollRef}
+            chips={rightChips}
+            progress={rightProgress}
+            bottomPad
+          >
+            {rightContent}
+          </ColumnPane>
+        </div>
+      </div>
 
-      <FloatingChapterNav
-        prev={prev}
-        next={next}
-        mobileSide={mobileSide}
-        onMobileSide={setMobileSide}
-        leftLabel={activeLeftLabel}
-        rightLabel={activeRightLabel}
-      />
+      {/* Mobile: which page am I on — tap a dot to jump, or swipe. */}
+      <MobilePageDots page={mobilePage} onGo={goToPage} />
+
+      <FloatingChapterNav prev={prev} next={next} />
+    </div>
+  );
+}
+
+/**
+ * Minimal 2-dot page indicator for the mobile column swipe. Sits above the
+ * chapter chevrons, hidden once both columns are visible (lg+). Each dot is
+ * tappable for readers who'd rather tap than swipe.
+ */
+function MobilePageDots({
+  page,
+  onGo,
+}: {
+  page: number;
+  onGo: (i: 0 | 1) => void;
+}) {
+  return (
+    <div className="pointer-events-none fixed inset-x-0 bottom-[5.5rem] z-30 flex justify-center lg:hidden">
+      <div className="pointer-events-auto flex items-center gap-2 rounded-full bg-card px-3 py-2 shadow-[0_5px_12px_-2px_rgba(0,0,0,0.32),0_22px_50px_-10px_rgba(0,0,0,0.8)]">
+        {([0, 1] as const).map((i) => (
+          <button
+            key={i}
+            type="button"
+            aria-label={i === 0 ? "Material" : "Hilfe"}
+            aria-current={page === i}
+            onClick={() => onGo(i)}
+            className={cn(
+              "h-2 cursor-pointer rounded-full transition-all",
+              page === i ? "w-5 bg-[var(--accent)]" : "w-2 bg-foreground/25",
+            )}
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -419,6 +483,7 @@ function ColumnPane({
   background,
   fill,
   className,
+  bottomPad,
   children,
 }: {
   ariaLabel: string;
@@ -433,6 +498,8 @@ function ColumnPane({
   fill?: boolean;
   /** Extra classes — used to toggle mobile visibility (one page at a time). */
   className?: string;
+  /** Pad the scroll bottom so content clears the floating chapter nav (mobile). */
+  bottomPad?: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -456,7 +523,11 @@ function ColumnPane({
            steady. */
         <div
           ref={scrollRef}
-          className="h-full overflow-y-auto overscroll-contain"
+          className={cn(
+            "h-full overflow-y-auto overscroll-contain",
+            // Clear the floating dots + chevrons on mobile; desktop keeps none.
+            bottomPad && "pb-28 lg:pb-0",
+          )}
         >
           {children}
         </div>
@@ -566,36 +637,19 @@ function ChipRow({ chips, small }: { chips: Chip[]; small?: boolean }) {
 function FloatingChapterNav({
   prev,
   next,
-  mobileSide,
-  onMobileSide,
-  leftLabel,
-  rightLabel,
 }: {
   prev?: Lesson;
   next?: Lesson;
-  /** Mobile facing-page state + labels for the segmented toggle. */
-  mobileSide: "left" | "right";
-  onMobileSide: (side: "left" | "right") => void;
-  leftLabel: string;
-  rightLabel: string;
 }) {
   return (
     <nav
       aria-label="Kapitelnavigation"
-      className="pointer-events-none fixed inset-x-0 bottom-6 z-30 flex items-center justify-center gap-2.5 px-4"
+      className="pointer-events-none fixed inset-x-0 bottom-6 z-30 flex justify-center gap-2.5"
     >
       <ArrowButton
         direction="prev"
         lesson={prev}
         ariaLabel="Vorheriges Kapitel"
-      />
-      {/* Facing-page switcher — phones show one column at a time, full screen,
-          and flip between them here. Hidden once both columns fit (lg+). */}
-      <MobileSideToggle
-        side={mobileSide}
-        onSide={onMobileSide}
-        leftLabel={leftLabel}
-        rightLabel={rightLabel}
       />
       <ArrowButton
         direction="next"
@@ -603,52 +657,6 @@ function FloatingChapterNav({
         ariaLabel="Nächstes Kapitel"
       />
     </nav>
-  );
-}
-
-/**
- * Two-segment pill that flips the visible column on mobile. Matches the
- * floating-chip aesthetic (solid card, accent fill on the active segment).
- * `lg:hidden` because on wide screens both columns are shown at once.
- */
-function MobileSideToggle({
-  side,
-  onSide,
-  leftLabel,
-  rightLabel,
-}: {
-  side: "left" | "right";
-  onSide: (side: "left" | "right") => void;
-  leftLabel: string;
-  rightLabel: string;
-}) {
-  return (
-    <div
-      role="tablist"
-      aria-label="Seite wechseln"
-      className="pointer-events-auto flex min-w-0 items-center gap-1 rounded-full bg-card p-1 shadow-[0_5px_12px_-2px_rgba(0,0,0,0.32),0_22px_50px_-10px_rgba(0,0,0,0.8)] lg:hidden"
-    >
-      {(["left", "right"] as const).map((s) => {
-        const active = side === s;
-        return (
-          <button
-            key={s}
-            type="button"
-            role="tab"
-            aria-selected={active}
-            onClick={() => onSide(s)}
-            className={cn(
-              "max-w-[34vw] truncate rounded-full px-3.5 py-1.5 font-serif text-[14px] tracking-tight transition-colors",
-              active
-                ? "bg-[var(--accent)] font-medium text-background"
-                : "cursor-pointer text-foreground/70 hover:text-foreground",
-            )}
-          >
-            {s === "left" ? leftLabel : rightLabel}
-          </button>
-        );
-      })}
-    </div>
   );
 }
 

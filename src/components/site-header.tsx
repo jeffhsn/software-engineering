@@ -15,8 +15,11 @@ import {
 import { YearPicker } from "@/components/year-picker";
 import { SubjectPicker } from "@/components/subject-picker";
 import { ChapterPicker } from "@/components/chapter-picker";
+import { ChapterSidebar } from "@/components/chapter-sidebar";
+import { SettingsMenu } from "@/components/settings-menu";
 import { NotebookSearch } from "@/components/notebook-search";
 import { clampedIndex } from "@/lib/notebooks/nav";
+import { ACCENT_INK } from "@/lib/subjects/accents";
 import { cn } from "@/lib/utils";
 
 const SUBJECT_RE = /^\/subjects\/([^/]+)(?:\/([^/]+))?\/?$/;
@@ -33,7 +36,7 @@ const SUBJECT_RE = /^\/subjects\/([^/]+)(?:\/([^/]+))?\/?$/;
  * centered no matter how wide the breadcrumb gets.
  */
 export function SiteHeader() {
-  const { dict } = useI18n();
+  const { dict, tr } = useI18n();
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -55,6 +58,7 @@ export function SiteHeader() {
   const currentLesson =
     lessonIndex >= 0 && notebook ? notebook.lessons[lessonIndex] : undefined;
   const onSubjectHome = Boolean(subject && !inChapter);
+  const accent = subject ? ACCENT_INK[subject.accent] : "var(--ink)";
 
   // On the home page the header sits in normal flow — no fixed positioning and
   // no drop shadow. In a notebook it's the fixed, shadowed reading bar, and it
@@ -71,10 +75,11 @@ export function SiteHeader() {
           : "fixed inset-x-0 top-0 shadow-[0_4px_18px_-2px_rgba(0,0,0,0.2)] dark:shadow-[0_6px_22px_-2px_rgba(0,0,0,0.7)]",
       )}
     >
-      {/* Mobile: left track takes all the slack so the brand/subject crumb
-          isn't squeezed by an equal-width right track the small controls never
-          fill. lg+: a symmetric 3-track grid keeps the middle slot centered. */}
-      <div className="grid h-14 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 px-4 sm:px-8 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:px-12">
+      {/* Mobile: the MIDDLE track is the flexible/truncating one (chapter title
+          or search), with intrinsic side tracks (☰ / brand on the left, the
+          gear on the right) — so a long title truncates instead of growing into
+          the buttons. lg+: a symmetric 3-track grid keeps the middle centered. */}
+      <div className="grid h-14 grid-cols-[minmax(0,auto)_minmax(0,1fr)_auto] items-center gap-3 px-4 sm:px-8 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:px-12">
         <div className="flex min-w-0 items-center gap-2">
           {!subject ? (
             <Link
@@ -91,21 +96,30 @@ export function SiteHeader() {
             </Link>
           ) : (
             <>
-              {/* Home logo button — icon only, its own pill. */}
+              {/* Mobile: chapter drawer (☰) replaces the in-header pickers. */}
+              {notebook && (
+                <span className="lg:hidden">
+                  <ChapterSidebar
+                    notebook={notebook}
+                    currentLesson={currentLesson}
+                  />
+                </span>
+              )}
+              {/* Home logo button — desktop only; on mobile the ☰ drawer
+                  carries the "Alle Notizbücher" link instead. */}
               <Link
                 href="/"
                 aria-label={dict.brand}
-                className="group inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-foreground/[0.05] transition-colors hover:bg-foreground/[0.1]"
+                className="group hidden h-9 w-9 shrink-0 items-center justify-center rounded-full bg-foreground/[0.05] transition-colors hover:bg-foreground/[0.1] lg:inline-flex"
               >
                 <span className="text-[16px] leading-none transition-transform group-hover:-rotate-6">
                   💻
                 </span>
               </Link>
-              {/* Current subject — a searchable dropdown of all notebooks,
-                  same pattern as the language switcher. */}
-              <SubjectPicker current={subject} />
-              {notebook && (
-                <span className="hidden shrink-0 sm:inline-flex">
+              {/* Desktop: subject + year pickers (mobile uses the drawer). */}
+              <span className="hidden min-w-0 items-center gap-2 lg:flex">
+                <SubjectPicker current={subject} />
+                {notebook && (
                   <YearPicker
                     current={notebook}
                     available={getNotebooksForSubject(notebook.subject)}
@@ -113,15 +127,33 @@ export function SiteHeader() {
                       router.push(`/subjects/${notebook.subject}?y=${n.year}&l=1`)
                     }
                   />
-                </span>
-              )}
+                )}
+              </span>
             </>
           )}
         </div>
 
         <div className="flex min-w-0 items-center justify-center">
           {currentLesson && notebook ? (
-            <ChapterPicker notebook={notebook} currentLesson={currentLesson} />
+            <>
+              {/* Desktop: jump-to-chapter dropdown. */}
+              <span className="hidden lg:block">
+                <ChapterPicker notebook={notebook} currentLesson={currentLesson} />
+              </span>
+              {/* Mobile: read-only "where am I" label (the ☰ drawer jumps). */}
+              <span className="flex min-w-0 items-center gap-1.5 lg:hidden">
+                <span
+                  aria-hidden
+                  className="shrink-0 font-serif text-[14px] font-semibold italic tabular-nums"
+                  style={{ color: accent }}
+                >
+                  {String(currentLesson.number).padStart(2, "0")}
+                </span>
+                <span className="truncate font-serif text-[13.5px] font-medium text-foreground">
+                  {tr(currentLesson.title)}
+                </span>
+              </span>
+            </>
           ) : onSubjectHome && notebook ? (
             <NotebookSearch notebooks={[notebook]} scope="single" />
           ) : !subject ? (
@@ -130,11 +162,16 @@ export function SiteHeader() {
         </div>
 
         <div className="flex items-center justify-end gap-1.5">
-          {/* Reading-display controls only matter where there's prose to read —
-              hidden on the home page (no subject context). */}
-          {subject && <ReadingSettings />}
-          <ThemeSwitcher />
-          <LanguageSwitcher />
+          {/* Desktop: the controls stay split out as separate pills. */}
+          <span className="hidden items-center gap-1.5 lg:flex">
+            {subject && <ReadingSettings />}
+            <ThemeSwitcher />
+            <LanguageSwitcher />
+          </span>
+          {/* Mobile: one gear bundles theme + language + text settings. */}
+          <span className="lg:hidden">
+            <SettingsMenu showReading={Boolean(subject)} />
+          </span>
         </div>
       </div>
     </header>
