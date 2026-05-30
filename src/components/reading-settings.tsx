@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 
 const SCALE_KEY = "se-bsc-reading-scale";
 const LEADING_KEY = "se-bsc-reading-leading";
+const FONT_KEY = "se-bsc-reading-font";
 const MIN = 0.8;
 const MAX = 1.5;
 const STEP = 0.1;
@@ -19,6 +20,16 @@ const LEADINGS = [
   { label: "Eng", value: 0.9 },
   { label: "Normal", value: 1 },
   { label: "Luftig", value: 1.15 },
+] as const;
+
+// Reading body faces. `value` is the CSS the --reading-font variable is set to
+// (the font's next/font variable). The first is the default (site sans).
+const DEFAULT_FONT = "var(--font-sans)";
+const FONTS = [
+  { label: "Sans", value: DEFAULT_FONT },
+  { label: "Serif", value: "var(--font-serif)" },
+  { label: "Lora", value: "var(--font-lora)" },
+  { label: "Klar", value: "var(--font-atkinson)" },
 ] as const;
 
 function round(n: number) {
@@ -46,6 +57,18 @@ function applyLeading(leading: number) {
   } catch {}
 }
 
+function applyFont(font: string) {
+  document.documentElement.style.setProperty("--reading-font", font);
+  try {
+    localStorage.setItem(FONT_KEY, font);
+  } catch {}
+}
+
+function readStoredString(key: string, fallback: string) {
+  if (typeof window === "undefined") return fallback;
+  return localStorage.getItem(key) || fallback;
+}
+
 /**
  * Text / reading settings — a soft tinted "Aa" button next to the theme
  * toggle. Opens a small panel to adjust the reading font size and line
@@ -63,6 +86,9 @@ export function ReadingSettings() {
   // Mirror whatever the pre-paint inline script already applied.
   const [scale, setScale] = useState(() => clampScale(readStored(SCALE_KEY, 1)));
   const [leading, setLeading] = useState(() => readStored(LEADING_KEY, 1));
+  const [font, setFont] = useState(() =>
+    readStoredString(FONT_KEY, DEFAULT_FONT),
+  );
 
   const changeScale = (next: number) => {
     const c = clampScale(next);
@@ -75,9 +101,15 @@ export function ReadingSettings() {
     applyLeading(next);
   };
 
+  const changeFont = (next: string) => {
+    setFont(next);
+    applyFont(next);
+  };
+
   const reset = () => {
     changeScale(1);
     changeLeading(1);
+    changeFont(DEFAULT_FONT);
   };
 
   const pct = Math.round(scale * 100);
@@ -150,6 +182,32 @@ export function ReadingSettings() {
             >
               <AArrowUp aria-hidden className="h-5 w-5" strokeWidth={1.75} />
             </button>
+          </div>
+        </div>
+
+        {/* Font family */}
+        <div>
+          <div className="mb-1.5 text-[13px] text-foreground">Schriftart</div>
+          <div className="grid grid-cols-2 gap-1.5">
+            {FONTS.map((opt) => {
+              const active = font === opt.value;
+              return (
+                <button
+                  key={opt.label}
+                  type="button"
+                  onClick={() => changeFont(opt.value)}
+                  style={{ fontFamily: opt.value }}
+                  className={cn(
+                    "inline-flex h-9 cursor-pointer items-center justify-center rounded-lg text-[14px] transition-colors",
+                    active
+                      ? "bg-foreground text-background"
+                      : "bg-foreground/[0.05] text-muted-foreground hover:bg-foreground/[0.1] hover:text-foreground",
+                  )}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 

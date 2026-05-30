@@ -130,6 +130,10 @@ body {
    so a reader can sit with the material without fatigue. */
 .prose-notebook {
   color: var(--foreground);
+  /* Reader-chosen body face (text settings); defaults to the site sans so the
+     default look is unchanged. em/blockquotes keep their own serif below. */
+  font-family: var(--reading-font, var(--font-sans)), ui-sans-serif, system-ui,
+    -apple-system, sans-serif;
   font-size: calc(1.15rem * var(--reading-scale, 1));
   line-height: calc(1.78 * var(--reading-leading, 1));
   letter-spacing: 0.005em;
@@ -145,7 +149,10 @@ body {
 .prose-notebook h2,
 .prose-notebook h3,
 .prose-notebook h4 {
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  /* Headings follow the reader-chosen body face too, so the whole explanation
+     reads as ONE piece. Defaults to the site sans → unchanged default look. */
+  font-family: var(--reading-font, var(--font-sans)), ui-sans-serif, system-ui,
+    sans-serif;
   color: var(--ink);
   letter-spacing: -0.018em;
   text-wrap: balance;
@@ -177,7 +184,8 @@ body {
 .prose-notebook h4 {
   font-size: calc(1.05rem * var(--reading-scale, 1));
   font-weight: 600;
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--reading-font, var(--font-sans)), ui-sans-serif, system-ui,
+    sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--ink-soft);

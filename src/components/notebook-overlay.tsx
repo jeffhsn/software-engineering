@@ -4,8 +4,10 @@ import { useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { SUBJECTS } from "@/lib/subjects/registry";
 import { getNotebookForYear } from "@/lib/notebooks/registry";
-import { getExplanation } from "@/lib/notebooks/explanations/registry";
-import { getQuizSet } from "@/lib/notebooks/quizzes/registry";
+import {
+  getExplanation,
+  getQuizSet,
+} from "@/lib/notebooks/content-objects-client";
 import { clampedIndex, setOverlayInUrl } from "@/lib/notebooks/nav";
 import { ExplanationView } from "@/components/explanation-view";
 import { QuizPlayer } from "@/components/quiz-player";

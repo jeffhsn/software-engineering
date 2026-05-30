@@ -107,6 +107,7 @@ interface ResourceRef {
 2. **Triage / classify** each file by what it *is* — lecture, Übung (Aufgaben / Lösung / Mitschrift), a Grundlagen-/prep helper, Zusammenfassung, Cheatsheet, or Klausur. The filename and number are hypotheses; the content decides.
 3. **Place & match by content** (see *Matching playbook* below): lectures get chapter numbers; Übungen get wired to the lecture they actually test.
 4. **Report placement**, then generate the per-lecture AI artefacts (one explanation, one quiz bank) and wire everything into the registry.
+5. **Translate (dead last).** Once the notebook's content has stopped moving, run the translation pass **automatically** — I do not wait to be asked. It is incremental (only the new strings), background/non-blocking, and $0 at runtime. See *Translation comes dead last → How the translation pass actually runs* for the exact commands (nav inline + claude-quality explanations + free-MT quizzes). Announce that it's starting; it draws on the Claude plan for the explanations. **After we later EDIT an explanation/quiz, re-run the same pass** — translations are cached by German source text, so only the changed strings re-translate (changed → redone, unchanged → instant, deleted → dropped). Re-extract `de.json` first (`content-i18n.js`).
 
 **Sequencing of the whole notebook:** lectures + their Übungen + per-chapter explanations + quizzes come **first** and must be solid. Zusammenfassungen, Cheatsheets and Klausuren are notebook-level and **deferred** — I still convert and file any the user drops, but the polished AI versions come *later*, on request, once the chapters are done. **Translation comes dead last** (see *Translation* at the end). The per-type table is the detail for each kind.
 
@@ -230,3 +231,20 @@ The user's mental model is: this is a real notebook with chapters. Every chapter
 German is the canonical language for **everything** I author — chapter titles, chip labels, explanations, quiz banks, walkthroughs, and UI strings. When I create a new `LocalizedText`, I write the `de` field properly and may leave `en` (and any future language) as a quick mirror or placeholder. I do **not** polish translations as I go.
 
 A single, dedicated translation pass happens **only at the very end**, once we have stopped adding and restructuring material for the notebook (lectures, Übungen, explanations, quizzes, then summaries/cheatsheets/exams). Translating earlier just means redoing it every time content moves. When that pass comes, it localises every `de` string the notebook accumulated — nothing is exempt.
+
+## How the translation pass actually runs (automatic, incremental, $0)
+
+This runs the moment a notebook stops moving — **for every notebook, every year, every new subject**, without being asked. It is **incremental and cached**: a new notebook (or new material in an existing one) translates **only its new strings**; nothing is ever re-done. Full design in `tools/translate/README.md`. There are two layers because short labels and long prose are different problems:
+
+1. **Nav layer — short labels, inlined into the `.ts` files** (chapter/quiz titles, chip labels, descriptions). Free Google MT, all 31 locales:
+   ```sh
+   node tools/translate/translate.js          # (--dry to preview)
+   ```
+2. **Deep content — explanations + quiz strings, served as static per-locale files** (`public/content-i18n/<nb>/<locale>.json`, fetched per active locale by `content-client.tsx`, German fallback). Never bundled, so 31 locales add static files, never JS weight.
+   ```sh
+   node tools/translate/content-i18n.js                                   # extract German → de.json
+   node tools/translate/translate-content.js --engine=claude --only=explanations   # ← the IMPORTANT one: high-quality explanations via the local claude CLI (no API key)
+   node tools/translate/translate-content.js                              # quiz bulk via free Google MT
+   ```
+
+**The explanations are the priority** (they are the site) and get **claude-CLI quality**; there are few of them per notebook (long but ~1 per lesson), so this is a short job. The thousands of short quiz strings go through free Google MT. Everything is committed as static files → **$0 at runtime, no API key, scales to 50+ notebooks** because each is a one-time per-notebook step. Finish with `npx tsc --noEmit` + a browser check in a couple of locales (0 console errors).

@@ -15,8 +15,19 @@ import type {
 import type { LocalizedText } from "@/lib/i18n/types";
 import { clampedIndex, setLessonInUrl } from "@/lib/notebooks/nav";
 import { useI18n } from "@/lib/i18n/client";
-import { getExplanation } from "@/lib/notebooks/explanations/registry";
-import { getQuizSet } from "@/lib/notebooks/quizzes/registry";
+import {
+  useContentText,
+  notebookOf,
+  contentKey,
+  seedContent,
+} from "@/lib/i18n/content-client";
+import {
+  getExplanation,
+  getQuizSet,
+  seedContentObjects,
+} from "@/lib/notebooks/content-objects-client";
+import type { Explanation } from "@/lib/notebooks/explanation-types";
+import type { QuizSet } from "@/lib/notebooks/quiz-types";
 import { LBL } from "@/lib/notebooks/labels-i18n";
 import { QuizPlayer } from "@/components/quiz-player";
 import { getSubject } from "@/lib/subjects/registry";
@@ -46,6 +57,19 @@ const PdfViewer = dynamic(
 
 interface Props {
   notebook: Notebook;
+  /**
+   * This notebook's heavy content objects, resolved on the server so the
+   * client bundle never imports the all-notebooks registries. Seeded into
+   * content-objects-client for synchronous by-id lookups in the panels + the
+   * overlay.
+   */
+  content?: { explanations: Explanation[]; quizSets: QuizSet[] };
+  /**
+   * The active locale's deep-content map, read on the server and embedded in
+   * the HTML so explanations/quizzes render instantly (no post-paint fetch).
+   * Absent for German (the bundled fallback) and while translations are empty.
+   */
+  initialContent?: { key: string; locale: string; map: Record<string, string> };
 }
 
 /**
@@ -54,7 +78,16 @@ interface Props {
  * defaults to chapter 1 (the subject route also redirects bare URLs to
  * `?l=1` server-side so the header stays in sync).
  */
-export function NotebookView({ notebook }: Props) {
+export function NotebookView({ notebook, content, initialContent }: Props) {
+  // Seed synchronously during render so the child panes (and the layout-level
+  // overlay, which renders after this) resolve content + translations on their
+  // very first render. Both are idempotent.
+  if (content) {
+    seedContentObjects(content.explanations, content.quizSets);
+  }
+  if (initialContent) {
+    seedContent(initialContent.key, initialContent.locale, initialContent.map);
+  }
   const searchParams = useSearchParams();
   const rawL = searchParams.get("l");
   const index = clampedIndex(parseInt(rawL ?? "1") - 1, notebook.lessons.length);
@@ -663,6 +696,7 @@ function ErklaerungPanel({
   emptyHint?: string;
 }) {
   const { tr } = useI18n();
+  const ct = useContentText(notebookOf(walkthroughId ?? ""));
 
   if (!walkthroughId) {
     return <EmptyHint>{emptyHint}</EmptyHint>;
@@ -672,15 +706,23 @@ function ErklaerungPanel({
     return <EmptyHint>{`Kein Eintrag mit der ID „${walkthroughId}“.`}</EmptyHint>;
   }
 
-  const body =
-    mode === "simple" && explanation.simpleContent
-      ? tr(explanation.simpleContent)
-      : tr(explanation.content);
+  const useSimple = mode === "simple" && Boolean(explanation.simpleContent);
+  const body = useSimple
+    ? ct(
+        contentKey.expl(explanation.id, "simpleContent"),
+        tr(explanation.simpleContent),
+      )
+    : ct(contentKey.expl(explanation.id, "content"), tr(explanation.content));
   const title = tr(explanation.title);
 
   return (
     <article className="prose-notebook max-w-none px-5 pt-16 pb-8 text-[16px] sm:px-8">
-      <h2 className="not-prose mb-5 font-serif text-[24px] font-semibold leading-tight text-[var(--ink)]">
+      <h2
+        className="not-prose mb-5 text-[24px] font-semibold leading-tight text-[var(--ink)]"
+        style={{
+          fontFamily: "var(--reading-font, var(--font-sans)), sans-serif",
+        }}
+      >
         {title}
       </h2>
       <ReactMarkdown remarkPlugins={[remarkGfm]} components={figureComponents}>

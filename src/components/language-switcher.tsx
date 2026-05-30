@@ -17,6 +17,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function LanguageSwitcher() {
@@ -41,6 +42,10 @@ export function LanguageSwitcher() {
         <span className="font-serif italic text-muted-foreground group-hover:text-foreground">
           {current.nativeLabel}
         </span>
+        <ChevronDown
+          className="h-3.5 w-3.5 text-muted-foreground transition-transform group-hover:text-foreground group-data-[state=open]:rotate-180"
+          strokeWidth={2}
+        />
       </PopoverTrigger>
       <PopoverContent
         align="end"

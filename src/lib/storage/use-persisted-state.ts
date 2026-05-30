@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export const STORAGE_NAMESPACE = "se-bsc:v1:";
 
@@ -23,7 +23,18 @@ export function usePersistedState<T>(
   initial: T,
 ): [T, (value: T | ((prev: T) => T)) => void] {
   const fullKey = storageKey(key);
-  const [value, setValue] = useState<T>(() => readPersisted(key, initial));
+  // Start from `initial` on BOTH the server and the first client render so the
+  // hydrated markup matches, then read localStorage after mount. Reading it in
+  // the useState initializer instead would make the first client render diverge
+  // from the server (localStorage is empty server-side) → hydration mismatch.
+  const [value, setValue] = useState<T>(initial);
+
+  useEffect(() => {
+    const stored = readPersisted(key, initial);
+    setValue(stored);
+    // Re-read when the key changes (e.g. switching between quizzes).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fullKey]);
 
   const update = useCallback(
     (next: T | ((prev: T) => T)) => {

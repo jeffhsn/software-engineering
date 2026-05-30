@@ -56,8 +56,21 @@ export function SiteHeader() {
     lessonIndex >= 0 && notebook ? notebook.lessons[lessonIndex] : undefined;
   const onSubjectHome = Boolean(subject && !inChapter);
 
+  // On the home page the header sits in normal flow — no fixed positioning and
+  // no drop shadow. In a notebook it's the fixed, shadowed reading bar, and it
+  // renders its own h-14 spacer so the content below clears it.
+  const isHome = !subject;
+
   return (
-    <header className="fixed inset-x-0 top-0 z-40 h-14 bg-background shadow-[0_4px_18px_-2px_rgba(0,0,0,0.2)] dark:shadow-[0_6px_22px_-2px_rgba(0,0,0,0.7)]">
+    <>
+    <header
+      className={cn(
+        "z-40 h-14 bg-background",
+        isHome
+          ? "relative"
+          : "fixed inset-x-0 top-0 shadow-[0_4px_18px_-2px_rgba(0,0,0,0.2)] dark:shadow-[0_6px_22px_-2px_rgba(0,0,0,0.7)]",
+      )}
+    >
       <div className="grid h-14 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 px-4 sm:px-8 lg:px-12">
         <div className="flex min-w-0 items-center gap-2">
           {!subject ? (
@@ -112,11 +125,15 @@ export function SiteHeader() {
         </div>
 
         <div className="flex items-center justify-end gap-1.5">
-          <ReadingSettings />
+          {/* Reading-display controls only matter where there's prose to read —
+              hidden on the home page (no subject context). */}
+          {subject && <ReadingSettings />}
           <ThemeSwitcher />
           <LanguageSwitcher />
         </div>
       </div>
     </header>
+    {!isHome && <div aria-hidden className="h-14" />}
+    </>
   );
 }

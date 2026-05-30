@@ -10,9 +10,6 @@ export default async function Home() {
   return (
     <div className="w-full px-4 py-12 sm:px-8 sm:py-16 lg:px-12">
       <header className="mb-12 flex flex-col items-start gap-4">
-        <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-          {dict.home.pill}
-        </span>
         <h1 className="text-balance text-5xl font-semibold tracking-tighter sm:text-6xl">
           {dict.home.title}
         </h1>

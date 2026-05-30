@@ -9,6 +9,11 @@ import type {
 } from "@/lib/notebooks/quiz-types";
 import type { LocalizedText } from "@/lib/i18n/types";
 import { useI18n } from "@/lib/i18n/client";
+import {
+  useContentText,
+  notebookOf,
+  contentKey,
+} from "@/lib/i18n/content-client";
 import { usePersistedState } from "@/lib/storage/use-persisted-state";
 import { UI } from "@/lib/notebooks/ui-i18n";
 import { cn } from "@/lib/utils";
@@ -350,6 +355,7 @@ function QuizRunner({
   tr: (text: LocalizedText | undefined) => string;
   chipInset?: boolean;
 }) {
+  const ct = useContentText(notebookOf(quiz.id));
   const questions = quiz.questions;
   const question = questions[view.index];
   const state = view.answers[question.id];
@@ -424,16 +430,20 @@ function QuizRunner({
           className="mt-2 text-balance text-2xl font-semibold leading-tight tracking-tight sm:text-3xl"
           style={{ fontFamily: "var(--font-serif), Georgia, serif", color: "var(--ink)" }}
         >
-          {tr(
-            question.type === "mcq"
-              ? question.question
-              : (question as TrueFalseQuestion).statement,
-          )}
+          {question.type === "mcq"
+            ? ct(
+                contentKey.question(quiz.id, question.id),
+                tr(question.question),
+              )
+            : ct(
+                contentKey.statement(quiz.id, question.id),
+                tr((question as TrueFalseQuestion).statement),
+              )}
         </h3>
 
         <div className="mt-8 space-y-2.5">
           {question.type === "mcq"
-            ? renderMcq(question, state, onSubmit, tr)
+            ? renderMcq(question, state, onSubmit, tr, quiz.id, ct)
             : renderTf(question, state, onSubmit)}
         </div>
 
@@ -459,7 +469,10 @@ function QuizRunner({
               </span>
               <span>{state.correct ? tr(UI.correct) : tr(UI.notQuite)}</span>
             </div>
-            {tr(question.explanation)}
+            {ct(
+              contentKey.explanation(quiz.id, question.id),
+              tr(question.explanation),
+            )}
           </div>
         )}
 
@@ -667,6 +680,8 @@ function renderMcq(
   state: AnswerState | undefined,
   submit: (chosen: number) => void,
   tr: (text: LocalizedText | undefined) => string,
+  quizId: string,
+  ct: (key: string, german: string) => string,
 ) {
   return q.options.map((opt, i) => {
     const answered = !!state;
@@ -701,7 +716,9 @@ function renderMcq(
         >
           {String.fromCharCode(65 + i)}
         </span>
-        <span className="flex-1">{tr(opt)}</span>
+        <span className="flex-1">
+          {ct(contentKey.option(quizId, q.id, i), tr(opt))}
+        </span>
         {answered && isCorrectChoice && (
           <span
             aria-hidden

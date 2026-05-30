@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useMemo, useCallback } from "react";
+import { createContext, useContext, useMemo, useCallback, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { Dict, Locale, LocalizedText } from "./types";
 import { getDict } from "./dictionaries";
 import { getLocaleMeta } from "./locales";
@@ -30,22 +31,41 @@ export function I18nProvider({
   initialLocale: Locale;
   children: React.ReactNode;
 }) {
-  const setLocale = useCallback((next: Locale) => {
-    writeLocaleCookie(next);
-    window.location.reload();
-  }, []);
+  const router = useRouter();
+  // Locale lives in client state so switching is instant: all bundled UI
+  // strings (nav, chips, dict) re-resolve in place with no page reload. The
+  // cookie is updated for the next server render, and router.refresh() lets the
+  // server components catch up without a hard navigation (preserves scroll +
+  // client state). The old window.location.reload() was the source of the lag.
+  const [locale, setLocaleState] = useState<Locale>(initialLocale);
+
+  const setLocale = useCallback(
+    (next: Locale) => {
+      if (next === locale) return;
+      writeLocaleCookie(next);
+      // Apply the direction/lang to <html> immediately so RTL flips without
+      // waiting for the server round-trip.
+      const meta = getLocaleMeta(next);
+      const root = document.documentElement;
+      root.lang = next;
+      root.dir = meta.dir;
+      setLocaleState(next);
+      router.refresh();
+    },
+    [locale, router],
+  );
 
   const value = useMemo<I18nContextValue>(() => {
-    const dict = getDict(initialLocale);
-    const meta = getLocaleMeta(initialLocale);
+    const dict = getDict(locale);
+    const meta = getLocaleMeta(locale);
     return {
-      locale: initialLocale,
+      locale,
       dict,
       dir: meta.dir,
       setLocale,
-      tr: (text) => resolveTr(text, initialLocale),
+      tr: (text) => resolveTr(text, locale),
     };
-  }, [initialLocale, setLocale]);
+  }, [locale, setLocale]);
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }

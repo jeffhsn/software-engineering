@@ -9,6 +9,7 @@ import { NotebookView } from "@/components/notebook-view";
 import { SHELL_GRID, ShellContainer } from "@/components/app-shell";
 import { cn } from "@/lib/utils";
 import { getServerI18n } from "@/lib/i18n/server";
+import { readContentSeed, resolveNotebookContent } from "@/lib/i18n/content-server";
 
 export async function generateStaticParams() {
   return getAllSubjectSlugs().map((slug) => ({ slug }));
@@ -47,7 +48,7 @@ export default async function SubjectPage({
   const subject = getSubject(slug);
   if (!subject) notFound();
 
-  const { dict } = await getServerI18n();
+  const { dict, locale } = await getServerI18n();
   const a = ACCENT[subject.accent];
   const notebook = getNotebookForYear(subject.slug, y ? Number(y) : undefined);
 
@@ -60,7 +61,14 @@ export default async function SubjectPage({
     if (!hasChapter) {
       redirect(`/subjects/${slug}?${y ? `y=${y}&` : ""}l=1`);
     }
-    return <NotebookView notebook={notebook} />;
+    const seed = await readContentSeed(notebook, locale);
+    return (
+      <NotebookView
+        notebook={notebook}
+        content={resolveNotebookContent(notebook)}
+        initialContent={seed ? { ...seed, locale } : undefined}
+      />
+    );
   }
 
   // Subjects without notebooks still adopt the shell so the header

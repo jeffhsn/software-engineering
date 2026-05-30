@@ -177,8 +177,12 @@ export function PdfViewer({
           {currentDocument.numPages && pageWidth ? (
             pageAspect ? (
               Array.from({ length: currentDocument.numPages }, (_, i) => (
+                // Key is width-free on purpose: when the column resizes or the
+                // user zooms, react-pdf re-fits the SAME mounted page in place
+                // instead of unmounting → re-rasterizing every page (which
+                // flashed). Smooth resize, no flicker.
                 <LazyPage
-                  key={`${src}-p-${i + 1}-w-${Math.round(pageWidth)}`}
+                  key={`${src}-p-${i + 1}`}
                   root={isStack ? null : containerElement}
                   pageNumber={i + 1}
                   width={pageWidth}
@@ -220,6 +224,7 @@ function LazyPage({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(!!eager);
+  const [rendered, setRendered] = useState(false);
 
   useEffect(() => {
     if (mounted || !ref.current) return;
@@ -230,7 +235,10 @@ function LazyPage({
           io.disconnect();
         }
       },
-      { root: root ?? undefined, rootMargin: "300px 0px" },
+      // Mount a little earlier (a screenful ahead) so the page has time to
+      // rasterize and fade in *before* it scrolls into view — no rendering
+      // visibly catching up to the scroll.
+      { root: root ?? undefined, rootMargin: "600px 0px" },
     );
     io.observe(ref.current);
     return () => io.disconnect();
@@ -241,16 +249,34 @@ function LazyPage({
   return (
     <div ref={ref} style={{ width }}>
       {mounted ? (
-        // Text + annotation layers are heavy and not needed for read-only
-        // slide viewing — leaving them off ~halves per-page render time.
-        <Page
-          pageNumber={pageNumber}
-          width={width}
-          renderTextLayer={false}
-          renderAnnotationLayer={false}
-          className="shadow-sm!"
-          loading={<PageSkeleton height={placeholderHeight} />}
-        />
+        // The page reserves its real height immediately; the skeleton sits
+        // underneath and crossfades out as the rasterized page fades in, so a
+        // slide settles in gently instead of popping.
+        <div className="relative" style={{ minHeight: placeholderHeight }}>
+          <div
+            aria-hidden
+            className={cn(
+              "absolute inset-0 transition-opacity duration-500 ease-out",
+              rendered ? "opacity-0" : "opacity-100",
+            )}
+          >
+            <PageSkeleton height={placeholderHeight} loading={!rendered} />
+          </div>
+          {/* Text + annotation layers are heavy and not needed for read-only
+              slide viewing — leaving them off ~halves per-page render time. */}
+          <Page
+            pageNumber={pageNumber}
+            width={width}
+            renderTextLayer={false}
+            renderAnnotationLayer={false}
+            onRenderSuccess={() => setRendered(true)}
+            className={cn(
+              "shadow-sm! transition-opacity duration-500 ease-out",
+              rendered ? "opacity-100" : "opacity-0",
+            )}
+            loading={<div style={{ height: placeholderHeight }} />}
+          />
+        </div>
       ) : (
         <PageSkeleton height={placeholderHeight} loading={false} />
       )}

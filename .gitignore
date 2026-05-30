@@ -48,3 +48,8 @@ tools/*/node_modules/
 # local debug artifacts
 load-*.png
 .playwright-mcp/
+
+# translation tool cache (resumable; large, regenerated locally)
+tools/translate/cache.json
+tools/translate/content-cache.json
+tools/translate/*.tmp
