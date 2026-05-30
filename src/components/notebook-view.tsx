@@ -97,7 +97,7 @@ export function NotebookView({ notebook, content, initialContent }: Props) {
 
 /* ─────────────────────── Chapter View ─────────────────────── */
 
-type LeftKey = "lecture" | `uebung-${number}`;
+type LeftKey = "lecture" | "uebung";
 type RightLectureKey = "tief" | "einfach" | "quiz";
 type RightUebungKey = "loesung" | "walkthrough";
 
@@ -132,6 +132,10 @@ function ChapterView({
   );
 
   const [leftKey, setLeftKey] = useState<LeftKey>("lecture");
+  // Which exercise is selected inside the single "Übung" chip (a notebook can
+  // have several exercises per chapter — they live in a sub-row, not as extra
+  // top-level chips).
+  const [exerciseIdx, setExerciseIdx] = useState(0);
   const [rightLecture, setRightLecture] = useState<RightLectureKey>("tief");
   const [rightUebung, setRightUebung] =
     useState<RightUebungKey>("loesung");
@@ -152,6 +156,7 @@ function ChapterView({
     if (lastSeen.current !== lesson.number) {
       lastSeen.current = lesson.number;
       setLeftKey("lecture");
+      setExerciseIdx(0);
       setRightLecture("tief");
       setRightUebung("loesung");
       setSolutionIdx(0);
@@ -163,12 +168,12 @@ function ChapterView({
     }
   }, [lesson.number]);
 
-  // Switching the primary material (Vorlesung ↔ Übung, or between Übungen)
-  // always starts at that material's first variant.
+  // Switching the primary material (Vorlesung ↔ Übung) or the selected
+  // exercise always starts at that material's first variant.
   useEffect(() => {
     setLeftVariant(null);
     leftScrollRef.current?.scrollTo({ top: 0 });
-  }, [leftKey]);
+  }, [leftKey, exerciseIdx]);
 
   // ← / → keyboard navigation between chapters. Skip when typing.
   useEffect(() => {
@@ -255,11 +260,8 @@ function ChapterView({
   }, []);
 
   const onLecture = leftKey === "lecture";
-  const activeExerciseIdx = onLecture
-    ? -1
-    : parseInt(leftKey.replace("uebung-", ""), 10);
-  const activeExercise =
-    activeExerciseIdx >= 0 ? exercises[activeExerciseIdx] : undefined;
+  const safeExerciseIdx = Math.min(exerciseIdx, Math.max(0, exercises.length - 1));
+  const activeExercise = onLecture ? undefined : exercises[safeExerciseIdx];
 
   // Variants of the active left material. A lecture is its slides plus, if
   // present, a video recording; an Übung is each of its Aufgaben sheets (e.g.
@@ -291,36 +293,64 @@ function ChapterView({
       }));
   const activeVariant =
     leftVariants.find((v) => v.key === leftVariant) ?? leftVariants[0];
-  const leftSubChips: Chip[] =
+  // Variant row (slides/video, or the Aufgaben languages) — shown small and
+  // separated below the two primary chips. Labels are trimmed to the part in
+  // parentheses where present (e.g. „Aufgaben (deutsch)" → „deutsch").
+  const leftVariantChips: Chip[] =
     leftVariants.length > 1
       ? leftVariants.map((v) => ({
           key: v.key,
-          label: tr(v.label),
+          label: shortChipLabel(tr(v.label)),
           active: v.key === activeVariant?.key,
           onClick: () => setLeftVariant(v.key),
         }))
       : [];
 
+  // Only ever TWO primary chips: Vorlesung and (if any) Übung. Multiple
+  // exercises don't each get a top chip — they go in the sub-row below.
   const leftChips: Chip[] = [
     {
       key: "lecture",
       label: tr(LBL.vorlesung),
-      active: leftKey === "lecture",
+      active: onLecture,
       onClick: () => {
         setLeftKey("lecture");
         setRightLecture("tief");
       },
     },
-    ...exercises.map((ex, i) => ({
-      key: `uebung-${i}`,
-      label: tr(ex.label) || `Übung ${i + 1}`,
-      active: leftKey === `uebung-${i}`,
-      onClick: () => {
-        setLeftKey(`uebung-${i}` as LeftKey);
-        setRightUebung("loesung");
-      },
-    })),
+    ...(exercises.length > 0
+      ? [
+          {
+            key: "uebung",
+            label: tr(LBL.uebung),
+            active: !onLecture,
+            onClick: () => {
+              setLeftKey("uebung");
+              setRightUebung("loesung");
+            },
+          },
+        ]
+      : []),
   ];
+
+  // Sub-row that picks WHICH exercise, when a chapter has more than one. Trimmed
+  // to the distinguishing part (e.g. „Übung (Vernam …)" → „Vernam …").
+  const exerciseChips: Chip[] =
+    !onLecture && exercises.length > 1
+      ? exercises.map((ex, i) => ({
+          key: `ex-${i}`,
+          label: shortChipLabel(tr(ex.label)) || `Übung ${i + 1}`,
+          active: i === safeExerciseIdx,
+          onClick: () => {
+            setExerciseIdx(i);
+            setSolutionIdx(0);
+            setRightUebung("loesung");
+          },
+        }))
+      : [];
+
+  // The exercise picker sits above the language/variant picker.
+  const leftSubRows: Chip[][] = [exerciseChips, leftVariantChips];
 
   const lectureExplanation = lesson.lecture.walkthroughId
     ? getExplanation(lesson.lecture.walkthroughId)
@@ -476,7 +506,7 @@ function ChapterView({
             ariaLabel="Materialien"
             scrollRef={leftScrollRef}
             chips={leftChips}
-            subChips={leftSubChips}
+            subRows={leftSubRows}
             progress={leftProgress}
             bottomPad
           >
@@ -516,7 +546,7 @@ function ColumnPane({
   ariaLabel,
   scrollRef,
   chips,
-  subChips,
+  subRows,
   progress,
   background,
   fill,
@@ -527,8 +557,9 @@ function ColumnPane({
   ariaLabel: string;
   scrollRef: React.RefObject<HTMLDivElement | null>;
   chips: Chip[];
-  /** Secondary row of smaller chips (e.g. slides/video, DE/EN). Optional. */
-  subChips?: Chip[];
+  /** Secondary rows of smaller chips (e.g. which exercise, then DE/EN). Each
+      non-empty row renders under the primary chips. Optional. */
+  subRows?: Chip[][];
   progress?: boolean;
   background?: string;
   /** Let the child own the full column height (no scroll padding) — used by
@@ -587,7 +618,9 @@ function ColumnPane({
         )}
       >
         <ChipRow chips={chips} />
-        {subChips && subChips.length > 0 && <ChipRow chips={subChips} small />}
+        {subRows
+          ?.filter((row) => row.length > 0)
+          .map((row, i) => <ChipRow key={i} chips={row} small />)}
       </div>
     </section>
   );
@@ -933,6 +966,17 @@ interface Chip {
   sub?: string;
   active: boolean;
   onClick: () => void;
+}
+
+/**
+ * Trim a chip label to the part in parentheses when there is one, so a
+ * sub-row chip reads „Vernam & DES-S-Boxen" / „deutsch" instead of repeating
+ * „Übung (…)" / „Aufgaben (…)". Language-agnostic; labels without parens are
+ * returned unchanged.
+ */
+function shortChipLabel(label: string): string {
+  const m = label.match(/^[^(]*\((.+)\)\s*$/);
+  return m ? m[1].trim() : label;
 }
 
 
