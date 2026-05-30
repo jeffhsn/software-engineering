@@ -14,6 +14,7 @@ import type {
 } from "@/lib/notebooks/types";
 import type { LocalizedText } from "@/lib/i18n/types";
 import { clampedIndex, setLessonInUrl } from "@/lib/notebooks/nav";
+import { setChromeHidden, useChromeHidden } from "@/lib/chrome-visibility";
 import { useI18n } from "@/lib/i18n/client";
 import {
   useContentText,
@@ -155,6 +156,7 @@ function ChapterView({
       setRightUebung("loesung");
       setSolutionIdx(0);
       setMobilePage(0);
+      setChromeHidden(false);
       leftScrollRef.current?.scrollTo({ top: 0 });
       rightScrollRef.current?.scrollTo({ top: 0 });
       mobileTrackRef.current?.scrollTo({ left: 0 });
@@ -192,6 +194,41 @@ function ChapterView({
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [prev, next]);
+
+  // Immersive reading on mobile: hide the chrome (header, chips, bottom nav)
+  // while scrolling down, bring it back when scrolling up or when the scroll
+  // settles — like the X app. Desktop is never affected.
+  useEffect(() => {
+    const els = [leftScrollRef.current, rightScrollRef.current].filter(
+      Boolean,
+    ) as HTMLDivElement[];
+    if (els.length === 0) return;
+    const last = new WeakMap<HTMLElement, number>();
+    let idle: ReturnType<typeof setTimeout>;
+    const onScroll = (e: Event) => {
+      const el = e.currentTarget as HTMLElement;
+      if (window.innerWidth >= 1024) {
+        setChromeHidden(false);
+        return;
+      }
+      const top = el.scrollTop;
+      const prev = last.get(el) ?? 0;
+      last.set(el, top);
+      if (top < 56) setChromeHidden(false);
+      else if (top - prev > 6) setChromeHidden(true);
+      else if (prev - top > 6) setChromeHidden(false);
+      clearTimeout(idle);
+      idle = setTimeout(() => setChromeHidden(false), 240);
+    };
+    els.forEach((el) =>
+      el.addEventListener("scroll", onScroll, { passive: true }),
+    );
+    return () => {
+      clearTimeout(idle);
+      els.forEach((el) => el.removeEventListener("scroll", onScroll));
+      setChromeHidden(false);
+    };
+  }, []);
 
   const onLecture = leftKey === "lecture";
   const activeExerciseIdx = onLecture
@@ -369,10 +406,18 @@ function ChapterView({
     if (el) el.scrollTo({ left: i * el.clientWidth, behavior: "smooth" });
   };
 
+  const chromeHidden = useChromeHidden();
+
   return (
     <div
       style={{ ["--accent" as string]: accentInk }}
-      className="relative h-[calc(100dvh-3.5rem)] w-full"
+      className={cn(
+        "relative w-full transition-[height] duration-300",
+        // When the header slides away on mobile its spacer collapses, so the
+        // reading area grows to the full viewport; desktop is unchanged.
+        chromeHidden ? "h-[100dvh]" : "h-[calc(100dvh-3.5rem)]",
+        "lg:h-[calc(100dvh-3.5rem)]",
+      )}
     >
       {/* Centre fold — a soft book-gutter shadow instead of a hard
           divider, so the two columns read like facing pages (desktop only). */}
@@ -471,6 +516,7 @@ function ColumnPane({
   bottomPad?: boolean;
   children: React.ReactNode;
 }) {
+  const chromeHidden = useChromeHidden();
   return (
     <section
       aria-label={ariaLabel}
@@ -507,8 +553,15 @@ function ColumnPane({
 
       {/* Chips float ON TOP of the material — separate pills, no subheader.
           A secondary row (slides/video, DE/EN, …) sits just below the primary
-          chips when the active material has more than one source. */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex min-h-16 flex-col justify-center gap-1.5 px-3 py-2 sm:px-4">
+          chips when the active material has more than one source. They slide up
+          out of the way while scrolling on mobile (with the rest of the chrome). */}
+      <div
+        className={cn(
+          "pointer-events-none absolute inset-x-0 top-0 z-20 flex min-h-16 flex-col justify-center gap-1.5 px-3 py-2 transition-all duration-300 sm:px-4",
+          chromeHidden && "-translate-y-[130%] opacity-0",
+          "lg:translate-y-0 lg:opacity-100",
+        )}
+      >
         <ChipRow chips={chips} />
         {subChips && subChips.length > 0 && <ChipRow chips={subChips} small />}
       </div>
@@ -619,10 +672,17 @@ function FloatingChapterNav({
   mobilePage: number;
   onGoToPage: (i: 0 | 1) => void;
 }) {
+  const chromeHidden = useChromeHidden();
   return (
     <nav
       aria-label="Kapitelnavigation"
-      className="pointer-events-none fixed inset-x-0 bottom-6 z-30 flex items-center justify-center gap-2.5"
+      className={cn(
+        "pointer-events-none fixed inset-x-0 bottom-6 z-30 flex items-center justify-center gap-2.5",
+        "transition-all duration-300",
+        // Slide out of the way while scrolling (mobile); always shown on lg.
+        chromeHidden && "pointer-events-none translate-y-[200%] opacity-0",
+        "lg:translate-y-0 lg:opacity-100",
+      )}
     >
       <ArrowButton
         direction="prev"

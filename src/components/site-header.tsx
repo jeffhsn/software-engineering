@@ -20,6 +20,7 @@ import { SettingsMenu } from "@/components/settings-menu";
 import { NotebookSearch } from "@/components/notebook-search";
 import { clampedIndex } from "@/lib/notebooks/nav";
 import { ACCENT_INK } from "@/lib/subjects/accents";
+import { useChromeHidden } from "@/lib/chrome-visibility";
 import { ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -41,6 +42,7 @@ export function SiteHeader() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const chromeHidden = useChromeHidden();
 
   const match = pathname.match(SUBJECT_RE);
   const slug = match?.[1];
@@ -74,6 +76,10 @@ export function SiteHeader() {
         isHome
           ? "relative"
           : "fixed inset-x-0 top-0 shadow-[0_4px_18px_-2px_rgba(0,0,0,0.2)] dark:shadow-[0_6px_22px_-2px_rgba(0,0,0,0.7)]",
+        // Slide up out of the way while scrolling a notebook on mobile.
+        "transition-transform duration-300",
+        !isHome && chromeHidden && "-translate-y-full",
+        "lg:translate-y-0",
       )}
     >
       {/* Mobile: the MIDDLE track is the flexible/truncating one (chapter title
@@ -186,7 +192,18 @@ export function SiteHeader() {
         </div>
       </div>
     </header>
-    {!isHome && <div aria-hidden className="h-14" />}
+    {/* Spacer the fixed notebook header sits on. It collapses on mobile when
+        the header slides away, so the reading area below grows into the space. */}
+    {!isHome && (
+      <div
+        aria-hidden
+        className={cn(
+          "transition-[height] duration-300",
+          chromeHidden ? "h-0" : "h-14",
+          "lg:h-14",
+        )}
+      />
+    )}
     </>
   );
 }
