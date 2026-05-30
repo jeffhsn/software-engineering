@@ -56,6 +56,16 @@ export function PdfViewer({
     null,
   );
   const [containerWidth, setContainerWidth] = useState<number | null>(null);
+  // Cap the rasterisation resolution. pdf.js renders each page to a canvas of
+  // width × devicePixelRatio pixels; on a Retina iPad that is ×2, which on a
+  // 30-slide deck adds up to hundreds of MB and crashes the Safari tab
+  // ("a problem repeatedly occurred"). 1.5 stays crisp for slides while
+  // roughly halving canvas memory vs the native ×2. Measured on the client
+  // after mount so SSR markup is unaffected.
+  const [pixelRatio, setPixelRatio] = useState(1);
+  useEffect(() => {
+    setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+  }, []);
   const zoom = usePdfZoom();
   const [documentState, setDocumentState] = useState<DocumentState>({
     src,
@@ -187,6 +197,7 @@ export function PdfViewer({
                   pageNumber={i + 1}
                   width={pageWidth}
                   aspect={pageAspect}
+                  devicePixelRatio={pixelRatio}
                   eager={i === 0}
                 />
               ))
@@ -203,15 +214,20 @@ export function PdfViewer({
 }
 
 /**
- * One page wrapped in an IntersectionObserver gate. Until the wrapper is
- * within ~1 viewport of being on-screen, we render a sized placeholder.
- * Once mounted, we keep the page mounted — scrolling back is instant.
+ * One page wrapped in an IntersectionObserver gate. A page is only rasterised
+ * while it is within ~1.5 viewports of the screen; once it scrolls far away it
+ * is unmounted again and its canvas is freed. Keeping every viewed page
+ * mounted (the old behaviour) means a long slide deck accumulates hundreds of
+ * MB of canvases and crashes memory-constrained tablets — so we trade instant
+ * scroll-back for bounded memory. The buffer is generous enough that normal
+ * reading never sees a placeholder.
  */
 function LazyPage({
   pageNumber,
   width,
   aspect,
   root,
+  devicePixelRatio,
   eager,
 }: {
   pageNumber: number;
@@ -219,36 +235,39 @@ function LazyPage({
   /** Real page height/width, so the placeholder matches the rendered page. */
   aspect: number;
   root: HTMLElement | null;
+  /** Capped rasterisation ratio — keeps canvas memory in check on Retina. */
+  devicePixelRatio: number;
   /** When true, mount immediately — used for the first page so it renders ASAP. */
   eager?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [mounted, setMounted] = useState(!!eager);
+  // `visible` mounts/unmounts the page for bounded memory; `rendered` drives the
+  // crossfade so a freshly-rasterized slide settles in gently instead of popping.
+  const [visible, setVisible] = useState(!!eager);
   const [rendered, setRendered] = useState(false);
 
   useEffect(() => {
-    if (mounted || !ref.current) return;
+    if (!ref.current) return;
     const io = new IntersectionObserver(
       (entries) => {
-        if (entries[0]?.isIntersecting) {
-          setMounted(true);
-          io.disconnect();
-        }
+        const entry = entries[0];
+        if (entry) setVisible(entry.isIntersecting);
       },
-      // Mount a little earlier (a screenful ahead) so the page has time to
-      // rasterize and fade in *before* it scrolls into view — no rendering
-      // visibly catching up to the scroll.
-      { root: root ?? undefined, rootMargin: "600px 0px" },
+      // ~1.5 screens of buffer: a page mounts ahead of the viewport so it has
+      // time to rasterize and fade in before it is reached, and once it scrolls
+      // that far away again it unmounts and frees its canvas — keeping resident
+      // memory bounded on low-RAM tablets instead of growing with every page.
+      { root: root ?? undefined, rootMargin: "1200px 0px" },
     );
     io.observe(ref.current);
     return () => io.disconnect();
-  }, [mounted, root]);
+  }, [root]);
 
   const placeholderHeight = Math.round(width * aspect);
 
   return (
     <div ref={ref} style={{ width }}>
-      {mounted ? (
+      {visible ? (
         // The page reserves its real height immediately; the skeleton sits
         // underneath and crossfades out as the rasterized page fades in, so a
         // slide settles in gently instead of popping.
@@ -263,10 +282,13 @@ function LazyPage({
             <PageSkeleton height={placeholderHeight} loading={!rendered} />
           </div>
           {/* Text + annotation layers are heavy and not needed for read-only
-              slide viewing — leaving them off ~halves per-page render time. */}
+              slide viewing — leaving them off ~halves per-page render time.
+              devicePixelRatio is capped by the parent to keep canvas memory in
+              check on Retina. */}
           <Page
             pageNumber={pageNumber}
             width={width}
+            devicePixelRatio={devicePixelRatio}
             renderTextLayer={false}
             renderAnnotationLayer={false}
             onRenderSuccess={() => setRendered(true)}
