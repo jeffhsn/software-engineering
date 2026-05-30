@@ -131,6 +131,16 @@ body {
   background: color-mix(in oklab, currentColor 20%, transparent);
 }
 
+/* No visible scrollbars anywhere — the reading progress bar conveys position
+   and bars clutter the notebook feel. Scrolling itself is unchanged. */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* old Edge */
+}
+*::-webkit-scrollbar {
+  display: none; /* WebKit / Blink */
+}
+
 /* ───────────────────────────── Notebook typography ──────────────────────
    Long-form reading surface for Erklärungen and Lösungs-Walkthroughs.
    Hierarchy by SIZE + FAMILY + RHYTHM, not by color. Headings use the

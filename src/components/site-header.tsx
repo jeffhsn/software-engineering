@@ -86,7 +86,7 @@ export function SiteHeader() {
           or search), with intrinsic side tracks (☰ / brand on the left, the
           gear on the right) — so a long title truncates instead of growing into
           the buttons. lg+: a symmetric 3-track grid keeps the middle centered. */}
-      <div className="grid h-14 grid-cols-[minmax(0,auto)_minmax(0,1fr)_auto] items-center gap-3 px-4 sm:px-8 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:px-12">
+      <div className="grid h-14 grid-cols-[minmax(0,auto)_minmax(0,1fr)_auto] items-center gap-2 px-3 sm:gap-3 sm:px-4 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:px-5">
         <div className="flex min-w-0 items-center gap-2">
           {!subject ? (
             <Link
@@ -103,13 +103,13 @@ export function SiteHeader() {
             </Link>
           ) : (
             <>
-              {/* Mobile: a back chevron to the library (home) — not a logo,
-                  not a home button, just "go back" like leaving a book. */}
+              {/* A back chevron to the library — on every size, in place of the
+                  logo. Just "go back", like putting a book back on the shelf. */}
               <Link
                 href="/"
                 aria-label="Zurück zur Bibliothek"
                 title="Zurück zur Bibliothek"
-                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-foreground/[0.05] transition-colors hover:bg-foreground/[0.1] lg:hidden"
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-foreground/[0.05] transition-colors hover:bg-foreground/[0.1]"
               >
                 <ChevronLeft className="h-[20px] w-[20px] text-muted-foreground" strokeWidth={2} />
               </Link>
@@ -122,17 +122,6 @@ export function SiteHeader() {
                   />
                 </span>
               )}
-              {/* Home logo button — desktop only; on mobile the ☰ drawer
-                  carries the "Alle Notizbücher" link instead. */}
-              <Link
-                href="/"
-                aria-label={dict.brand}
-                className="group hidden h-9 w-9 shrink-0 items-center justify-center rounded-full bg-foreground/[0.05] transition-colors hover:bg-foreground/[0.1] lg:inline-flex"
-              >
-                <span className="text-[16px] leading-none transition-transform group-hover:-rotate-6">
-                  💻
-                </span>
-              </Link>
               {/* Desktop: subject + year pickers (mobile uses the drawer). */}
               <span className="hidden min-w-0 items-center gap-2 lg:flex">
                 <SubjectPicker current={subject} />

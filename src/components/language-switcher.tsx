@@ -59,12 +59,18 @@ export function LanguageSwitcher() {
  * standalone LanguageSwitcher popover and inside the combined mobile
  * settings menu.
  */
-export function LanguageList({ onPicked }: { onPicked?: () => void }) {
+export function LanguageList({
+  onPicked,
+  listClassName = "max-h-72",
+}: {
+  onPicked?: () => void;
+  listClassName?: string;
+}) {
   const { locale, setLocale, dict } = useI18n();
   return (
     <Command>
       <CommandInput placeholder={dict.nav.language + "…"} />
-      <CommandList className="max-h-72">
+      <CommandList className={listClassName}>
         <CommandEmpty>—</CommandEmpty>
         <CommandGroup>
           {LOCALES.map((l) => {

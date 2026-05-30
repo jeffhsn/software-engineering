@@ -205,6 +205,17 @@ function ChapterView({
     if (els.length === 0) return;
     const last = new WeakMap<HTMLElement, number>();
     let idle: ReturnType<typeof setTimeout>;
+    // While a finger is down we keep the chrome hidden even if the scroll
+    // pauses — it only comes back once the touch is released (and the scroll
+    // has settled). Without an active touch (trackpad/momentum), the idle
+    // timer brings it back.
+    let touching = false;
+    const scheduleShow = () => {
+      clearTimeout(idle);
+      idle = setTimeout(() => {
+        if (!touching) setChromeHidden(false);
+      }, 240);
+    };
     const onScroll = (e: Event) => {
       const el = e.currentTarget as HTMLElement;
       if (window.innerWidth >= 1024) {
@@ -216,16 +227,29 @@ function ChapterView({
       last.set(el, top);
       if (top < 56) setChromeHidden(false);
       else if (top - prev > 6) setChromeHidden(true);
-      else if (prev - top > 6) setChromeHidden(false);
+      else if (prev - top > 6 && !touching) setChromeHidden(false);
+      scheduleShow();
+    };
+    const onTouchStart = () => {
+      touching = true;
       clearTimeout(idle);
-      idle = setTimeout(() => setChromeHidden(false), 240);
+    };
+    const onTouchEnd = () => {
+      touching = false;
+      scheduleShow();
     };
     els.forEach((el) =>
       el.addEventListener("scroll", onScroll, { passive: true }),
     );
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
+    window.addEventListener("touchcancel", onTouchEnd, { passive: true });
     return () => {
       clearTimeout(idle);
       els.forEach((el) => el.removeEventListener("scroll", onScroll));
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchend", onTouchEnd);
+      window.removeEventListener("touchcancel", onTouchEnd);
       setChromeHidden(false);
     };
   }, []);
