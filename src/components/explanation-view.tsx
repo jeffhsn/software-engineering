@@ -7,6 +7,8 @@ import remarkGfm from "remark-gfm";
 import { figureComponents } from "@/components/prose-figure";
 import type { Explanation } from "@/lib/notebooks/explanation-types";
 import { useI18n } from "@/lib/i18n/client";
+import { LBL } from "@/lib/notebooks/labels-i18n";
+import { UI } from "@/lib/notebooks/ui-i18n";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -20,10 +22,11 @@ interface Props {
  * above the markdown body so authors can start their content at h2 and
  * still get a full visible hierarchy.
  */
-export function ExplanationView({ explanation, eyebrow = "Erklärung" }: Props) {
+export function ExplanationView({ explanation, eyebrow }: Props) {
   const [mode, setMode] = useState<"deep" | "simple">("deep");
   const [progress, setProgress] = useState(0);
   const { tr } = useI18n();
+  const resolvedEyebrow = eyebrow ?? tr(LBL.erklaerung);
   const hasSimple = Boolean(explanation.simpleContent);
   const body = mode === "simple" && explanation.simpleContent
     ? tr(explanation.simpleContent)
@@ -53,15 +56,15 @@ export function ExplanationView({ explanation, eyebrow = "Erklärung" }: Props) 
         <article className="prose-notebook min-w-0 max-w-[78ch] rounded-3xl border border-border/60 bg-card/45 px-6 py-9 shadow-sm sm:px-9 sm:py-12 lg:px-12">
           <header className="mb-10 border-b border-border/60 pb-8">
             <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-              {eyebrow}
+              {resolvedEyebrow}
             </p>
             <h1>{title}</h1>
             <div className="not-prose mt-5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
               <span className="rounded-full border border-border bg-background px-3 py-1 font-semibold">
-                ca. {readingMinutes} Min. Lesezeit
+                {readingMinutes} {tr(UI.minAbbr)} {tr(UI.readingTime)}
               </span>
               <span className="rounded-full border border-border bg-background px-3 py-1 font-semibold">
-                {headings.length} Abschnitte
+                {headings.length} {tr(UI.sectionsWord)}
               </span>
             </div>
             {hasSimple && (
@@ -76,7 +79,7 @@ export function ExplanationView({ explanation, eyebrow = "Erklärung" }: Props) 
                       : "text-muted-foreground hover:text-foreground",
                   )}
                 >
-                  Tiefe Erklärung
+                  {tr(LBL.tief)}
                 </button>
                 <button
                   type="button"
@@ -88,7 +91,7 @@ export function ExplanationView({ explanation, eyebrow = "Erklärung" }: Props) 
                       : "text-muted-foreground hover:text-foreground",
                   )}
                 >
-                  Einfach erklärt
+                  {tr(LBL.einfach)}
                 </button>
               </div>
             )}
@@ -109,7 +112,7 @@ export function ExplanationView({ explanation, eyebrow = "Erklärung" }: Props) 
         <aside className="hidden lg:block">
           <div className="sticky top-8 rounded-3xl border border-border/60 bg-card/70 p-4 shadow-sm">
             <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-              Fortschritt {progress}%
+              {tr(UI.progress)} {progress}%
             </p>
             <nav className="flex max-h-[calc(100dvh-8rem)] flex-col gap-1 overflow-y-auto text-sm">
               {headings.map((heading) => (

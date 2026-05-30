@@ -10,6 +10,7 @@ import type {
 import type { LocalizedText } from "@/lib/i18n/types";
 import { useI18n } from "@/lib/i18n/client";
 import { usePersistedState } from "@/lib/storage/use-persisted-state";
+import { UI } from "@/lib/notebooks/ui-i18n";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -140,24 +141,24 @@ function QuizRow({
           )}
           <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
             <span className="font-semibold tabular-nums text-foreground">
-              {quiz.questions.length} Fragen
+              {quiz.questions.length} {tr(UI.fragen)}
             </span>
             {attempts.length > 0 ? (
               <>
                 <span>
-                  {attempts.length}× versucht · zuletzt{" "}
+                  {attempts.length}× {tr(UI.attempted)} · {tr(UI.last)}{" "}
                   <span className="font-semibold tabular-nums text-foreground">
                     {lastPct}%
                   </span>
                 </span>
                 {mastered && (
                   <span className="font-semibold text-emerald-700 dark:text-emerald-400">
-                    ✓ sitzt
+                    ✓ {tr(UI.mastered)}
                   </span>
                 )}
               </>
             ) : (
-              <span className="italic">noch nicht versucht</span>
+              <span className="italic">{tr(UI.notAttempted)}</span>
             )}
           </div>
         </div>
@@ -173,11 +174,11 @@ function QuizRow({
                     : "bg-red-500/10 text-red-700 dark:text-red-400",
               )}
             >
-              Beste {bestPct}%
+              {tr(UI.best)} {bestPct}%
             </span>
           ) : (
             <span className="rounded-full border border-dashed border-border px-2.5 py-1 text-xs font-medium text-muted-foreground">
-              neu
+              {tr(UI.neu)}
             </span>
           )}
           {attempts.length > 0 && (
@@ -373,19 +374,19 @@ function QuizRunner({
             type="button"
             onClick={onExit}
             className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            title="Quiz verlassen"
+            title={tr(UI.leaveQuiz)}
           >
             <span aria-hidden className="rtl:rotate-180">
               ‹
             </span>
-            <span>Quiz-Liste</span>
+            <span>{tr(UI.quizList)}</span>
           </button>
           <span className="flex items-center gap-3 text-muted-foreground">
             <span className="font-semibold tabular-nums text-foreground">
               {view.index + 1} / {total}
             </span>
             <span>
-              Punkte{" "}
+              {tr(UI.points)}{" "}
               <span className="font-semibold tabular-nums text-foreground">
                 {score}
               </span>
@@ -417,7 +418,7 @@ function QuizRunner({
         </div>
 
         <p className="mt-10 text-[10px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-          Frage {view.index + 1}
+          {tr(UI.question)} {view.index + 1}
         </p>
         <h3
           className="mt-2 text-balance text-2xl font-semibold leading-tight tracking-tight sm:text-3xl"
@@ -456,7 +457,7 @@ function QuizRunner({
               <span aria-hidden className="text-base leading-none">
                 {state.correct ? "✓" : "✗"}
               </span>
-              <span>{state.correct ? "Richtig" : "Nicht ganz"}</span>
+              <span>{state.correct ? tr(UI.correct) : tr(UI.notQuite)}</span>
             </div>
             {tr(question.explanation)}
           </div>
@@ -476,7 +477,7 @@ function QuizRunner({
             <span aria-hidden className="rtl:rotate-180">
               ‹
             </span>
-            <span>Zurück</span>
+            <span>{tr(UI.back)}</span>
           </button>
           <button
             type="button"
@@ -488,7 +489,7 @@ function QuizRunner({
               "disabled:pointer-events-none disabled:opacity-30",
             )}
           >
-            <span>{finished ? "Quiz abschließen" : "Weiter"}</span>
+            <span>{finished ? tr(UI.finishQuiz) : tr(UI.next)}</span>
             <span aria-hidden className="rtl:rotate-180">
               ›
             </span>
@@ -516,6 +517,7 @@ function QuizSummary({
   onBack: () => void;
   chipInset?: boolean;
 }) {
+  const { tr } = useI18n();
   const pct = Math.round((attempt.score / attempt.total) * 100);
   const newRecord =
     !previousBest ||
@@ -532,7 +534,7 @@ function QuizSummary({
     >
       <div className="my-auto flex w-full max-w-md flex-col items-center gap-6 rounded-3xl border border-border bg-card p-8 text-center shadow-sm">
         <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-          Ergebnis
+          {tr(UI.result)}
         </span>
         <span aria-hidden className="text-7xl leading-none">
           {pct >= 90 ? "🎯" : pct >= 70 ? "✨" : pct >= 50 ? "💪" : "📚"}
@@ -552,12 +554,12 @@ function QuizSummary({
         <div className="flex flex-wrap items-center justify-center gap-2 text-xs">
           {newRecord && (
             <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-emerald-700 dark:text-emerald-400">
-              Neue Bestleistung 🎉
+              {tr(UI.newBest)} 🎉
             </span>
           )}
           {!newRecord && previousBest && (
             <span className="text-muted-foreground">
-              Bestleistung: {previousBest.score}/{previousBest.total}
+              {tr(UI.bestScore)}: {previousBest.score}/{previousBest.total}
             </span>
           )}
         </div>
@@ -565,7 +567,7 @@ function QuizSummary({
         {history.length > 1 && (
           <div className="w-full text-start">
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              Verlauf · {history.length} Versuche
+              {tr(UI.history)} · {history.length} {tr(UI.attemptsPlural)}
             </p>
             <ul className="flex flex-col">
               {history.slice(0, 10).map((a, i) => (
@@ -574,7 +576,7 @@ function QuizSummary({
             </ul>
             {history.length > 10 && (
               <p className="mt-1.5 text-xs text-muted-foreground">
-                und {history.length - 10} weitere
+                {tr(UI.and)} {history.length - 10} {tr(UI.more)}
               </p>
             )}
           </div>
@@ -586,14 +588,14 @@ function QuizSummary({
             onClick={onRetake}
             className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full border border-foreground bg-foreground px-6 text-sm font-semibold text-background transition-opacity hover:opacity-90"
           >
-            Nochmal versuchen
+            {tr(UI.retake)}
           </button>
           <button
             type="button"
             onClick={onBack}
             className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full border border-border bg-card px-6 text-sm font-semibold text-foreground transition-colors hover:bg-accent"
           >
-            Andere Quizzes
+            {tr(UI.otherQuizzes)}
           </button>
         </div>
       </div>

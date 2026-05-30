@@ -9,6 +9,9 @@ import { getQuizSet } from "@/lib/notebooks/quizzes/registry";
 import { clampedIndex, setOverlayInUrl } from "@/lib/notebooks/nav";
 import { ExplanationView } from "@/components/explanation-view";
 import { QuizPlayer } from "@/components/quiz-player";
+import { useI18n } from "@/lib/i18n/client";
+import { LBL } from "@/lib/notebooks/labels-i18n";
+import { UI } from "@/lib/notebooks/ui-i18n";
 import { cn } from "@/lib/utils";
 
 const SUBJECT_RE = /^\/subjects\/([^/]+)(?:\/([^/]+))?\/?$/;
@@ -22,6 +25,7 @@ const SUBJECT_RE = /^\/subjects\/([^/]+)(?:\/([^/]+))?\/?$/;
 export function NotebookOverlay() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { tr } = useI18n();
 
   const match = pathname.match(SUBJECT_RE);
   const slug = match?.[1];
@@ -67,15 +71,15 @@ export function NotebookOverlay() {
     >
       <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border/60 bg-background/95 px-4 py-3 sm:px-6">
         <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-          {view === "quiz" ? "Quiz" : "Walkthrough"}
+          {view === "quiz" ? tr(LBL.quiz) : tr(LBL.loesungsweg)}
         </span>
         <button
           type="button"
           onClick={() => setOverlayInUrl(null)}
           className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-          aria-label="Schließen"
+          aria-label={tr(UI.close)}
         >
-          <span>Schließen</span>
+          <span>{tr(UI.close)}</span>
           <span aria-hidden>✕</span>
         </button>
       </div>
@@ -98,11 +102,12 @@ function QuizPanel({ quizBankId }: { quizBankId: string | undefined }) {
 }
 
 function WalkthroughPanel({ walkthroughId }: { walkthroughId: string | undefined }) {
+  const { tr } = useI18n();
   if (!walkthroughId)
     return <EmptyPanel hint="Für dieses Kapitel gibt es noch keinen Walkthrough." />;
   const expl = getExplanation(walkthroughId);
   if (!expl) return <EmptyPanel hint={`Kein Walkthrough mit der ID „${walkthroughId}".`} />;
-  return <ExplanationView explanation={expl} eyebrow="Walkthrough" />;
+  return <ExplanationView explanation={expl} eyebrow={tr(LBL.loesungsweg)} />;
 }
 
 function EmptyPanel({ hint }: { hint: string }) {
